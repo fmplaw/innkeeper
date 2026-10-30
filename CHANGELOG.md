@@ -4,6 +4,8 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ## [Non publié]
 
+## [0.9.1] - 2026-10-30
+
 ### Ajouté
 
 - Icône du projet (enseigne d'auberge), utilisée aussi comme favicon par défaut.
@@ -34,5 +36,6 @@ Première version publique.
 - **Apparence** : palettes Horde, Alliance et multi-faction, logo, bannière et couleur d'accent de la guilde, affichage adapté aux téléphones.
 - **Exploitation** : image Docker multi-architecture publiée par la CI, sauvegardes de la base, point de contrôle `/healthz`.
 
-[Non publié]: https://github.com/fmplaw/innkeeper/compare/v0.9.0...HEAD
+[Non publié]: https://github.com/fmplaw/innkeeper/compare/v0.9.1...HEAD
+[0.9.1]: https://github.com/fmplaw/innkeeper/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/fmplaw/innkeeper/releases/tag/v0.9.0
