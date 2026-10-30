@@ -6,11 +6,40 @@
 	import InterestBadges from '$lib/components/InterestBadges.svelte';
 	import { AXIS_LABELS, INTEREST_AXES, INTEREST_LEVELS, LEVEL_LABELS } from '$lib/interests';
 	import { className, classColor, fullName, professionNames, raceName, specRole } from '$lib/labels';
+	import { sortRows, type SortDir, type SortValue } from '$lib/sort';
 
 	let { data } = $props();
 	const cfg = $derived(data.config);
 	const total = $derived(data.rows.length);
 	const pct = (n: number) => (total ? Math.round((n / total) * 100) : 0);
+
+	type Row = (typeof data.rows)[number];
+	// Colonnes triables : valeur comparée et sens du premier clic (les nombres commencent par le plus grand).
+	const interestScore = (v: string | null) => (v === 'competitive' ? 2 : v === 'casual' ? 1 : 0);
+	const COLUMNS: { key: string; label: string; value: (c: Row) => SortValue; first?: SortDir }[] = [
+		{ key: 'perso', label: 'Perso', value: (c) => fullName(c) },
+		// Les mains (sans « reroll de ») restent en fin de liste, groupés.
+		{ key: 'reroll', label: 'Reroll de', value: (c) => (c.isMain ? null : c.mainName) },
+		{ key: 'joueur', label: 'Joueur', value: (c) => c.player },
+		{ key: 'classe', label: 'Classe', value: (c) => className(cfg, c.class) },
+		{ key: 'spe', label: 'Spé principale', value: (c) => specRole(cfg, c.class, c.spec, c.role) },
+		{ key: 'spe2', label: 'Spé secondaire', value: (c) => specRole(cfg, c.class, c.spec2, c.role2) },
+		{ key: 'niveau', label: 'Niv.', value: (c) => c.level, first: 'desc' },
+		{ key: 'race', label: 'Race', value: (c) => raceName(cfg, c.race) },
+		{ key: 'interets', label: 'Intérêts', value: (c) => interestScore(c.pve) + interestScore(c.pvp) || null, first: 'desc' },
+		{ key: 'metiers', label: 'Métiers', value: (c) => professionNames(cfg, c.professions) }
+	];
+
+	// Tri dans le navigateur ; il est conservé quand on change de filtre. Sans tri : l'ordre du serveur (classe, main, nom).
+	let sort = $state<{ key: string; dir: SortDir } | null>(null);
+	const rows = $derived.by(() => {
+		const col = sort && COLUMNS.find((k) => k.key === sort!.key);
+		return col ? sortRows(data.rows, col.value, sort!.dir) : data.rows;
+	});
+	function sortBy(col: (typeof COLUMNS)[number]) {
+		sort = sort?.key === col.key ? { key: col.key, dir: sort.dir === 'asc' ? 'desc' : 'asc' } : { key: col.key, dir: col.first ?? 'asc' };
+	}
+	const ariaSort = (key: string) => (sort?.key === key ? (sort.dir === 'asc' ? 'ascending' : 'descending') : undefined);
 
 	function submit(e: Event) {
 		(e.currentTarget as HTMLInputElement | HTMLSelectElement).form?.requestSubmit();
@@ -150,21 +179,18 @@
 		<table>
 			<thead>
 				<tr>
-					<th>Perso</th>
-					<th>Reroll de</th>
-					<th>Joueur</th>
-					<th>Classe</th>
-					<th>Spé principale</th>
-					<th>Spé secondaire</th>
-					<th>Niv.</th>
-					<th>Race</th>
-					<th>Intérêts</th>
-					<th>Métiers</th>
+					{#each COLUMNS as col (col.key)}
+						<th aria-sort={ariaSort(col.key)}>
+							<button type="button" class="sort" onclick={() => sortBy(col)} title="Trier par {col.label.toLowerCase()}">
+								{col.label}<span class="arrow" aria-hidden="true">{sort?.key === col.key ? (sort.dir === 'asc' ? '▲' : '▼') : '↕'}</span>
+							</button>
+						</th>
+					{/each}
 					{#if data.roster && data.officer}<th></th>{/if}
 				</tr>
 			</thead>
 			<tbody>
-				{#each data.rows as c (c.id)}
+				{#each rows as c (c.id)}
 					<tr>
 						<td>
 							{fullName(c)}
@@ -306,5 +332,31 @@
 	}
 	.player {
 		color: var(--text);
+	}
+	button.sort {
+		all: unset;
+		cursor: pointer;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.3rem;
+		color: inherit;
+		font: inherit;
+	}
+	button.sort:hover,
+	th[aria-sort] button.sort {
+		color: var(--text);
+	}
+	button.sort:focus-visible {
+		outline: 2px solid var(--accent);
+		outline-offset: 2px;
+		border-radius: 3px;
+	}
+	.arrow {
+		font-size: 0.7rem;
+		opacity: 0.45;
+	}
+	th[aria-sort] .arrow {
+		opacity: 1;
+		color: var(--gold);
 	}
 </style>

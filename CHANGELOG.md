@@ -4,6 +4,14 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ## [Non publié]
 
+### Ajouté
+
+- **Roster** : tri du tableau au clic sur l'en-tête des colonnes (perso, joueur, classe, spés, niveau, race, intérêts, métiers), dans les deux sens, conservé quand on change de filtre. Les cases vides restent en fin de liste.
+
+### Corrigé
+
+- **Admin → Progression** s'affiche beaucoup plus vite : les rôles des nouveaux membres sont relus sur Discord en une seule requête, au lieu d'une par membre (Discord freinait ces appels en rafale).
+
 ## [0.10.0] - 2026-10-30
 
 ### Ajouté

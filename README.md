@@ -19,7 +19,7 @@
 **Innkeeper** est un portail de guilde auto-hébergeable pour **World of Warcraft: Forever**, construit autour de Discord et de Raid-Helper. Une instance correspond à une guilde (Alliance, Horde ou multi-faction). Les joueurs se connectent avec Discord ; leurs droits découlent de leurs rôles sur le serveur de la guilde.
 
 - **Fiches de persos** tenues par chaque joueur : main et rerolls, double spécialisation, métiers avec niveau, intérêts PvE/PvP.
-- **Roster** filtrable, répartition par classe et par rôle, **rosters** composés par les officiers (équipe de raid, PvP…).
+- **Roster** filtrable et triable, répartition par classe et par rôle, **rosters** composés par les officiers (équipe de raid, PvP…).
 - **Sorties** pilotées dans [Raid-Helper](https://raid-helper.dev) : création depuis le site (officielles et proposées par les membres), inscription depuis le site, composition, comparaison avec un roster, banc.
 - **Recrutement** : candidature en ligne, avis des officiers, entrée sur le serveur Discord et rôle d'arrivée posés par le bot, suivi des nouveaux membres.
 - **Import des données du jeu** par un addon (registre de guilde, métiers, recettes, dernière connexion).

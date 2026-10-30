@@ -1,5 +1,5 @@
 import { and, eq, sql } from 'drizzle-orm';
-import { botReady, guildMember } from './bot';
+import { botReady, listMembers } from './bot';
 import { db, schema } from './db';
 import { getRecruitment } from './settings';
 
@@ -40,19 +40,22 @@ export async function listNewcomers() {
 	const { arrivalRoleId, reviewDays } = getRecruitment();
 	let list = newcomersFromCache();
 
-	if (arrivalRoleId && botReady()) {
-		const refreshed = [];
-		for (const u of list) {
-			const member = await guildMember(u.discordId).catch(() => undefined);
-			if (member === undefined) {
-				refreshed.push(u); // Discord indisponible : on garde le cache.
-				continue;
+	if (arrivalRoleId && botReady() && list.length) {
+		// Une seule liste des membres du serveur (une requête par tranche de 1000) plutôt
+		// qu'un appel par nouveau membre : Discord freine les appels en rafale.
+		const members = await listMembers().catch(() => null);
+		if (members) {
+			const rolesById = new Map(members.map((m) => [m.user.id, m.roles]));
+			const refreshed = [];
+			for (const u of list) {
+				// Absent de la liste : il a quitté le serveur.
+				const roles = rolesById.get(u.discordId) ?? [];
+				db().update(users).set({ roles }).where(eq(users.discordId, u.discordId)).run();
+				if (roles.includes(arrivalRoleId)) refreshed.push({ ...u, roles });
 			}
-			const roles = member?.roles ?? [];
-			db().update(users).set({ roles }).where(eq(users.discordId, u.discordId)).run();
-			if (roles.includes(arrivalRoleId)) refreshed.push({ ...u, roles });
+			list = refreshed;
 		}
-		list = refreshed;
+		// Discord indisponible : on garde le cache.
 	}
 
 	const now = Date.now();

@@ -1,7 +1,7 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createUser } from '../../test/helpers';
 import { dueReviewCount, listNewcomers, markReviewed, setJoinedAt } from './progression';
-import { recruitmentSchema, setRecruitment } from './settings';
+import { recruitmentSchema, setDiscord, setRecruitment } from './settings';
 
 const SANG_NEUF = '900000000000000005';
 const BRISEUR = '900000000000000003';
@@ -39,5 +39,26 @@ describe('progression des nouveaux membres', () => {
 		setRecruitment(recruitmentSchema.parse({}));
 		expect(await listNewcomers()).toEqual([]);
 		expect(dueReviewCount()).toBe(0);
+	});
+
+	describe('avec le bot', () => {
+		afterEach(() => vi.unstubAllGlobals());
+		const member = (id: string, roles: string[]) => ({ user: { id, username: id }, nick: null, roles, joined_at: '2026-10-01T10:00:00.000Z' });
+
+		it('Discord indisponible : la liste vient du cache', async () => {
+			setRecruitment(recruitmentSchema.parse({ arrivalRoleId: SANG_NEUF, reviewDays: 90 }));
+			setDiscord({ clientId: '111111111111111111', clientSecret: 'secret-secret-123', guildId: '222222222222222222', botToken: 'b' });
+			vi.stubGlobal('fetch', async () => new Response('', { status: 502 }));
+			expect((await listNewcomers()).map((n) => n.id).sort()).toEqual(['ancien', 'recent', 'sansdate']);
+		});
+
+		it('relit les rôles en une seule requête : promus et partis disparaissent', async () => {
+			const fetch = vi.fn(async () => Response.json([member('ancien', [SANG_NEUF]), member('recent', [BRISEUR])]));
+			vi.stubGlobal('fetch', fetch);
+			expect((await listNewcomers()).map((n) => n.id)).toEqual(['ancien']);
+			expect(fetch).toHaveBeenCalledTimes(1);
+			// Le cache est mis à jour : « sansdate », à revoir, est parti, et « ancien » a déjà été revu.
+			expect(dueReviewCount()).toBe(0);
+		});
 	});
 });

@@ -55,7 +55,7 @@ Menu **Mes persos** → **Ajouter un perso**.
 
 ### Le roster et les pages joueurs
 
-- **Roster** : la liste des persos de la guilde, avec des filtres par classe, rôle, faction, intérêts, métier et niveau de métier. Par défaut, **seuls les mains** sont affichés, pour une vue juste de l'effectif ; choisis « Mains et rerolls » pour tout voir. Les onglets en haut montrent les **rosters** composés par les officiers (équipe de raid…).
+- **Roster** : la liste des persos de la guilde, avec des filtres par classe, rôle, faction, intérêts, métier et niveau de métier. Par défaut, **seuls les mains** sont affichés, pour une vue juste de l'effectif ; choisis « Mains et rerolls » pour tout voir. Un clic sur l'en-tête d'une colonne trie le tableau, un second clic inverse l'ordre ; le tri reste en place quand tu changes de filtre. Les onglets en haut montrent les **rosters** composés par les officiers (équipe de raid…).
 - **Page joueur** : un clic sur un nom affiche ses persos, ses métiers, ses recettes connues et ses rosters.
 
 ### Les sorties
