@@ -1,7 +1,7 @@
 services:
   site:
     # Version publiée ; pour construire depuis les sources, remplace par `build: .`
-    image: ghcr.io/fmplaw/innkeeper:0.10.0
+    image: ghcr.io/fmplaw/innkeeper:0.10.1
     env_file: .env
     ports:
       - "3000:3000"
