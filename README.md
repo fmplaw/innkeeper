@@ -165,7 +165,7 @@ scripts/backup.mjs          sauvegarde à chaud de la base
    ```sh
    docker compose up -d --build
    ```
-   ou, avec l'image publiée : `image: ghcr.io/<owner>/<repo>:latest` dans `docker-compose.yml`.
+   ou, avec l'image publiée : `image: ghcr.io/fmplaw/innkeeper:latest` (ou une version précise, par exemple `:0.9.1`) dans `docker-compose.yml`, à la place de `build: .`.
 3. Récupère le **code d'installation** dans les logs :
    ```sh
    docker compose logs site
@@ -352,7 +352,15 @@ npm run dev
 | `npm run build` | construction de production |
 | `npm run db:generate` | migration après une modification de `src/lib/server/db/schema.ts` |
 
-Les tests tournent aussi à chaque `docker build` et dans la CI GitHub (`.github/workflows/docker.yml`), qui publie l'image multi-architecture sur GHCR.
+Les tests tournent aussi à chaque `docker build` et dans la CI GitHub (`.github/workflows/docker.yml`), qui publie l'image multi-architecture (amd64, arm64) sur `ghcr.io/fmplaw/innkeeper` : `latest` suit `main`, chaque version a sa propre étiquette (`0.9.1`…).
+
+**Publier une version** : déplacer la section « Non publié » de [CHANGELOG.md](CHANGELOG.md) sous le nouveau numéro, mettre à jour `version` dans `package.json` et `package-lock.json`, committer, puis poser le tag et le pousser **séparément** de la branche (poussés ensemble, GitHub ne lance que le build de la branche) :
+
+```sh
+git tag -a v0.9.2 -m "Innkeeper 0.9.2"
+git push origin main
+git push origin v0.9.2
+```
 
 **Mettre à jour les données de jeu** : `src/lib/game/forever.ts` (combinaisons race × classe, spés, métiers et leurs identifiants de compétence, instances avec taille, niveaux et date d'ouverture, correspondance Raid-Helper).
 

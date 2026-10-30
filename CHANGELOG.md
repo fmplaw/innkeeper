@@ -4,6 +4,10 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ## [Non publié]
 
+### Modifié
+
+- README : adresse de l'image Docker publiée et procédure de publication d'une version.
+
 ## [0.9.1] - 2026-10-30
 
 ### Ajouté
