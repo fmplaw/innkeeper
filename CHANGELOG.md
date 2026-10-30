@@ -4,9 +4,14 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ## [Non publié]
 
+### Ajouté
+
+- `scripts/version.mjs` : change le numéro de version partout (paquet, fichiers compose, CHANGELOG), avec un test qui vérifie que tout concorde.
+
 ### Modifié
 
-- README : adresse de l'image Docker publiée et procédure de publication d'une version.
+- Les fichiers `docker-compose.yml` et `docker-compose.traefik.yml` utilisent l'image publiée de la version en cours (`ghcr.io/fmplaw/innkeeper:X.Y.Z`) au lieu de construire depuis les sources.
+- README : installation sans cloner le dépôt, mise à jour d'une instance, publication d'une version.
 
 ## [0.9.1] - 2026-10-30
 

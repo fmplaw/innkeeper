@@ -9,3 +9,5 @@ backups
 .git
 .github
 *.md
+!CHANGELOG.md
+docs

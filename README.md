@@ -157,15 +157,16 @@ scripts/backup.mjs          sauvegarde à chaud de la base
 
 ### Démarrage
 
-1. Crée un fichier `.env` avec l'adresse publique du site, sans slash final :
+1. Dans un dossier vide, récupère le `docker-compose.yml` et crée un fichier `.env` avec l'adresse publique du site, sans slash final :
    ```sh
+   curl -O https://raw.githubusercontent.com/fmplaw/innkeeper/main/docker-compose.yml
    echo "ORIGIN=https://guilde.mondomaine.fr" > .env
    ```
+   Le fichier utilise l'image publiée de la dernière version (`ghcr.io/fmplaw/innkeeper:X.Y.Z`, amd64 et arm64) : rien à construire. Pour partir des sources, clone le dépôt et remplace la ligne `image:` par `build: .`.
 2. Lance le conteneur :
    ```sh
-   docker compose up -d --build
+   docker compose up -d
    ```
-   ou, avec l'image publiée : `image: ghcr.io/fmplaw/innkeeper:latest` (ou une version précise, par exemple `:0.9.1`) dans `docker-compose.yml`, à la place de `build: .`.
 3. Récupère le **code d'installation** dans les logs :
    ```sh
    docker compose logs site
@@ -330,7 +331,7 @@ L'addon n'envoie rien sur Internet. Le site lit le fichier **sans l'exécuter** 
   docker compose exec site node scripts/backup.mjs
   ```
   Monte `/backups` sur un autre disque et planifie la commande (cron, timer systemd).
-- **Mises à jour** : tirer la nouvelle image, ou reconstruire avec `docker compose build --pull` (pour récupérer aussi les correctifs de sécurité de l'image de base Node), puis redémarrer ; les migrations s'appliquent seules. Les sessions sont conservées, sauf changement de domaine.
+- **Mises à jour** : lis le [CHANGELOG](CHANGELOG.md), remplace le numéro de version sur la ligne `image:` de ton `docker-compose.yml` (ou récupère le fichier à jour), puis `docker compose pull && docker compose up -d` ; les migrations s'appliquent seules. Depuis les sources : `docker compose build --pull` (pour récupérer aussi les correctifs de sécurité de l'image de base Node). Les sessions sont conservées, sauf changement de domaine.
 - **Supervision conseillée** : `/healthz`, et, avec une IP dynamique, un contrôle que le DNS pointe toujours sur l'IP publique.
 
 ---
@@ -354,9 +355,11 @@ npm run dev
 
 Les tests tournent aussi à chaque `docker build` et dans la CI GitHub (`.github/workflows/docker.yml`), qui publie l'image multi-architecture (amd64, arm64) sur `ghcr.io/fmplaw/innkeeper` : `latest` suit `main`, chaque version a sa propre étiquette (`0.9.1`…).
 
-**Publier une version** : déplacer la section « Non publié » de [CHANGELOG.md](CHANGELOG.md) sous le nouveau numéro, mettre à jour `version` dans `package.json` et `package-lock.json`, committer, puis poser le tag et le pousser **séparément** de la branche (poussés ensemble, GitHub ne lance que le build de la branche) :
+**Publier une version** : `node scripts/version.mjs X.Y.Z` change le numéro dans `package.json`, `package-lock.json`, les fichiers compose (image proposée aux guildes) et renomme la section « Non publié » de [CHANGELOG.md](CHANGELOG.md). Un test vérifie que tout concorde. Committe, puis pose le tag et pousse-le **séparément** de la branche (poussés ensemble, GitHub ne lance que le build de la branche) :
 
 ```sh
+node scripts/version.mjs 0.9.2
+git commit -am "Version 0.9.2"
 git tag -a v0.9.2 -m "Innkeeper 0.9.2"
 git push origin main
 git push origin v0.9.2

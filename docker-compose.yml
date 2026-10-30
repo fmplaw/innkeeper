@@ -1,7 +1,7 @@
 services:
   site:
-    build: .
-    # Ou l'image publiée par la CI : ghcr.io/<owner>/<repo>:latest
+    # Version publiée ; pour construire depuis les sources, remplace par `build: .`
+    image: ghcr.io/fmplaw/innkeeper:0.9.1
     env_file: .env
     ports:
       - "3000:3000"

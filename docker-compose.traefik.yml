@@ -1,11 +1,12 @@
 # Déploiement derrière un Traefik existant (HTTPS géré par Traefik).
-#   docker compose -f docker-compose.traefik.yml up -d --build
+#   docker compose -f docker-compose.traefik.yml up -d
 # Variables lues dans .env : SITE_DOMAIN, TRAEFIK_NETWORK, TRAEFIK_ENTRYPOINT,
 # TRAEFIK_CERTRESOLVER (voir .env.example).
 
 services:
   site:
-    build: .
+    # Version publiée ; pour construire depuis les sources, remplace par `build: .`
+    image: ghcr.io/fmplaw/innkeeper:0.9.1
     env_file: .env
     environment:
       ORIGIN: https://${SITE_DOMAIN:?SITE_DOMAIN manquant dans .env}
