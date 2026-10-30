@@ -9,8 +9,11 @@
 	let { data, form } = $props();
 	const su = $derived(data.signup);
 	let characterId = $state<number | null>(null);
-	const chosen = $derived(su?.characters.find((c) => c.id === (characterId ?? su?.characters.find((k) => k.isMain)?.id)) ?? null);
-	let status = $state('present');
+	// Par défaut, le perso et le statut de l'inscription actuelle (sinon le main, présent).
+	const chosen = $derived(
+		su?.characters.find((c) => c.id === (characterId ?? (su.characters.find((k) => k.name === su.current?.name) ?? su.characters.find((k) => k.isMain))?.id)) ?? null
+	);
+	let status = $derived(su?.current && su.current.category !== 'present' && su.current.category in su.statuses ? su.current.category : 'present');
 	const cfg = $derived(data.config);
 	const comp = $derived(data.composition);
 	const cmp = $derived(data.roster);
@@ -37,7 +40,7 @@
 	{#if data.event.image}<img class="cover" src={data.event.image} alt="" />{/if}
 	<h1>{data.event.title}</h1>
 	<p class="muted">
-		{data.event.when}{#if data.event.leader} · organisé par {data.event.leader}{/if}
+		{data.event.when}{#if data.event.leader}{' '}· organisé par {data.event.leader}{/if}
 	</p>
 	<div class="row">
 		<a class="button secondary" href="https://raid-helper.dev/event/{data.event.id}" target="_blank" rel="noopener">
@@ -147,7 +150,7 @@
 {/if}
 
 <p class="summary">
-	<strong>{comp.presentCount}</strong>{#if data.event.limit} / {data.event.limit} places{:else} inscrits{/if}
+	<strong>{comp.presentCount}</strong>{#if data.event.limit}{' '}/ {data.event.limit} places{:else}{' '}inscrits{/if}
 	{#if data.event.limit && comp.presentCount >= data.event.limit}<span class="badge full">Complet</span>{/if}
 	{#if comp.benchCount}· <strong>{comp.benchCount}</strong> sur le banc{/if}
 	{#if comp.withoutAccount}· <span class="warn">{comp.withoutAccount} sans compte sur le site</span>{/if}
@@ -264,7 +267,7 @@
 							<strong>{s.name}</strong>
 							<span style:color={s.class ? classColor(cfg, s.class) : undefined}>
 								{#if s.class}
-									{className(cfg, s.class)}{#if s.spec} · {specName(cfg, s.class, s.spec)}{/if}
+									{className(cfg, s.class)}{#if s.spec}{' '}· {specName(cfg, s.class, s.spec)}{/if}
 								{:else}
 									{s.rhSpec ?? '?'}
 								{/if}
@@ -298,7 +301,7 @@
 			{#if comp.bench[r].length}
 				<div class="bench">
 					<span class="muted">Sur le banc :</span>
-					{#each comp.bench[r] as b, i (b.id)}{i ? ', ' : ''}<span style:color={b.class ? classColor(cfg, b.class) : undefined}>{b.name}</span>{#if b.class}<span class="muted"> ({specName(cfg, b.class, b.spec) || className(cfg, b.class)})</span>{/if}{/each}
+					{#each comp.bench[r] as b, i (b.id)}{i ? ', ' : ''}<span style:color={b.class ? classColor(cfg, b.class) : undefined}>{b.name}</span>{#if b.class}{' '}<span class="muted">({specName(cfg, b.class, b.spec) || className(cfg, b.class)})</span>{/if}{/each}
 				</div>
 			{/if}
 		</div>

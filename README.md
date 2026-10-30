@@ -1,6 +1,20 @@
-# Innkeeper
+<p align="center">
+  <img src="docs/images/innkeeper.svg" alt="" width="112">
+</p>
 
-> *Pose ta pierre de foyer : le point de ralliement de ta guilde.*
+<h1 align="center">Innkeeper</h1>
+
+<p align="center"><em>Pose ta pierre de foyer : le point de ralliement de ta guilde.</em></p>
+
+<p align="center">
+  <a href="LICENSE">Licence AGPL v3</a> ·
+  <a href="docs/GUIDE.md">Guide d'utilisation</a> ·
+  <a href="CHANGELOG.md">Journal des modifications</a>
+</p>
+
+<p align="center">
+  <img src="docs/images/accueil.png" alt="Page d'accueil d'une guilde de démonstration : présentation, recrutement ouvert et répartition des rôles et des classes" width="820">
+</p>
 
 **Innkeeper** est un portail de guilde auto-hébergeable pour **World of Warcraft: Forever**, construit autour de Discord et de Raid-Helper. Une instance correspond à une guilde (Alliance, Horde ou multi-faction). Les joueurs se connectent avec Discord ; leurs droits découlent de leurs rôles sur le serveur de la guilde.
 
@@ -13,6 +27,22 @@
 - **Aux couleurs de la guilde** : palette de fond selon la faction (bruns chauds pour la Horde, bleu nuit pour l'Alliance, anthracite pour une guilde multi-faction), couleur d'accent, logo et bannière au choix.
 
 Le guide d'utilisation (membres et officiers) est dans [docs/GUIDE.md](docs/GUIDE.md).
+
+### Aperçu
+
+Captures prises sur une guilde de démonstration fictive.
+
+| | |
+|---|---|
+| ![Roster de la guilde avec filtres et répartition par rôle et par classe](docs/images/roster.png) | ![Liste des sorties officielles et des sorties proposées par les membres](docs/images/sorties.png) |
+| **Roster** : filtres, répartition, badge « en jeu » venu de l'addon. | **Sorties** : officielles et proposées par les membres, tirées de Raid-Helper. |
+| ![Composition d'un raid de 10 : inscrits par rôle, banc, retards et absences](docs/images/sortie.png) | ![Candidature avec les réponses du candidat, les avis des officiers et la décision](docs/images/candidature.png) |
+| **Une sortie** : composition par rôle et par classe, banc, inscription depuis le site. | **Une candidature** : réponses, avis des officiers, décision. |
+
+<p align="center">
+  <img src="docs/images/mobile.png" alt="Page d'une sortie sur téléphone, avec le formulaire d'inscription" width="260"><br>
+  <em>Sur téléphone</em>
+</p>
 
 ---
 
