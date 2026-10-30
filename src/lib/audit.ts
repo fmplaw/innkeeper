@@ -1,0 +1,41 @@
+// Libellés du journal d'audit, partagés entre serveur et navigateur.
+
+export const AUDIT_ACTIONS = {
+	'character.create': { group: 'Fiches', label: 'a créé un perso pour un autre joueur' },
+	'character.update': { group: 'Fiches', label: "a modifié le perso d'un autre joueur" },
+	'character.delete': { group: 'Fiches', label: "a supprimé le perso d'un autre joueur" },
+	'character.set-main': { group: 'Fiches', label: "a changé le main d'un autre joueur" },
+	'roster.create': { group: 'Rosters', label: 'a créé le roster' },
+	'roster.update': { group: 'Rosters', label: 'a modifié le roster' },
+	'roster.delete': { group: 'Rosters', label: 'a supprimé le roster' },
+	'roster.add': { group: 'Rosters', label: 'a ajouté un perso au roster' },
+	'roster.remove': { group: 'Rosters', label: 'a retiré un perso du roster' },
+	'application.vote': { group: 'Candidatures', label: 'a donné son avis sur la candidature de' },
+	'application.accept': { group: 'Candidatures', label: 'a accepté la candidature de' },
+	'application.refuse': { group: 'Candidatures', label: 'a refusé la candidature de' },
+	'outing.create': { group: 'Sorties', label: 'a créé la sortie' },
+	'outing.update': { group: 'Sorties', label: 'a modifié la sortie' },
+	'outing.delete': { group: 'Sorties', label: 'a supprimé la sortie' },
+	'outing-template.create': { group: 'Sorties', label: 'a créé le modèle de sortie' },
+	'outing-template.update': { group: 'Sorties', label: 'a modifié le modèle de sortie' },
+	'outing-template.delete': { group: 'Sorties', label: 'a supprimé le modèle de sortie' },
+	'outing-image.update': { group: 'Sorties', label: "a changé l'image de sortie" },
+	'raidhelper.update': { group: 'Configuration', label: 'a modifié la connexion Raid-Helper' },
+	'game.import': { group: 'Fiches', label: 'a importé les données du jeu' },
+	'member.review': { group: 'Progression', label: 'a revu la progression de' },
+	'member.joined': { group: 'Progression', label: "a corrigé la date d'arrivée de" },
+	'recruitment.update': { group: 'Configuration', label: 'a modifié les réglages du recrutement' },
+	'roles.update': { group: 'Rôles et accès', label: 'a modifié les rôles Discord' },
+	'roles.sync': { group: 'Rôles et accès', label: 'a synchronisé les rôles depuis le bot' },
+	'access.update': { group: 'Rôles et accès', label: "a changé le mode d'accès au site" },
+	'guild.update': { group: 'Configuration', label: 'a modifié le profil de la guilde' },
+	'discord.update': { group: 'Configuration', label: 'a modifié la connexion Discord' },
+	'admin.create': { group: 'Admin local', label: 'a créé le compte admin local' },
+	'admin.login': { group: 'Admin local', label: "s'est connecté en admin local" },
+	'admin.login-failed': { group: 'Admin local', label: 'Échec de connexion admin' },
+	'admin.password': { group: 'Admin local', label: 'a changé le mot de passe admin' }
+} as const;
+
+export type AuditAction = keyof typeof AUDIT_ACTIONS;
+
+export const AUDIT_GROUPS = [...new Set(Object.values(AUDIT_ACTIONS).map((a) => a.group))];

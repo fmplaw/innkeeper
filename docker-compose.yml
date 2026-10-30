@@ -1,0 +1,13 @@
+services:
+  site:
+    build: .
+    # Ou l'image publiée par la CI : ghcr.io/<owner>/<repo>:latest
+    env_file: .env
+    ports:
+      - "3000:3000"
+    volumes:
+      - data:/data
+    restart: unless-stopped
+
+volumes:
+  data:

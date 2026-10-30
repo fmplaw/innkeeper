@@ -1,0 +1,199 @@
+# Guide d'utilisation d'Innkeeper
+
+Ce guide explique comment utiliser au quotidien le site de ta guilde, propulsé par Innkeeper.
+
+- [Pour tous les membres](#pour-tous-les-membres)
+  - [Se connecter](#se-connecter)
+  - [Créer ses fiches de persos](#créer-ses-fiches-de-persos)
+  - [Le roster et les pages joueurs](#le-roster-et-les-pages-joueurs)
+  - [Les sorties](#les-sorties)
+  - [Proposer une sortie](#proposer-une-sortie)
+- [Pour les candidats](#pour-les-candidats)
+- [Pour les officiers](#pour-les-officiers)
+- [Pour l'admin du site](#pour-ladmin-du-site)
+- [En cas de problème](#en-cas-de-problème)
+
+---
+
+## Pour tous les membres
+
+### Se connecter
+
+1. Sur le site, clique sur **« Se connecter avec Discord »**.
+2. Tu arrives sur **discord.com**, la page officielle de Discord. Vérifie le compte affiché : ce doit être **celui que tu utilises sur le serveur de la guilde**.
+3. Clique sur **Autoriser**. Tu reviens sur le site, connecté.
+
+Sur téléphone, les pages du site sont dans le menu **☰** en haut, avec ton nom et le bouton de déconnexion.
+
+Le site ne voit jamais ton mot de passe. Discord lui transmet seulement ton identifiant, ton pseudo, ton avatar et tes rôles sur le serveur de la guilde. Ce sont ces rôles qui déterminent ce que tu vois : membre ou officier.
+
+> **Pas reconnu comme membre ?** Ton navigateur est probablement connecté à un autre compte Discord que celui de ton appli. Voir [En cas de problème](#en-cas-de-problème).
+
+### Créer ses fiches de persos
+
+Menu **Mes persos** → **Ajouter un perso**.
+
+| Champ | Conseil |
+|---|---|
+| **Nom** | **Exactement comme en jeu**, accents compris : il sert à relier ta fiche aux données importées du jeu. Le site le met en forme tout seul (une majuscule, le reste en minuscules). |
+| Nom de famille | **Obligatoire**, comme dans Forever. Même mise en forme que le nom. |
+| Race, classe | La liste ne propose que les combinaisons possibles dans Forever. |
+| Spé et rôle | Ta spécialisation principale ; la **spé secondaire** (double spé) à partir du niveau 40. |
+| Niveau | 1 par défaut. À mettre à jour de temps en temps, ou automatiquement après un import du jeu. |
+| Métiers | Deux métiers principaux au plus, plus les secondaires (cuisine, secourisme, pêche). Un métier coché démarre au niveau 1. |
+| Recettes | Texte libre pour tes spécialités (« flacons », « cape de résistance au feu »…). |
+| Intérêts | PvE et PvP : pas intéressé, détente ou compétitif. |
+| Notes | Visibles seulement par toi et les officiers. |
+
+**Main et rerolls** : ton premier perso devient ton **main**. Les suivants sont des rerolls rattachés à ton main. Pour changer de main, clique sur **« Définir comme main »** sous le reroll concerné, dans Mes persos. Un main qui a encore des rerolls ne peut pas être supprimé.
+
+**Le badge « en jeu »** : après chaque import du registre de guilde par un officier, tes persos affichent :
+
+- **✔ en jeu** : le perso a été trouvé dans la guilde en jeu ;
+- **⚠ pas trouvé en jeu** : aucun perso de ce nom dans la guilde. Vérifie l'orthographe du nom sur ta fiche ;
+- **« pas encore vérifié »** : la fiche a été créée après le dernier import.
+
+### Le roster et les pages joueurs
+
+- **Roster** : la liste des persos de la guilde, avec des filtres par classe, rôle, faction, intérêts, métier et niveau de métier. Par défaut, **seuls les mains** sont affichés, pour une vue juste de l'effectif ; choisis « Mains et rerolls » pour tout voir. Les onglets en haut montrent les **rosters** composés par les officiers (équipe de raid…).
+- **Page joueur** : un clic sur un nom affiche ses persos, ses métiers, ses recettes connues et ses rosters.
+
+### Les sorties
+
+Menu **Sorties** : deux listes, **sorties officielles** et **sorties des membres**, avec la date, l'organisateur et le nombre d'inscrits.
+
+Sur la page d'une sortie :
+
+- **Mon inscription** : choisis ton perso, ta spé (principale ou secondaire) et ton statut :
+
+  | Statut | Signification |
+  |---|---|
+  | Présent | Tu viens, dans le rôle de ta spé. |
+  | Remplaçant | Disponible si besoin : tu es mis sur le banc avec ta spé, les organisateurs savent quel rôle tu peux tenir. |
+  | Peut-être | Pas encore sûr. |
+  | En retard | Tu arriveras après le début. |
+  | Absent | Tu ne viens pas. |
+
+  Ton inscription apparaît aussi sur le message Raid-Helper dans Discord, sous le nom de ton perso. Tu peux la **modifier** ou te **désinscrire** à tout moment.
+- **Groupe complet** : si toutes les places sont prises, une nouvelle inscription « Présent » passe automatiquement sur le banc.
+- **Composition** : les inscrits par rôle, les remplaçants de chaque rôle, et ce qui manque (« Il manque : 1 tank »). Pour un raid, la répartition par classe et la comparaison avec un roster.
+- **Actualiser** : une inscription faite sur Discord apparaît sur le site en une minute au plus ; ce bouton la fait apparaître tout de suite.
+
+Tu peux aussi t'inscrire directement sur Discord avec les boutons de Raid-Helper : c'est la même liste.
+
+### Proposer une sortie
+
+Bouton **Proposer une sortie** (page Sorties).
+
+1. **Type de sortie** : donjon, quêtes, farm/métiers, PvP ou autre. Les raids sont organisés par les officiers.
+2. Pour un donjon : choisis-le dans la liste. Le titre, le nombre de places (5) et la tranche de niveau se remplissent tout seuls ; les nouveautés de Forever sont signalées.
+3. **Description** : rendez-vous, prérequis, consommables…
+4. **Date et heure**, puis **Proposer la sortie**.
+
+La sortie est publiée dans le salon des sorties des membres, avec toi comme organisateur. Depuis sa page, tu peux la **modifier** (titre, description, date, heure) ou la **supprimer**. Tu peux avoir **trois sorties à venir** au plus en même temps.
+
+---
+
+## Pour les candidats
+
+Si tu n'es pas encore membre de la guilde, tu peux postuler depuis le site, même sans être sur le serveur Discord.
+
+1. Connecte-toi avec Discord : le site te propose de **postuler**.
+2. Remplis la fiche de ton perso et réponds aux questions de la guilde.
+3. Suis ta candidature dans **Ma candidature**. Si tu es déjà sur le serveur Discord, le bot te prévient aussi en message privé de la décision.
+4. **Acceptée** : clique sur **« Rejoindre le serveur Discord »** et autorise Discord. Le bot te fait entrer directement, avec ton rôle de nouveau membre, sans questionnaire.
+5. **Refusée** : tu pourras repostuler après le délai fixé par la guilde.
+
+---
+
+## Pour les officiers
+
+Les officiers ont accès au menu **Admin**. Le compteur du menu signale les candidatures en attente et les nouveaux membres à revoir.
+
+### Candidatures
+
+Admin → **Candidatures** :
+
+- donne ton avis **+1 ou −1** (un −1 doit être justifié) ; chaque officier a un avis, modifiable ;
+- **n'importe quel officier peut accepter ou refuser**, avec un message facultatif au candidat. Accepter malgré des avis défavorables demande une confirmation ;
+- à l'acceptation, le perso de la candidature devient le main de la recrue, et le bot lui donne le rôle d'arrivée.
+
+### Progression des nouveaux membres
+
+Admin → **Progression** : les porteurs du rôle d'arrivée, du plus ancien au plus récent, avec leur dernière connexion en jeu. Au-delà du délai de revue, ils sont signalés **« À revoir »**. La promotion se fait sur Discord ; **« Revu »** repousse le rappel de 30 jours. **Aucune promotion n'est automatique.**
+
+### Joueurs
+
+Admin → **Joueurs** :
+
+- tous les joueurs connectés au moins une fois, avec leurs persos ;
+- **« Sur Discord, sans compte sur le site »** : les membres du serveur qui ont accès au site mais ne s'y sont jamais connectés. Le bouton **« Copier les mentions »** prépare un message de relance à coller sur Discord.
+
+### Rosters
+
+Admin → **Rosters** : crée des équipes nommées (« Roster raid principal »…), visibles par les membres ou réservées aux officiers. Les persos s'ajoutent depuis la page **Roster**, onglet de l'équipe. Sur une sortie de raid, compare les inscrits avec un roster : inscrits, absents, persos hors roster.
+
+### Sorties officielles
+
+Bouton **Nouvelle sortie** (page Sorties), en choisissant **« Sortie officielle »** :
+
+- type de sortie et instance (les raids indiquent leur date d'ouverture), titre, description, date, heure, salon et chef de raid ;
+- un **modèle** préremplit tout (Admin → Sorties → Modèles : « Raid du mercredi 21h », avec un roster à comparer) ;
+- si l'option est activée, un **événement Discord** est créé en plus, avec rappels.
+
+Les officiers peuvent modifier ou supprimer **toutes** les sorties, et proposer aussi des sorties membres.
+
+Admin → **Sorties** contient aussi :
+
+- les **salons** des sorties officielles et des sorties membres ;
+- les **images des sorties** : une par type et par instance, affichées sur Discord et sur le site (PNG, JPEG ou WebP, 2 Mo au plus, format 16:9 conseillé). N'utilise que des images que la guilde a le droit de diffuser.
+
+### Import du jeu
+
+Admin → **Import du jeu**, à faire par un officier de temps en temps (une fois par semaine par exemple) :
+
+1. Télécharge l'**addon InnkeeperSync** et décompresse-le dans `Interface/AddOns` du jeu.
+2. En jeu, avec un perso de la guilde : tape **`/innkeeper`** (ou `/ik`). Pour exporter tes recettes, ouvre la fenêtre de chacun de tes métiers. Puis tape **`/reload`**.
+3. Dépose le fichier `WTF/Account/<TON COMPTE>/SavedVariables/InnkeeperSync.lua`.
+4. Vérifie l'**aperçu** :
+   - niveaux et métiers qui changent ;
+   - **membres de la guilde sans fiche** (à relancer) ;
+   - **fiches introuvables en jeu** (nom mal écrit ?).
+5. **Appliquer l'import**.
+
+L'addon n'envoie rien sur Internet ; il écrit seulement ce fichier.
+
+### Recrutement et rôles
+
+- Admin → **Recrutement** : rôle d'arrivée, salons des annonces et des invitations, questions aux candidats, délais.
+- Admin → **Rôles Discord** : permission de chaque rôle (Officier, Membre, Aucune) et mode d'accès au site.
+- Admin → **Guilde** : présentation, logo, bannière, ambitions, horaires, recrutement affiché sur l'accueil. La **faction** choisie donne aussi l'ambiance du site (fond chaud pour la Horde, bleu nuit pour l'Alliance, neutre pour une guilde mixte) ; la couleur d'accent reste au choix.
+
+---
+
+## Pour l'admin du site
+
+Le compte **admin local** (créé à l'installation) gère ce qui touche à l'instance :
+
+- **Connexion Discord** : application, serveur, jeton et invitation du bot ;
+- **clé API Raid-Helper** (Admin → Sorties) ;
+- **Journal** : toutes les actions des officiers (fiches modifiées, décisions, sorties…), avec filtres, conservées un an ;
+- **Compte admin** : changement de mot de passe.
+
+Le compte admin local reste utilisable si Discord ne répond plus : `<adresse du site>/admin/connexion`.
+
+---
+
+## En cas de problème
+
+| Problème | Cause probable et solution |
+|---|---|
+| **« Site dangereux » en rouge** dans le navigateur | Faux positif fréquent sur un site neuf avec une connexion Discord. Préviens l'admin du site, qui demande un réexamen à Google. |
+| **Connecté, mais vu comme candidat** | Ton navigateur est connecté à un autre compte Discord. Déconnecte-toi du site, va sur discord.com/app, vérifie le compte en bas à gauche (déconnecte-le si ce n'est pas le bon), puis reconnecte-toi au site. |
+| **Ton inscription faite sur Discord n'apparaît pas** | Délai d'une minute : clique sur **Actualiser** sur la page de la sortie. |
+| **« Raid-Helper a refusé l'opération : missing permissions »** | Un droit manque à Raid-Helper dans le salon de la sortie (souvent « Utiliser des émojis externes »). Préviens un officier. |
+| **« Tu as déjà 3 sorties à venir »** | Supprime une de tes sorties, ou attends qu'une soit passée. |
+| **Ton perso est marqué « pas trouvé en jeu »** | Le nom de ta fiche ne correspond pas à celui du jeu : corrige-le dans Mes persos. |
+| **Une sortie n'apparaît pas dans la liste** | La liste se rafraîchit toutes les quelques minutes ; une sortie créée hors du site n'apparaît que si le bot voit son salon. |
+
+Pour toute autre question, contacte un officier de la guilde sur Discord.

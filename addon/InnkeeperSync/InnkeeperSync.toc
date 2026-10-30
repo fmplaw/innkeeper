@@ -1,0 +1,9 @@
+## Interface: 16001
+## Title: Innkeeper Sync
+## Notes: Exporte le registre de guilde, les métiers et les recettes pour Innkeeper, le portail de la guilde.
+## Author: Innkeeper
+## Version: 1.1.0
+## IconTexture: Interface\Icons\INV_Misc_Note_01
+## SavedVariables: InnkeeperSyncDB
+
+InnkeeperSync.lua

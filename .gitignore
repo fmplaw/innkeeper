@@ -1,0 +1,12 @@
+# Notes de travail locales (infrastructure, contexte de l'instance) : jamais publiées
+CLAUDE.md
+CLAUDE.local.md
+
+node_modules
+/build
+/.svelte-kit
+/data
+/backups
+.env
+.env.*
+!.env.example

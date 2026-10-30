@@ -1,0 +1,32 @@
+# Déploiement derrière un Traefik existant (HTTPS géré par Traefik).
+#   docker compose -f docker-compose.traefik.yml up -d --build
+# Variables lues dans .env : SITE_DOMAIN, TRAEFIK_NETWORK, TRAEFIK_ENTRYPOINT,
+# TRAEFIK_CERTRESOLVER (voir .env.example).
+
+services:
+  site:
+    build: .
+    env_file: .env
+    environment:
+      ORIGIN: https://${SITE_DOMAIN:?SITE_DOMAIN manquant dans .env}
+    volumes:
+      - data:/data
+      - ./backups:/backups
+    networks:
+      - traefik
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=${TRAEFIK_NETWORK:-traefik}
+      - traefik.http.routers.innkeeper.rule=Host(`${SITE_DOMAIN}`)
+      - traefik.http.routers.innkeeper.entrypoints=${TRAEFIK_ENTRYPOINT:-websecure}
+      - traefik.http.routers.innkeeper.tls.certresolver=${TRAEFIK_CERTRESOLVER:-letsencrypt}
+      - traefik.http.services.innkeeper.loadbalancer.server.port=3000
+    restart: unless-stopped
+
+volumes:
+  data:
+
+networks:
+  traefik:
+    name: ${TRAEFIK_NETWORK:-traefik}
+    external: true
