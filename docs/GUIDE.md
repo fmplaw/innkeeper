@@ -129,6 +129,17 @@ Admin → **Joueurs** :
 - tous les joueurs connectés au moins une fois, avec leurs persos ;
 - **« Sur Discord, sans compte sur le site »** : les membres du serveur qui ont accès au site mais ne s'y sont jamais connectés. Le bouton **« Copier les mentions »** prépare un message de relance à coller sur Discord.
 
+### Statistiques
+
+Admin → **Statistiques** : une vue d'ensemble pour repérer les manques. Seuls les joueurs qui ont encore accès au site sont comptés.
+
+- **Rôles des mains** : répartition, mains capables de passer à un rôle avec leur spé secondaire, rerolls. Les rôles cherchés dans le recrutement sont marqués « recherché ».
+- **Classes** : mains par rôle pour chaque classe jouable par la guilde (un tiret quand la classe ne peut pas tenir ce rôle), rerolls en clair, classes sans aucun main signalées.
+- **Métiers** : nombre de persos (rerolls compris), meilleur niveau et les trois artisans les plus avancés ; un métier que personne n'a est signalé.
+- **Niveaux** et **intérêts** PvE/PvP des mains.
+- **Activité** : dernière connexion au site (cette semaine, ce mois-ci, plus de 30 jours) et, après un import du jeu, mains trouvés dans le registre de guilde. La liste des absents depuis plus de 30 jours se déplie.
+- **Fiches à compléter** : joueurs sans perso, ou à qui il manque un nom de famille, la spé, les métiers ou les intérêts du main. **« Copier les mentions »** prépare la relance sur Discord.
+
 ### Rosters
 
 Admin → **Rosters** : crée des équipes nommées (« Roster raid principal »…), visibles par les membres ou réservées aux officiers. Les persos s'ajoutent depuis la page **Roster**, onglet de l'équipe. Sur une sortie de raid, compare les inscrits avec un roster : inscrits, absents, persos hors roster.

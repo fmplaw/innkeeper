@@ -6,6 +6,7 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ### Ajouté
 
+- **Admin → Statistiques** (officiers) : rôles des mains (avec spés secondaires et rerolls), tableau des classes par rôle, métiers avec meilleurs niveaux et artisans, niveaux et intérêts des mains, activité sur le site, fiches à compléter avec copie des mentions Discord. Les classes et rôles recherchés dans le recrutement sont mis en évidence.
 - `scripts/version.mjs` : change le numéro de version partout (paquet, fichiers compose, CHANGELOG), avec un test qui vérifie que tout concorde.
 
 ### Modifié

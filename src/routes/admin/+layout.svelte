@@ -6,6 +6,7 @@
 	const links = $derived([
 		{ href: '/admin', label: 'Joueurs' },
 		{ href: '/admin/candidatures', label: data.pendingApplications ? `Candidatures (${data.pendingApplications})` : 'Candidatures' },
+		{ href: '/admin/statistiques', label: 'Statistiques' },
 		{ href: '/admin/progression', label: data.dueReviews ? `Progression (${data.dueReviews})` : 'Progression' },
 		{ href: '/admin/recrutement', label: 'Recrutement' },
 		{ href: '/admin/guilde', label: 'Guilde' },

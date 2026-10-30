@@ -23,6 +23,7 @@
 - **Sorties** pilotées dans [Raid-Helper](https://raid-helper.dev) : création depuis le site (officielles et proposées par les membres), inscription depuis le site, composition, comparaison avec un roster, banc.
 - **Recrutement** : candidature en ligne, avis des officiers, entrée sur le serveur Discord et rôle d'arrivée posés par le bot, suivi des nouveaux membres.
 - **Import des données du jeu** par un addon (registre de guilde, métiers, recettes, dernière connexion).
+- **Statistiques pour les officiers** : composition par classe et par rôle face au recrutement, métiers et meilleurs artisans, niveaux, intérêts, activité, fiches à compléter.
 - **Administration** sans éditer de fichiers : assistant d'installation, profil de guilde, rôles, journal des actions.
 - **Aux couleurs de la guilde** : palette de fond selon la faction (bruns chauds pour la Horde, bleu nuit pour l'Alliance, anthracite pour une guilde multi-faction), couleur d'accent, logo et bannière au choix.
 
@@ -38,6 +39,11 @@ Captures prises sur une guilde de démonstration fictive.
 | **Roster** : filtres, répartition, badge « en jeu » venu de l'addon. | **Sorties** : officielles et proposées par les membres, tirées de Raid-Helper. |
 | ![Composition d'un raid de 10 : inscrits par rôle, banc, retards et absences](docs/images/sortie.png) | ![Candidature avec les réponses du candidat, les avis des officiers et la décision](docs/images/candidature.png) |
 | **Une sortie** : composition par rôle et par classe, banc, inscription depuis le site. | **Une candidature** : réponses, avis des officiers, décision. |
+
+<p align="center">
+  <img src="docs/images/statistiques.png" alt="Statistiques des officiers : rôles des mains, niveaux, intérêts, tableau des classes par rôle, métiers et meilleurs artisans" width="820"><br>
+  <em>Statistiques des officiers : les manques sautent aux yeux (classes sans main, métiers sans artisan, rôles recherchés).</em>
+</p>
 
 <p align="center">
   <img src="docs/images/mobile.png" alt="Page d'une sortie sur téléphone, avec le formulaire d'inscription" width="260"><br>
@@ -115,6 +121,7 @@ src/
 │       ├── signups.ts      inscriptions depuis le site
 │       ├── recruitment.ts  candidatures, arrivée des recrues
 │       ├── game-import.ts  import de l'export de l'addon
+│       ├── stats.ts        chiffres publics de l'accueil, statistiques des officiers
 │       └── …
 └── routes/                 pages (fr) : /persos, /roster, /sorties, /admin/…
 addon/InnkeeperSync/        addon d'export pour le jeu (Lua)
