@@ -4,6 +4,8 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ## [Non publié]
 
+## [0.10.0] - 2026-10-30
+
 ### Ajouté
 
 - **Admin → Statistiques** (officiers) : rôles des mains (avec spés secondaires et rerolls), tableau des classes par rôle, métiers avec meilleurs niveaux et artisans, niveaux et intérêts des mains, activité sur le site, fiches à compléter avec copie des mentions Discord. Les classes et rôles recherchés dans le recrutement sont mis en évidence.
@@ -46,6 +48,7 @@ Première version publique.
 - **Apparence** : palettes Horde, Alliance et multi-faction, logo, bannière et couleur d'accent de la guilde, affichage adapté aux téléphones.
 - **Exploitation** : image Docker multi-architecture publiée par la CI, sauvegardes de la base, point de contrôle `/healthz`.
 
-[Non publié]: https://github.com/fmplaw/innkeeper/compare/v0.9.1...HEAD
+[Non publié]: https://github.com/fmplaw/innkeeper/compare/v0.10.0...HEAD
+[0.10.0]: https://github.com/fmplaw/innkeeper/compare/v0.9.1...v0.10.0
 [0.9.1]: https://github.com/fmplaw/innkeeper/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/fmplaw/innkeeper/releases/tag/v0.9.0
