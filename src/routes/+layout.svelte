@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { SOURCE_URL } from '$lib/project';
 	import '../app.css';
 	import { afterNavigate } from '$app/navigation';
 	import { page } from '$app/state';
@@ -112,7 +113,7 @@
 			{#if guild.tagline}<span>{guild.tagline}</span>{/if}
 			<span class="muted">Guilde {GUILD_FACTION_LABELS[guild.faction]} sur World of Warcraft Forever</span>
 			<a href="/confidentialite" class="muted">Confidentialité</a>
-			<span class="muted">Propulsé par Innkeeper</span>
+			<a href={SOURCE_URL} class="muted" rel="noopener">Propulsé par Innkeeper</a>
 		</footer>
 	{/if}
 </div>

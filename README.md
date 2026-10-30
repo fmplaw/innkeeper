@@ -339,6 +339,6 @@ Les tests tournent aussi à chaque `docker build` et dans la CI GitHub (`.github
 
 ## Licence
 
-Innkeeper est un logiciel libre sous licence [GNU AGPL v3](LICENSE). Tu peux l'utiliser, le modifier et le redistribuer. Si tu héberges une version modifiée pour d'autres joueurs, tu dois leur donner accès à son code source, modifications comprises.
+Innkeeper est un logiciel libre sous licence [GNU AGPL v3](LICENSE). Tu peux l'utiliser, le modifier et le redistribuer. Si tu héberges une version modifiée pour d'autres joueurs, tu dois leur donner accès à son code source, modifications comprises. Le lien « Propulsé par Innkeeper » du pied de page y pourvoit : fais pointer `SOURCE_URL` (`src/lib/project.ts`) vers ton propre dépôt.
 
 World of Warcraft est une marque de Blizzard Entertainment. Innkeeper est un projet de joueurs, sans lien avec Blizzard, Discord ou Raid-Helper.
