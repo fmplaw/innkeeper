@@ -9,7 +9,7 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 ### Corrigé
 
 - L'installateur Windows d'InnkeeperSync porte l'icône d'Innkeeper au lieu de l'icône générique.
-- L'AppImage Linux d'InnkeeperSync se construit de nouveau (bibliothèques système manquantes dans la CI).
+- L'AppImage Linux d'InnkeeperSync se construit de nouveau : la bibliothèque `rust-ini` 0.21.3 cassait le module des liens `innkeeper://` sous Linux, elle est figée en 0.21.1.
 
 ## [0.12.0] - 2026-10-31
 
