@@ -4,6 +4,8 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ## [Non publié]
 
+## [0.11.0] - 2026-10-31
+
 ### Ajouté
 
 - **Charte et règlement** : rédigés dans Admin → Charte (aperçu en direct, modification notée dans le journal), publiés sur la page publique `/charte` avec un lien dans le menu. Quand une charte existe, le candidat la lit dans le formulaire et doit cocher « J'ai lu la charte et je m'engage à la respecter » ; la candidature indique aux officiers que la charte a été acceptée. Mise en page pensée pour un long texte : chaque partie (`#`) ouvre par un titre souligné, ses sous-parties (`##`) s'affichent en encadrés côte à côte (empilés sur téléphone), et une dernière ligne entièrement en gras (une devise) sort des parties pour former un bandeau en bas de page.
@@ -72,7 +74,8 @@ Première version publique.
 - **Apparence** : palettes Horde, Alliance et multi-faction, logo, bannière et couleur d'accent de la guilde, affichage adapté aux téléphones.
 - **Exploitation** : image Docker multi-architecture publiée par la CI, sauvegardes de la base, point de contrôle `/healthz`.
 
-[Non publié]: https://github.com/fmplaw/innkeeper/compare/v0.10.1...HEAD
+[Non publié]: https://github.com/fmplaw/innkeeper/compare/v0.11.0...HEAD
+[0.11.0]: https://github.com/fmplaw/innkeeper/compare/v0.10.1...v0.11.0
 [0.10.1]: https://github.com/fmplaw/innkeeper/compare/v0.10.0...v0.10.1
 [0.10.0]: https://github.com/fmplaw/innkeeper/compare/v0.9.1...v0.10.0
 [0.9.1]: https://github.com/fmplaw/innkeeper/compare/v0.9.0...v0.9.1
