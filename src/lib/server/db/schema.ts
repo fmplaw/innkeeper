@@ -193,6 +193,8 @@ export const applications = sqliteTable(
 		// Arrivée sur Discord après acceptation : invitation créée par le bot, rôle attribué.
 		inviteUrl: text('invite_url'),
 		roleAssignedAt: integer('role_assigned_at', { mode: 'timestamp' }),
+		// Charte acceptée en postulant (null : pas de charte à ce moment-là).
+		charterAcceptedAt: integer('charter_accepted_at', { mode: 'timestamp' }),
 		createdAt: timestamp('created_at')
 	},
 	(t) => [index('applications_user_idx').on(t.userId), index('applications_status_idx').on(t.status)]

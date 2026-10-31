@@ -29,6 +29,7 @@ export const AUDIT_ACTIONS = {
 	'roles.sync': { group: 'Rôles et accès', label: 'a synchronisé les rôles depuis le bot' },
 	'access.update': { group: 'Rôles et accès', label: "a changé le mode d'accès au site" },
 	'guild.update': { group: 'Configuration', label: 'a modifié le profil de la guilde' },
+	'charter.update': { group: 'Configuration', label: 'a modifié la charte de la guilde' },
 	'discord.update': { group: 'Configuration', label: 'a modifié la connexion Discord' },
 	'admin.create': { group: 'Admin local', label: 'a créé le compte admin local' },
 	'admin.login': { group: 'Admin local', label: "s'est connecté en admin local" },

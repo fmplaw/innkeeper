@@ -56,6 +56,7 @@ Menu **Mes persos** → **Ajouter un perso**.
 ### Le roster et les pages joueurs
 
 - **Roster** : la liste des persos de la guilde, avec des filtres par classe, rôle, faction, intérêts, métier et niveau de métier. Par défaut, **seuls les mains** sont affichés, pour une vue juste de l'effectif ; choisis « Mains et rerolls » pour tout voir. Un clic sur l'en-tête d'une colonne trie le tableau, un second clic inverse l'ordre ; le tri reste en place quand tu changes de filtre. Les onglets en haut montrent les **rosters** composés par les officiers (équipe de raid…).
+- **Charte** : la charte et le règlement de la guilde, dans le menu dès que les officiers l'ont publiée. Elle est lisible par tous, même sans connexion.
 - **Page joueur** : un clic sur un nom affiche ses persos, ses métiers, ses recettes connues et ses rosters.
 
 ### Les sorties
@@ -99,7 +100,7 @@ La sortie est publiée dans le salon des sorties des membres, avec toi comme org
 Si tu n'es pas encore membre de la guilde, tu peux postuler depuis le site, même sans être sur le serveur Discord.
 
 1. Connecte-toi avec Discord : le site te propose de **postuler**.
-2. Remplis la fiche de ton perso et réponds aux questions de la guilde.
+2. Remplis la fiche de ton perso et réponds aux questions de la guilde. Si la guilde a publié une **charte**, elle s'affiche en bas du formulaire : lis-la et coche « J'ai lu la charte et je m'engage à la respecter », sans quoi la candidature ne part pas.
 3. Suis ta candidature dans **Ma candidature**. Si tu es déjà sur le serveur Discord, le bot te prévient aussi en message privé de la décision.
 4. **Acceptée** : clique sur **« Rejoindre le serveur Discord »** et autorise Discord. Le bot te fait entrer directement, avec ton rôle de nouveau membre, sans questionnaire.
 5. **Refusée** : tu pourras repostuler après le délai fixé par la guilde.
@@ -178,7 +179,8 @@ L'addon n'envoie rien sur Internet ; il écrit seulement ce fichier.
 
 - Admin → **Recrutement** : rôle d'arrivée, salons des annonces et des invitations, questions aux candidats, délais.
 - Admin → **Rôles Discord** : permission de chaque rôle (Officier, Membre, Aucune) et mode d'accès au site.
-- Admin → **Guilde** : présentation, logo, bannière, ambitions, horaires, recrutement affiché sur l'accueil. La **faction** choisie donne aussi l'ambiance du site (fond chaud pour la Horde, bleu nuit pour l'Alliance, neutre pour une guilde mixte) ; la couleur d'accent reste au choix.
+- Admin → **Charte** : la charte et le règlement de la guilde, avec un aperçu en direct. Mise en forme : `# Titre`, `## Sous-titre`, `- élément de liste`, `**gras**`, `*italique*`, ligne vide entre les paragraphes. Sur la page, chaque `## Sous-titre` devient un encadré : regroupe par exemple les valeurs de la guilde sous un `# Titre`, une valeur par `##`. Une dernière ligne entièrement en gras, comme une devise, s'affiche en bandeau tout en bas. Une fois publiée, elle apparaît dans le menu de tous et les candidats doivent l'accepter pour postuler ; la candidature indique « charte acceptée ». La laisser vide la retire. Chaque modification est notée dans le journal.
+- Admin → **Guilde** : **type de serveur** (JcJ, JcE, JdR ou Hardcore), affiché sur l'accueil et en bas de chaque page ; présentation, logo, bannière, ambitions, horaires, recrutement affiché sur l'accueil. La **faction** choisie donne aussi l'ambiance du site (fond chaud pour la Horde, bleu nuit pour l'Alliance, neutre pour une guilde mixte) ; la couleur d'accent reste au choix.
 
 ---
 

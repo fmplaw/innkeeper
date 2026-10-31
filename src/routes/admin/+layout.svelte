@@ -10,6 +10,7 @@
 		{ href: '/admin/progression', label: data.dueReviews ? `Progression (${data.dueReviews})` : 'Progression' },
 		{ href: '/admin/recrutement', label: 'Recrutement' },
 		{ href: '/admin/guilde', label: 'Guilde' },
+		{ href: '/admin/charte', label: 'Charte' },
 		{ href: '/admin/rosters', label: 'Rosters' },
 		{ href: '/admin/sorties', label: 'Sorties' },
 		{ href: '/admin/import', label: 'Import du jeu' },
@@ -25,6 +26,12 @@
 			<a href={link.href} aria-current={page.url.pathname === link.href ? 'page' : undefined}>{link.label}</a>
 		{/each}
 	</nav>
+	{#if !data.config.guild.serverType}
+		<p class="card notice">
+			Le type de serveur de la guilde (JcJ, JcE, JdR…) n'est pas encore renseigné : choisis-le dans
+			<a href="/admin/guilde">Admin → Guilde</a>, il s'affiche sur l'accueil et en bas de chaque page.
+		</p>
+	{/if}
 {/if}
 
 {@render children()}
@@ -43,6 +50,10 @@
 		color: var(--text);
 		text-decoration: none;
 		font-size: 0.9rem;
+	}
+	.notice {
+		margin: 0 0 1.5rem;
+		border-color: color-mix(in srgb, #e3a03a 50%, var(--border));
 	}
 	.subnav a[aria-current='page'] {
 		border-color: var(--accent);

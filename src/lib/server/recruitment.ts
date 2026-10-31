@@ -37,8 +37,13 @@ export function applyBlocker(userId: string): { reason: 'pending' | 'accepted' |
 	return null;
 }
 
-export function submitApplication(userId: string, character: CharacterDraft, answers: { question: string; answer: string }[]) {
-	const app = db().insert(applications).values({ userId, character, answers }).returning().get();
+export function submitApplication(
+	userId: string,
+	character: CharacterDraft,
+	answers: { question: string; answer: string }[],
+	charterAcceptedAt: Date | null = null
+) {
+	const app = db().insert(applications).values({ userId, character, answers, charterAcceptedAt }).returning().get();
 	void announce(app, 'new');
 	return app;
 }

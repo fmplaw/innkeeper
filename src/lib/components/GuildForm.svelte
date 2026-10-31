@@ -1,13 +1,14 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import { enhance } from '$app/forms';
-	import { CLASSES, GUILD_FACTION_LABELS, type GuildFaction } from '$lib/game/forever';
+	import { CLASSES, GUILD_FACTION_LABELS, SERVER_TYPE_INFO, type GuildFaction } from '$lib/game/forever';
 	import { AMBITIONS, AMBITION_LABELS, DEFAULT_ACCENTS } from '$lib/guild';
 	import { ROLES, ROLE_LABELS } from '$lib/roles';
 
 	interface Values {
 		name?: string;
 		faction?: string;
+		serverType?: string | null;
 		tagline?: string;
 		description?: string;
 		ambitions?: string[];
@@ -66,6 +67,16 @@
 			{/each}
 			{#if errors.faction}<p class="error">{errors.faction}</p>{/if}
 		</div>
+		<div class="factions">
+			<span class="label">Type de serveur *</span>
+			{#each Object.entries(SERVER_TYPE_INFO) as [id, info] (id)}
+				<label class="choice" title={info.name}>
+					<input type="radio" name="serverType" value={id} required checked={initial.serverType === id} />
+					{info.label} <span class="muted small">({info.name}{info.upcoming ? ', pas encore ouvert' : ''})</span>
+				</label>
+			{/each}
+			{#if errors.serverType}<p class="error">{errors.serverType}</p>{/if}
+		</div>
 		<div class="grid">
 			<div>
 				<label for="logo">Logo carré (PNG, JPEG ou WebP, 1 Mo max)</label>
@@ -114,7 +125,7 @@
 		<div>
 			<label for="description">Qui sommes-nous ?</label>
 			<textarea id="description" name="description" rows="8" maxlength="5000">{initial.description ?? ''}</textarea>
-			<p class="hint muted">Mise en forme : **gras**, *italique*, une ligne vide pour changer de paragraphe.</p>
+			<p class="hint muted">Mise en forme : **gras**, *italique*, « - » en début de ligne pour une liste, une ligne vide pour changer de paragraphe.</p>
 		</div>
 		<div>
 			<span class="label">Ambitions</span>
@@ -226,6 +237,9 @@
 		flex-wrap: wrap;
 		gap: 0.4rem 1.25rem;
 		align-items: center;
+	}
+	.small {
+		font-size: 0.82rem;
 	}
 	.factions .label {
 		width: 100%;

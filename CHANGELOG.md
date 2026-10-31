@@ -4,6 +4,20 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ## [Non publié]
 
+### Ajouté
+
+- **Charte et règlement** : rédigés dans Admin → Charte (aperçu en direct, modification notée dans le journal), publiés sur la page publique `/charte` avec un lien dans le menu. Quand une charte existe, le candidat la lit dans le formulaire et doit cocher « J'ai lu la charte et je m'engage à la respecter » ; la candidature indique aux officiers que la charte a été acceptée. Mise en page pensée pour un long texte : chaque partie (`#`) ouvre par un titre souligné, ses sous-parties (`##`) s'affichent en encadrés côte à côte (empilés sur téléphone), et une dernière ligne entièrement en gras (une devise) sort des parties pour former un bandeau en bas de page.
+
+- **Type de serveur** de la guilde (JcJ, JcE, JdR, Hardcore à venir) dans le profil de guilde, demandé à l'installation et dans Admin → Guilde. Il s'affiche sur la bannière de l'accueil (« Horde · JcJ · World of Warcraft Forever ») et en pied de page. Un rappel s'affiche dans l'admin tant qu'il n'est pas renseigné.
+
+### Modifié
+
+- Les textes de la guilde (charte, présentation, horaires, recrutement) acceptent des titres (`# `, `## `) et des listes (`- `).
+
+### Corrigé
+
+- Le titre du formulaire de candidature affichait « Postuler au Le Pacte… » : il devient « Rejoindre <nom de la guilde> ».
+
 ## [0.10.1] - 2026-10-30
 
 ### Ajouté

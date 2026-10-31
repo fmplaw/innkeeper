@@ -16,11 +16,12 @@
   <img src="docs/images/accueil.png" alt="Page d'accueil d'une guilde de démonstration : présentation, recrutement ouvert et répartition des rôles et des classes" width="820">
 </p>
 
-**Innkeeper** est un portail de guilde auto-hébergeable pour **World of Warcraft: Forever**, construit autour de Discord et de Raid-Helper. Une instance correspond à une guilde (Alliance, Horde ou multi-faction). Les joueurs se connectent avec Discord ; leurs droits découlent de leurs rôles sur le serveur de la guilde.
+**Innkeeper** est un portail de guilde auto-hébergeable pour **World of Warcraft: Forever**, construit autour de Discord et de Raid-Helper. Une instance correspond à une guilde (Alliance, Horde ou multi-faction, sur un serveur JcJ, JcE, JdR ou Hardcore). Les joueurs se connectent avec Discord ; leurs droits découlent de leurs rôles sur le serveur de la guilde.
 
 - **Fiches de persos** tenues par chaque joueur : main et rerolls, double spécialisation, métiers avec niveau, intérêts PvE/PvP.
 - **Roster** filtrable et triable, répartition par classe et par rôle, **rosters** composés par les officiers (équipe de raid, PvP…).
 - **Sorties** pilotées dans [Raid-Helper](https://raid-helper.dev) : création depuis le site (officielles et proposées par les membres), inscription depuis le site, composition, comparaison avec un roster, banc.
+- **Charte et règlement** rédigés dans l'admin, publiés pour tous et à accepter pour postuler.
 - **Recrutement** : candidature en ligne, avis des officiers, entrée sur le serveur Discord et rôle d'arrivée posés par le bot, suivi des nouveaux membres.
 - **Import des données du jeu** par un addon (registre de guilde, métiers, recettes, dernière connexion).
 - **Statistiques pour les officiers** : composition par classe et par rôle face au recrutement, métiers et meilleurs artisans, niveaux, intérêts, activité, fiches à compléter.
@@ -131,7 +132,7 @@ scripts/backup.mjs          sauvegarde à chaud de la base
 
 ### Deux niveaux de données
 
-- **Données de jeu Forever** (`src/lib/game/forever.ts`) : races et factions, combinaisons race × classe, spés et rôles, métiers, donjons et raids, correspondance avec le modèle Raid-Helper `wowforever`. **Communes à toutes les instances**, versionnées dans le dépôt, mises à jour par le projet quand Blizzard change le jeu.
+- **Données de jeu Forever** (`src/lib/game/forever.ts`) : races et factions, types de serveur, combinaisons race × classe, spés et rôles, métiers, donjons et raids, correspondance avec le modèle Raid-Helper `wowforever`. **Communes à toutes les instances**, versionnées dans le dépôt, mises à jour par le projet quand Blizzard change le jeu.
 - **Configuration de la guilde** (table `settings`) : connexion Discord, rôles et permissions, profil, recrutement, Raid-Helper. **Propre à chaque instance**, modifiée depuis l'interface d'administration.
 
 ---
@@ -181,7 +182,7 @@ scripts/backup.mjs          sauvegarde à chaud de la base
 4. Ouvre `<ORIGIN>/installation` et suis l'assistant :
    - **compte admin local** : il configure l'instance et reste disponible en secours si Discord ne répond plus ;
    - **application Discord** : voir [Configuration Discord](#configuration-discord) ;
-   - **profil de guilde** : nom, faction, logo, bannière, couleur, présentation, ambitions, horaires, recrutement.
+   - **profil de guilde** : nom, faction, type de serveur, logo, bannière, couleur, présentation, ambitions, horaires, recrutement.
 
 Tout reste modifiable ensuite dans **Admin**. La base est dans le volume `data` ; les migrations s'appliquent au démarrage.
 

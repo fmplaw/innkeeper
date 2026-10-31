@@ -3,7 +3,7 @@ import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { env } from '$env/dynamic/private';
 import { ROLES } from '$lib/roles';
-import { CLASSES } from '$lib/game/forever';
+import { CLASSES, SERVER_TYPES } from '$lib/game/forever';
 import { AMBITIONS } from '$lib/guild';
 import { db, schema } from './db';
 
@@ -24,6 +24,9 @@ const isTimeZone = (tz: string) => {
 export const guildSchema = z.object({
 	name: z.string().trim().min(2, 'Nom trop court').max(60),
 	faction: z.enum(['alliance', 'horde', 'both'], 'Faction invalide'),
+	// Type de serveur Forever (JcJ, JcE…). Null pour les profils enregistrés avant ce réglage ;
+	// le formulaire l'exige à la prochaine modification.
+	serverType: z.enum(SERVER_TYPES, 'Type de serveur invalide').nullable().default(null),
 	tagline: z.string().trim().max(140).default(''),
 	description: z.string().trim().max(5000).default(''),
 	ambitions: z.array(z.enum(AMBITIONS)).default([]),
@@ -152,6 +155,20 @@ export function getRaidHelper(): RaidHelperSettings {
 	return parsed.success ? parsed.data : raidHelperSchema.parse({});
 }
 export const setRaidHelper = (settings: RaidHelperSettings) => write('raidhelper', settings);
+
+// Charte et règlement de la guilde : page publique /charte, à accepter pour postuler.
+export const charterSchema = z.object({
+	text: z.string().trim().max(20_000, 'Charte trop longue (20 000 caractères au plus)'),
+	// Dernière modification (millisecondes) et son auteur, affichés sous la charte.
+	updatedAt: z.number().nullable().default(null),
+	updatedBy: z.string().nullable().default(null)
+});
+export type Charter = z.output<typeof charterSchema>;
+export function getCharter(): Charter | null {
+	const parsed = charterSchema.safeParse(read('charter') ?? {});
+	return parsed.success && parsed.data.text ? parsed.data : null;
+}
+export const setCharter = (charter: Charter) => write('charter', charter);
 
 // Images des sorties envoyées par la guilde : clé (`instance:<id>` ou `activity:<id>`) → fichier.
 export const getActivityImages = () => read<Record<string, string>>('activityImages') ?? {};

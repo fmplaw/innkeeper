@@ -1,0 +1,1 @@
+ALTER TABLE `applications` ADD `charter_accepted_at` integer;

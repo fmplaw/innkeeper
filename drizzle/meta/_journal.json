@@ -85,6 +85,13 @@
       "when": 1793195991074,
       "tag": "0011_sorties_membres",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1793446053872,
+      "tag": "0012_charter",
+      "breakpoints": true
     }
   ]
 }

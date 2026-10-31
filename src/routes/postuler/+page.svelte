@@ -1,11 +1,12 @@
 <script lang="ts">
 	import CharacterForm from '$lib/components/CharacterForm.svelte';
+	import RichText from '$lib/components/RichText.svelte';
 
 	let { data, form } = $props();
 	const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long' });
 </script>
 
-<h1>Postuler au {data.config.guild.name}</h1>
+<h1>Rejoindre {data.config.guild.name}</h1>
 
 {#if data.state === 'member'}
 	<p class="card">Tu fais déjà partie de la guilde. <a href="/persos">Gère tes persos</a>.</p>
@@ -19,6 +20,9 @@
 				présenteras le perso que tu comptes jouer et tu répondras à quelques questions. Les officiers examinent
 				chaque candidature, et tu peux suivre la tienne ici.
 			</p>
+			{#if data.config.hasCharter}
+				<p>Avant de postuler, prends le temps de lire <a href="/charte">la charte de la guilde</a> : il faudra l'accepter.</p>
+			{/if}
 			{#if data.discordReady}
 				<form method="POST" action="/connexion">
 					<input type="hidden" name="providerId" value="discord" />
@@ -60,6 +64,22 @@
 					</div>
 				{/each}
 			</fieldset>
+			{#if data.charter}
+				<fieldset class="questions charter">
+					<legend>Charte et règlement</legend>
+					<p class="muted">Lis la charte de la guilde : tu t'engages à la respecter en rejoignant la guilde.</p>
+					<!-- Zone qui défile : focusable pour la lire au clavier. -->
+					<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+					<div class="charter-text" tabindex="0" role="region" aria-label="Charte et règlement">
+						<RichText text={data.charter.text} document />
+					</div>
+					<label class="accept">
+						<input type="checkbox" name="charter" required checked={form?.charter ?? false} />
+						J'ai lu la charte et je m'engage à la respecter *
+					</label>
+					{#if form?.errors?.charter}<p class="error">{form.errors.charter}</p>{/if}
+				</fieldset>
+			{/if}
 		{/snippet}
 	</CharacterForm>
 {/if}
@@ -75,6 +95,27 @@
 	}
 	.lead {
 		max-width: 65ch;
+	}
+	.charter-text {
+		max-height: 22rem;
+		overflow-y: auto;
+		padding: 1rem;
+		border: 1px solid var(--border);
+		border-radius: 6px;
+		background: var(--bg);
+	}
+	.charter-text:focus-visible {
+		outline: 2px solid var(--accent);
+	}
+	.accept {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		color: var(--text);
+		font-size: 0.95rem;
+	}
+	.accept input {
+		width: auto;
 	}
 	.questions {
 		border: 1px solid var(--border);

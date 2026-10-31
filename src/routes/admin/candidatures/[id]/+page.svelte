@@ -25,6 +25,7 @@
 		<h1>{data.candidate.name}</h1>
 		<p class="muted">
 			@{data.candidate.username} · déposée le {dateFormat.format(app.createdAt)}
+			{#if app.charterAcceptedAt}{' '}· charte acceptée{/if}
 		</p>
 		{#if data.discord}
 			<p class="small">

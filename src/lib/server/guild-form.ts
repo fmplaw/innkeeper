@@ -50,6 +50,7 @@ export async function parseGuildForm(form: FormData, current: GuildProfile | nul
 	const raw = {
 		name: str('name'),
 		faction,
+		serverType: str('serverType') || null,
 		tagline: str('tagline'),
 		description: str('description'),
 		ambitions: form.getAll('ambitions').map(String),
@@ -78,6 +79,8 @@ export async function parseGuildForm(form: FormData, current: GuildProfile | nul
 	}
 
 	const result = guildSchema.safeParse(raw);
+	// Facultatif dans le profil enregistré (anciens profils), mais à choisir dans le formulaire.
+	if (!raw.serverType) errors.serverType = 'Choisis le type de serveur de la guilde';
 	if (!result.success) {
 		for (const issue of result.error.issues) errors[String(issue.path[0] ?? 'form')] ??= issue.message;
 	}

@@ -6,7 +6,7 @@ import {
 	racesFor,
 	type GuildFaction
 } from '$lib/game/forever';
-import { DEFAULT_ACCENTS, getGuild } from './settings';
+import { DEFAULT_ACCENTS, getCharter, getGuild } from './settings';
 
 /** Données transmises au navigateur : jeu Forever + profil public de la guilde. */
 export function publicConfig() {
@@ -16,6 +16,7 @@ export function publicConfig() {
 		guild: {
 			name: guild?.name ?? 'Innkeeper',
 			faction,
+			serverType: guild?.serverType ?? null,
 			tagline: guild?.tagline ?? '',
 			accentColor: guild?.accentColor ?? DEFAULT_ACCENTS[faction],
 			timezone: guild?.timezone ?? 'Europe/Paris',
@@ -24,6 +25,8 @@ export function publicConfig() {
 			bannerUrl: guild?.banner ? `/banniere?v=${guild.banner}` : null,
 			bannerTitle: !guild?.banner || (guild?.bannerTitle ?? true)
 		},
+		// Lien « Charte » dans le menu, seulement quand la guilde en a publié une.
+		hasCharter: Boolean(getCharter()),
 		maxLevel: MAX_LEVEL,
 		dualSpecLevel: DUAL_SPEC_LEVEL,
 		races: racesFor(faction),

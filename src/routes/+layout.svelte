@@ -3,11 +3,12 @@
 	import '../app.css';
 	import { afterNavigate } from '$app/navigation';
 	import { page } from '$app/state';
-	import { GUILD_FACTION_LABELS } from '$lib/game/forever';
+	import { GUILD_FACTION_LABELS, SERVER_TYPE_INFO } from '$lib/game/forever';
 
 	let { data, children } = $props();
 
 	const guild = $derived(data.config.guild);
+	const server = $derived(guild.serverType ? SERVER_TYPE_INFO[guild.serverType] : null);
 	const isHome = $derived(page.url.pathname === '/');
 	const inSetup = $derived(page.url.pathname.startsWith('/installation'));
 
@@ -20,6 +21,7 @@
 					{ href: '/sorties', label: 'Sorties' }
 				]
 			: []),
+		...(data.config.hasCharter ? [{ href: '/charte', label: 'Charte' }] : []),
 		...(data.candidate ? [{ href: '/candidature', label: 'Ma candidature' }] : []),
 		...(data.user?.permission === 'officer' || data.admin
 			? [
@@ -56,7 +58,11 @@
 				<div class="titles">
 					<span class="name">{guild.name}</span>
 					{#if isHome && guild.tagline}<span class="tagline">{guild.tagline}</span>{/if}
-					{#if isHome}<span class="faction">{GUILD_FACTION_LABELS[guild.faction]} · World of Warcraft Forever</span>{/if}
+					{#if isHome}
+						<span class="faction">
+							{GUILD_FACTION_LABELS[guild.faction]}{#if server}{' '}· <abbr title={server.name}>{server.label}</abbr>{/if} · World of Warcraft Forever
+						</span>
+					{/if}
 				</div>
 			</div>
 		</a>
@@ -111,7 +117,9 @@
 		<footer>
 			<strong>{guild.name}</strong>
 			{#if guild.tagline}<span>{guild.tagline}</span>{/if}
-			<span class="muted">Guilde {GUILD_FACTION_LABELS[guild.faction]} sur World of Warcraft Forever</span>
+			<span class="muted">
+				Guilde {GUILD_FACTION_LABELS[guild.faction]}{#if server}, serveur <abbr title={server.name}>{server.label}</abbr>,{/if} sur World of Warcraft Forever
+			</span>
 			<a href="/confidentialite" class="muted">Confidentialité</a>
 			<a href={SOURCE_URL} class="muted" rel="noopener">Propulsé par Innkeeper</a>
 		</footer>

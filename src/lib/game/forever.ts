@@ -12,6 +12,17 @@ export type GuildFaction = Faction | 'both';
 export const FACTION_LABELS: Record<Faction, string> = { alliance: 'Alliance', horde: 'Horde' };
 export const GUILD_FACTION_LABELS: Record<GuildFaction, string> = { ...FACTION_LABELS, both: 'Multi-faction' };
 
+// Types de serveur (règles choisies par chaque joueur sur le méga-serveur de Forever).
+// `upcoming` : annoncé, pas encore ouvert.
+export const SERVER_TYPES = ['pvp', 'pve', 'rp', 'hardcore'] as const;
+export type ServerType = (typeof SERVER_TYPES)[number];
+export const SERVER_TYPE_INFO: Record<ServerType, { label: string; name: string; upcoming?: boolean }> = {
+	pvp: { label: 'JcJ', name: 'Joueur contre joueur' },
+	pve: { label: 'JcE', name: 'Joueur contre environnement' },
+	rp: { label: 'JdR', name: 'Jeu de rôle' },
+	hardcore: { label: 'Hardcore', name: 'Une seule vie', upcoming: true }
+};
+
 export interface Spec {
 	id: string;
 	name: string;
