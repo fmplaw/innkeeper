@@ -4,6 +4,8 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ## [Non publié]
 
+## [0.12.0] - 2026-10-31
+
 ### Ajouté
 
 - **Application InnkeeperSync pour PC** (`companion/`, Tauri, installateur d'environ 5 Mo) : surveille le fichier de l'addon et l'envoie au site dès que le jeu l'écrit (déconnexion, `/reload`), sans dépôt manuel. Vit près de l'horloge, démarre avec Windows, se met à jour toute seule, notification après un envoi (désactivable). Installateur Windows et AppImage Linux attachés à chaque release GitHub.
@@ -79,7 +81,8 @@ Première version publique.
 - **Apparence** : palettes Horde, Alliance et multi-faction, logo, bannière et couleur d'accent de la guilde, affichage adapté aux téléphones.
 - **Exploitation** : image Docker multi-architecture publiée par la CI, sauvegardes de la base, point de contrôle `/healthz`.
 
-[Non publié]: https://github.com/fmplaw/innkeeper/compare/v0.11.0...HEAD
+[Non publié]: https://github.com/fmplaw/innkeeper/compare/v0.12.0...HEAD
+[0.12.0]: https://github.com/fmplaw/innkeeper/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/fmplaw/innkeeper/compare/v0.10.1...v0.11.0
 [0.10.1]: https://github.com/fmplaw/innkeeper/compare/v0.10.0...v0.10.1
 [0.10.0]: https://github.com/fmplaw/innkeeper/compare/v0.9.1...v0.10.0
