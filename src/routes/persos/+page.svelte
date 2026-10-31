@@ -14,7 +14,10 @@
 
 <div class="row head">
 	<h1>Mes persos</h1>
-	<a class="button" href="/persos/nouveau">Ajouter un perso</a>
+	<div class="row">
+		<a class="button secondary" href="/persos/synchro">Synchronisation automatique</a>
+		<a class="button" href="/persos/nouveau">Ajouter un perso</a>
+	</div>
 </div>
 
 {#if form?.message}<p class="card error">{form.message}</p>{/if}

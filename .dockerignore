@@ -3,6 +3,11 @@ build
 .svelte-kit
 data
 backups
+companion/dist
+companion/node_modules
+companion/release
+companion/src-tauri/target
+companion/src-tauri/gen
 .env
 .env.*
 !.env.example

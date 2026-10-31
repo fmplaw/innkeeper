@@ -23,7 +23,7 @@
 - **Sorties** pilotées dans [Raid-Helper](https://raid-helper.dev) : création depuis le site (officielles et proposées par les membres), inscription depuis le site, composition, comparaison avec un roster, banc.
 - **Charte et règlement** rédigés dans l'admin, publiés pour tous et à accepter pour postuler.
 - **Recrutement** : candidature en ligne, avis des officiers, entrée sur le serveur Discord et rôle d'arrivée posés par le bot, suivi des nouveaux membres.
-- **Import des données du jeu** par un addon (registre de guilde, métiers, recettes, dernière connexion).
+- **Import des données du jeu** par un addon, à la main ou automatiquement avec l'application InnkeeperSync pour PC (registre de guilde, métiers, recettes, dernière connexion).
 - **Statistiques pour les officiers** : composition par classe et par rôle face au recrutement, métiers et meilleurs artisans, niveaux, intérêts, activité, fiches à compléter.
 - **Administration** sans éditer de fichiers : assistant d'installation, profil de guilde, rôles, journal des actions.
 - **Aux couleurs de la guilde** : palette de fond selon la faction (bruns chauds pour la Horde, bleu nuit pour l'Alliance, anthracite pour une guilde multi-faction), couleur d'accent, logo et bannière au choix.
@@ -314,7 +314,20 @@ Le client de WoW Forever est un client de type Retail (interface `16001`) avec u
 | Métiers du perso connecté | `GetProfessions`, `GetProfessionInfo` |
 | Recettes connues | `C_TradeSkillUI` |
 
-L'addon n'envoie rien sur Internet. Le site lit le fichier **sans l'exécuter** (analyseur dédié au format des SavedVariables), relie les persos par leur nom (Forever n'a pas de royaumes) et les métiers par leur identifiant de compétence, indépendant de la langue. Un aperçu liste les changements, les membres sans fiche et les fiches introuvables en jeu avant toute application.
+L'addon n'envoie rien sur Internet (c'est l'application ci-dessous qui s'en charge, si le joueur l'installe). Le site lit le fichier **sans l'exécuter** (analyseur dédié au format des SavedVariables), relie les persos par leur nom (Forever n'a pas de royaumes) et les métiers par leur identifiant de compétence, indépendant de la langue. Un aperçu liste les changements, les membres sans fiche et les fiches introuvables en jeu avant toute application.
+
+### Application InnkeeperSync (synchronisation automatique)
+
+Un addon WoW n'a aucun accès au réseau, et le jeu n'écrit son fichier qu'à la déconnexion ou au `/reload`. L'application `companion/` fait le lien : elle surveille `WTF/Account/*/SavedVariables/InnkeeperSync.lua` (à la racine du jeu ou dans un sous-dossier de version) et envoie le fichier au site dès qu'il change. Elle vit près de l'horloge, démarre avec Windows et se met à jour toute seule.
+
+- **Technique** : [Tauri 2](https://tauri.app) (installateur d'environ 5 Mo, s'appuie sur WebView2, présent dans Windows 10 et 11). Toute la logique est en TypeScript : `companion/src/core` (recherche des fichiers, détection des écritures, envois, sans dépendance au système, testé avec le reste du projet) et `companion/src/app` (fenêtre et branchement sur les modules Tauri). `companion/src-tauri` n'est qu'une coquille Rust qui active ces modules (fichiers en lecture seule, HTTP, notifications, démarrage avec la session, liens `innkeeper://`, instance unique, mises à jour).
+- **Connexion** : sur le site, Mes persos → Synchronisation automatique → « Connecter InnkeeperSync » crée une clé et ouvre `innkeeper://connect?site=…&token=…` ; l'application vérifie la clé et **demande confirmation** en affichant le site, pour qu'une autre page ne puisse pas la détourner. Coller une clé reste possible.
+- **Clés** : 5 au plus par joueur, révocables ; seule leur empreinte SHA-256 est gardée.
+- **Adresse** : `GET /api/sync` (vérifie la clé), `POST /api/sync` (fichier brut, 5 Mo au plus), en-tête `Authorization: Bearer iks_…`.
+- **Droits** : clé d'officier = tout l'export, registre de guilde compris (référence « vu en jeu ») ; clé de membre = seulement ses persos. Les droits suivent les rôles Discord actuels du joueur.
+- **Garde-fous** : un fichier identique au précédent n'est pas réimporté, deux envois d'un même compte à moins de 10 s sont refusés (l'application réessaie), un import qui modifie des persos est noté dans le journal (`game.sync`).
+- **Publication** : à chaque tag `vX.Y.Z`, `.github/workflows/companion.yml` construit l'installateur Windows et l'AppImage Linux avec `tauri-action`, les attache à la release, publie `latest.json` (mises à jour) et une copie `InnkeeperSync-Setup.exe` (lien fixe du site). Les mises à jour sont signées : le secret `TAURI_SIGNING_PRIVATE_KEY` du dépôt contient la clé privée, la clé publique est dans `companion/src-tauri/tauri.conf.json`. Un fork doit générer sa propre paire (`npx tauri signer generate`) et changer `endpoints`. Pas encore de version Mac (signature Apple nécessaire).
+- **Développement** : `cd companion && npm install && npx tauri dev`.
 
 `addon/test/simulate.lua` exécute l'addon hors du jeu avec une fausse API WoW ; il produit le fichier utilisé par les tests de l'import.
 

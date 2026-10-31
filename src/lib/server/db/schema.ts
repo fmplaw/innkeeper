@@ -237,6 +237,27 @@ export const auditLog = sqliteTable(
 	(t) => [index('audit_log_at_idx').on(t.at)]
 );
 
+// Clés du programme InnkeeperSync (synchronisation automatique depuis le PC du joueur).
+// Seule l'empreinte SHA-256 de la clé est gardée : elle n'est montrée qu'une fois, à la création.
+export const syncTokens = sqliteTable(
+	'sync_tokens',
+	{
+		id: integer('id').primaryKey({ autoIncrement: true }),
+		userId: text('user_id')
+			.notNull()
+			.references(() => users.discordId, { onDelete: 'cascade' }),
+		label: text('label').notNull(),
+		tokenHash: text('token_hash').notNull(),
+		// Premiers caractères de la clé, pour la reconnaître dans la liste.
+		hint: text('hint').notNull(),
+		lastUsedAt: integer('last_used_at', { mode: 'timestamp' }),
+		// Empreinte du dernier fichier reçu : un fichier inchangé n'est pas réimporté.
+		lastFileHash: text('last_file_hash'),
+		createdAt: timestamp('created_at')
+	},
+	(t) => [uniqueIndex('sync_tokens_hash_idx').on(t.tokenHash), index('sync_tokens_user_idx').on(t.userId)]
+);
+
 export type User = typeof users.$inferSelect;
 export type Roster = typeof rosters.$inferSelect;
 export type Application = typeof applications.$inferSelect;

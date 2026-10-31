@@ -4,6 +4,11 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ## [Non publié]
 
+### Ajouté
+
+- **Application InnkeeperSync pour PC** (`companion/`, Tauri, installateur d'environ 5 Mo) : surveille le fichier de l'addon et l'envoie au site dès que le jeu l'écrit (déconnexion, `/reload`), sans dépôt manuel. Vit près de l'horloge, démarre avec Windows, se met à jour toute seule, notification après un envoi (désactivable). Installateur Windows et AppImage Linux attachés à chaque release GitHub.
+- **Synchronisation automatique** (Mes persos) : bouton « Connecter InnkeeperSync » (lien `innkeeper://`, confirmé dans l'application) et clés personnelles révocables ; une clé d'officier met à jour toute la guilde, une clé de membre seulement ses persos. Adresse `/api/sync`, envois notés dans le journal.
+
 ## [0.11.0] - 2026-10-31
 
 ### Ajouté

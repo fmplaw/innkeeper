@@ -5,6 +5,7 @@ Ce guide explique comment utiliser au quotidien le site de ta guilde, propulsé 
 - [Pour tous les membres](#pour-tous-les-membres)
   - [Se connecter](#se-connecter)
   - [Créer ses fiches de persos](#créer-ses-fiches-de-persos)
+  - [Synchronisation automatique (application pour PC)](#synchronisation-automatique-application-pour-pc)
   - [Le roster et les pages joueurs](#le-roster-et-les-pages-joueurs)
   - [Les sorties](#les-sorties)
   - [Proposer une sortie](#proposer-une-sortie)
@@ -52,6 +53,19 @@ Menu **Mes persos** → **Ajouter un perso**.
 - **✔ en jeu** : le perso a été trouvé dans la guilde en jeu ;
 - **⚠ pas trouvé en jeu** : aucun perso de ce nom dans la guilde. Vérifie l'orthographe du nom sur ta fiche ;
 - **« pas encore vérifié »** : la fiche a été créée après le dernier import.
+
+### Synchronisation automatique (application pour PC)
+
+Mes persos → **Synchronisation automatique** : la petite application **InnkeeperSync**, sur ton PC, envoie au site les données de l'addon chaque fois que le jeu les enregistre (à la déconnexion ou après un `/reload`). Plus de fichier à déposer à la main.
+
+1. Installe l'addon InnkeeperSync dans le jeu.
+2. Télécharge et installe **InnkeeperSync pour Windows** (lien sur la page). Si Windows affiche un avertissement (application non signée) : « Informations complémentaires », puis « Exécuter quand même ».
+3. Sur la page, clique sur **Connecter InnkeeperSync** : l'application s'ouvre et te montre le site de ta guilde ; vérifie-le et confirme. Elle trouve toute seule le dossier du jeu (sinon : « Choisir le dossier »).
+4. En jeu, tape `/innkeeper` de temps en temps, et ouvre tes fenêtres de métier pour envoyer tes recettes.
+
+Ensuite, InnkeeperSync se fait oublier : elle démarre avec Windows, reste près de l'horloge (fermer sa fenêtre ne l'arrête pas) et se met à jour toute seule. Un clic sur son icône montre l'état et les derniers envois.
+
+Une clé de **membre** met à jour tes persos seulement ; une clé d'**officier** met à jour toute la guilde. Chaque connexion crée une clé, visible dans « Mes clés » et révocable d'un clic (PC changé, application désinstallée).
 
 ### Le roster et les pages joueurs
 
@@ -174,6 +188,8 @@ Admin → **Import du jeu**, à faire par un officier de temps en temps (une foi
 5. **Appliquer l'import**.
 
 L'addon n'envoie rien sur Internet ; il écrit seulement ce fichier.
+
+**Plus simple : la synchronisation automatique.** Avec l'application InnkeeperSync pour PC, connectée par un officier (voir plus haut), le registre de la guilde est envoyé tout seul à chaque déconnexion, sans aperçu à valider.
 
 ### Recrutement et rôles
 

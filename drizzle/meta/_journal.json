@@ -92,6 +92,13 @@
       "when": 1793446053872,
       "tag": "0012_charter",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "6",
+      "when": 1793452300221,
+      "tag": "0013_sync_tokens",
+      "breakpoints": true
     }
   ]
 }

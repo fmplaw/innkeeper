@@ -1,0 +1,76 @@
+name: Application InnkeeperSync
+
+# À chaque version (tag vX.Y.Z) : construit l'application pour PC (Tauri), signe ses mises à jour et
+# l'attache à la release GitHub. La page « Synchronisation automatique » du site renvoie vers
+# releases/latest/download/InnkeeperSync-Setup.exe ; l'application vérifie latest.json pour se mettre à jour.
+# Secret nécessaire : TAURI_SIGNING_PRIVATE_KEY (clé privée de signature des mises à jour, sans mot de passe).
+
+on:
+  push:
+    tags: ["v*"]
+  pull_request:
+    paths: ["companion/**"]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            bundles: nsis
+          - os: ubuntu-22.04
+            bundles: appimage
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: companion
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: companion/src-tauri
+      - name: Dépendances Linux
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev
+      - run: npm ci
+      - run: npm run check
+      - name: Numéro de version (celui du site)
+        shell: bash
+        run: npm pkg set version="$(node -p "require('../package.json').version")"
+
+      - name: Construction (sans publication, pour une pull request)
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: npx tauri build --bundles ${{ matrix.bundles }} --config '{"bundle":{"createUpdaterArtifacts":false}}'
+      - name: Construction et publication
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ""
+        with:
+          projectPath: companion
+          tagName: ${{ github.ref_name }}
+          releaseName: Innkeeper ${{ github.ref_name }}
+          releaseBody: "Voir le [journal des modifications](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md). L'application InnkeeperSync pour Windows : InnkeeperSync-Setup.exe."
+          releaseDraft: false
+          includeUpdaterJson: true
+          args: --bundles ${{ matrix.bundles }}
+      - name: Installateur Windows sous un nom fixe (lien du site)
+        if: startsWith(github.ref, 'refs/tags/v') && runner.os == 'Windows'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          setup=$(ls src-tauri/target/release/bundle/nsis/*-setup.exe | head -1)
+          cp "$setup" InnkeeperSync-Setup.exe
+          gh release upload "${{ github.ref_name }}" InnkeeperSync-Setup.exe --clobber
