@@ -4,6 +4,11 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ## [Non publié]
 
+### Corrigé
+
+- L'installateur Windows d'InnkeeperSync porte l'icône d'Innkeeper au lieu de l'icône générique.
+- L'AppImage Linux d'InnkeeperSync se construit de nouveau (bibliothèques système manquantes dans la CI).
+
 ## [0.12.0] - 2026-10-31
 
 ### Ajouté

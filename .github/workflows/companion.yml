@@ -39,7 +39,7 @@ jobs:
           workspaces: companion/src-tauri
       - name: Dépendances Linux
         if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev
+        run: sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev libxdo-dev libssl-dev
       - run: npm ci
       - run: npm run check
       - name: Numéro de version (celui du site)

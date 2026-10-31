@@ -26,6 +26,11 @@ tauri-plugin-updater = "=2.14.0"
 # Utilisé par le code que génère tauri::generate_context! (configuration des modules).
 serde_json = "1"
 
+# Linux : rust-ini 0.21.3 a ajouté des champs obligatoires à ParseOption, ce qui casse
+# tauri-plugin-deep-link 2.6.2 (erreur E0063). À retirer quand le module sera corrigé.
+[target.'cfg(target_os = "linux")'.dependencies]
+rust-ini = "=0.21.1"
+
 # Exécutable le plus petit possible.
 [profile.release]
 codegen-units = 1
