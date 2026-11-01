@@ -70,7 +70,7 @@ export function identify(header: string | null): SyncIdentity {
 		.where(eq(syncTokens.tokenHash, sha256(token)))
 		.get();
 	if (!row) throw new SyncError('Clé inconnue ou révoquée : crée-en une nouvelle sur le site (Mes persos → Synchronisation).', 401);
-	const permission = permissionFor(row.u.roles);
+	const permission = permissionFor(row.u);
 	if (!permission) throw new SyncError('Ce compte n’a plus accès au site de la guilde.', 403);
 	return {
 		tokenId: row.t.id,

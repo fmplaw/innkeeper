@@ -83,11 +83,11 @@ export function advancedSettings(activityId: string | null, instance: string | n
 /** Officiers connus du site, chefs de raid possibles (Raid-Helper exige un compte Discord). */
 export function officers() {
 	return db()
-		.select({ id: users.discordId, name: users.displayName, roles: users.roles })
+		.select({ id: users.discordId, name: users.displayName, roles: users.roles, inGuild: users.inGuild })
 		.from(users)
 		.orderBy(asc(users.displayName))
 		.all()
-		.filter((u) => permissionFor(u.roles) === 'officer')
+		.filter((u) => permissionFor(u) === 'officer')
 		.map(({ id, name }) => ({ id, name }));
 }
 
