@@ -4,6 +4,10 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ## [Non publié]
 
+### Corrigé
+
+- InnkeeperSync : un envoi resté sans réponse (site muet, connexion coupée en plein envoi) bloquait l'application jusqu'à son redémarrage, sans plus rien synchroniser ni afficher d'erreur. Chaque requête abandonne maintenant au bout d'une minute, et l'application réessaie plus tard comme pour un site injoignable.
+
 ## [0.13.0] - 2026-11-01
 
 ### Ajouté
