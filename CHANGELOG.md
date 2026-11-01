@@ -4,6 +4,8 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ## [Non publié]
 
+## [0.12.2] - 2026-11-01
+
 ### Ajouté
 
 - Page d'erreur en français (page introuvable, accès réservé, erreur inattendue) avec « Réessayer » et « Retour à l'accueil », au lieu des messages bruts « Not Found » ou « Internal Error ».
@@ -98,7 +100,8 @@ Première version publique.
 - **Apparence** : palettes Horde, Alliance et multi-faction, logo, bannière et couleur d'accent de la guilde, affichage adapté aux téléphones.
 - **Exploitation** : image Docker multi-architecture publiée par la CI, sauvegardes de la base, point de contrôle `/healthz`.
 
-[Non publié]: https://github.com/fmplaw/innkeeper/compare/v0.12.1...HEAD
+[Non publié]: https://github.com/fmplaw/innkeeper/compare/v0.12.2...HEAD
+[0.12.2]: https://github.com/fmplaw/innkeeper/compare/v0.12.1...v0.12.2
 [0.12.1]: https://github.com/fmplaw/innkeeper/compare/v0.12.0...v0.12.1
 [0.12.0]: https://github.com/fmplaw/innkeeper/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/fmplaw/innkeeper/compare/v0.10.1...v0.11.0
