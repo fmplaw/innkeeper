@@ -11,6 +11,9 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 ### Corrigé
 
 - Une candidature validée deux fois (double clic, deux officiers en même temps) créait deux persos à la recrue et deux annonces. La décision ne s'enregistre plus que si la candidature est encore en attente ; un refus ou un retrait arrivé après coup est sans effet.
+### Corrigé
+
+- Sorties : une sortie commencée ou passée n'accepte plus d'inscription ni de désinscription depuis le site. Le formulaire était déjà masqué, mais l'envoi direct du formulaire passait encore et modifiait la liste dans Raid-Helper après coup.
 
 ## [0.13.0] - 2026-11-01
 
