@@ -2,9 +2,10 @@
 --
 -- Rien n'est envoyé nulle part : l'addon remplit InnkeeperSyncDB, que le jeu écrit dans
 -- WTF/Account/<COMPTE>/SavedVariables/InnkeeperSync.lua à la déconnexion (ou /reload).
--- Ce fichier se dépose ensuite sur le site. Forever ne relit pas les SavedVariables au
--- chargement (bug connu de la bêta) : chaque session repart de zéro, ce qui convient à
--- un export.
+-- Ce fichier se dépose ensuite sur le site. Chaque connexion d'un perso repart de zéro :
+-- le fichier est commun à tous les persos du compte, et le site attribue les métiers et
+-- recettes au perso connecté. La bêta de Forever ne relisait pas les SavedVariables ;
+-- un jeu qui les relit ne doit pas mélanger les données de deux persos.
 --
 -- Contenu :
 --   roster           registre de guilde (niveau, classe, rang, dernière connexion)
@@ -15,7 +16,7 @@
 local ADDON = "InnkeeperSync"
 local FORMAT_VERSION = 1
 
--- Créé à la connexion s'il n'a pas été rechargé (toujours le cas sous Forever).
+-- Remis à zéro à la connexion (PLAYER_LOGIN).
 InnkeeperSyncDB = InnkeeperSyncDB
 
 local function log(msg)
@@ -163,7 +164,8 @@ frame:RegisterEvent("SKILL_LINES_CHANGED")
 frame:RegisterEvent("TRADE_SKILL_LIST_UPDATE")
 frame:SetScript("OnEvent", function(_, event)
 	if event == "PLAYER_LOGIN" then
-		InnkeeperSyncDB = InnkeeperSyncDB or {}
+		-- Rien de la session d'un autre perso du compte : recettes, registre d'une autre guilde…
+		InnkeeperSyncDB = {}
 		header()
 		readOwnProfessions()
 		if IsInGuild() then try(C_GuildInfo and C_GuildInfo.GuildRoster) end
