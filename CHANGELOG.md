@@ -14,6 +14,9 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 ### Corrigé
 
 - Sorties : une sortie commencée ou passée n'accepte plus d'inscription ni de désinscription depuis le site. Le formulaire était déjà masqué, mais l'envoi direct du formulaire passait encore et modifiait la liste dans Raid-Helper après coup.
+### Corrigé
+
+- Connexion Discord : la lecture du profil du joueur sur le serveur abandonne au bout de 10 secondes, comme les autres appels à Discord, au lieu d'attendre indéfiniment une réponse quand Discord est lent.
 
 ## [0.13.0] - 2026-11-01
 
