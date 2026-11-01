@@ -162,7 +162,8 @@ details form {
 /* État de la synchronisation : une pastille colorée, un titre, un détail. */
 .status {
 	display: grid;
-	grid-template-columns: auto 1fr;
+	/* minmax(0, …) : un long chemin dans le message ne doit pas élargir la fenêtre. */
+	grid-template-columns: auto minmax(0, 1fr);
 	gap: 0.15rem 0.75rem;
 	align-items: center;
 }
@@ -188,6 +189,11 @@ details form {
 .status h2 {
 	margin: 0;
 }
+/* Messages d'erreur avec un chemin de fichier : coupés n'importe où plutôt que de déborder. */
+.status p,
+.events span {
+	overflow-wrap: anywhere;
+}
 .status .actions {
 	grid-column: 2;
 	margin-top: 0.4rem;
@@ -202,7 +208,7 @@ details form {
 }
 .events li {
 	display: grid;
-	grid-template-columns: 3.2rem 1fr;
+	grid-template-columns: 3.2rem minmax(0, 1fr);
 	gap: 0.5rem;
 }
 .events time {

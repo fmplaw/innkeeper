@@ -12,6 +12,10 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 - **Fiches du même nom signalées** : quand deux fiches portent le même nom de perso, l'import du jeu n'en met à jour aucune. Un avertissement l'explique désormais dans Mes persos et sur la page de modification du perso, et un badge « nom en double » apparaît dans Admin → Joueurs.
 
+### Corrigé
+
+- InnkeeperSync : un message contenant un long chemin de fichier (erreur de lecture, par exemple) élargissait la fenêtre au-delà de son bord ; le contenu et le bouton « Mettre à jour » étaient coupés à droite. Le chemin revient maintenant à la ligne.
+
 ## [0.13.1] - 2026-11-01
 
 ### Sécurité
