@@ -2,6 +2,7 @@ import { and, asc, count, eq, gt } from 'drizzle-orm';
 import { z } from 'zod';
 import { getActivity, getInstance } from '$lib/activities';
 import { RAID_HELPER } from '$lib/game/forever';
+import { remember } from './bounded';
 import { db, schema } from './db';
 import { BotError, botReady, recentMessages, textChannels } from './bot';
 import { permissionFor } from './permissions';
@@ -181,7 +182,7 @@ async function discoverWithBot(guildId: string): Promise<UpcomingEvent[]> {
 		Array.from({ length: 5 }, async () => {
 			for (let id = queue.shift(); id; id = queue.shift()) {
 				const e = await fetchEvent(id).catch(() => undefined);
-				if (e === null) notEvents.add(id);
+				if (e === null) remember(notEvents, id, undefined, 5000);
 				if (!e || e.serverId !== guildId || e.startTime < since) continue;
 				events.push({
 					id: e.id,
