@@ -6,7 +6,7 @@
 services:
   site:
     # Version publiée ; pour construire depuis les sources, remplace par `build: .`
-    image: ghcr.io/fmplaw/innkeeper:0.13.0
+    image: ghcr.io/fmplaw/innkeeper:0.13.1
     env_file: .env
     environment:
       ORIGIN: https://${SITE_DOMAIN:?SITE_DOMAIN manquant dans .env}

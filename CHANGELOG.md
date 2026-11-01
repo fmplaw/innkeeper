@@ -4,6 +4,8 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ## [Non publié]
 
+## [0.13.1] - 2026-11-01
+
 ### Sécurité
 
 - **Accès des comptes extérieurs au serveur** : en mode « tout membre du serveur » (le mode par défaut), un compte Discord qui n'est pas sur le serveur de la guilde obtenait l'accès membre (roster, sorties, inscriptions, clés de synchronisation) au lieu de passer par la candidature. Le site enregistre désormais la présence sur le serveur à chaque connexion et à chaque relecture des nouveaux membres par le bot ; sans elle, aucun accès. Migration : les comptes qui avaient au moins un rôle sont considérés comme présents ; ceux qui n'en avaient aucun doivent se reconnecter une fois.
@@ -132,7 +134,8 @@ Première version publique.
 - **Apparence** : palettes Horde, Alliance et multi-faction, logo, bannière et couleur d'accent de la guilde, affichage adapté aux téléphones.
 - **Exploitation** : image Docker multi-architecture publiée par la CI, sauvegardes de la base, point de contrôle `/healthz`.
 
-[Non publié]: https://github.com/fmplaw/innkeeper/compare/v0.13.0...HEAD
+[Non publié]: https://github.com/fmplaw/innkeeper/compare/v0.13.1...HEAD
+[0.13.1]: https://github.com/fmplaw/innkeeper/compare/v0.13.0...v0.13.1
 [0.13.0]: https://github.com/fmplaw/innkeeper/compare/v0.12.2...v0.13.0
 [0.12.2]: https://github.com/fmplaw/innkeeper/compare/v0.12.1...v0.12.2
 [0.12.1]: https://github.com/fmplaw/innkeeper/compare/v0.12.0...v0.12.1
