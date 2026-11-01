@@ -4,6 +4,16 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ## [Non publié]
 
+### Ajouté
+
+- Page d'erreur en français (page introuvable, accès réservé, erreur inattendue) avec « Réessayer » et « Retour à l'accueil », au lieu des messages bruts « Not Found » ou « Internal Error ».
+- Lien « Charte » en pied de page quand la guilde en a publié une.
+
+### Modifié
+
+- InnkeeperSync : une nouvelle version s'annonce dans la fenêtre (« Version X disponible », bouton « Mettre à jour » avec la progression) ; lien « Rechercher une mise à jour » près du numéro de version. Lancée cachée avec Windows, l'application se met encore à jour seule.
+- Candidature : l'acceptation de la charte s'affiche en pastille verte avec sa date (« ✔ Charte acceptée le … »), orange si la charte a été modifiée depuis.
+
 ## [0.12.1] - 2026-10-31
 
 ### Corrigé

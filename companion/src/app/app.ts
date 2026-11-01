@@ -12,7 +12,7 @@ import { isPermissionGranted, requestPermission, sendNotification } from '@tauri
 import { openUrl } from '@tauri-apps/plugin-opener';
 import { exit, relaunch } from '@tauri-apps/plugin-process';
 import { load } from '@tauri-apps/plugin-store';
-import { check as checkUpdate } from '@tauri-apps/plugin-updater';
+import { check as checkUpdate, type Update } from '@tauri-apps/plugin-updater';
 import { whoami, type Whoami } from '../core/api';
 import { normalizeSiteUrl, parseConfig, parseConnectLink, type Config } from '../core/config';
 import { describeResult, platformDeps, SyncEngine } from '../core/engine';
@@ -73,10 +73,12 @@ let pending: Pending | null = null;
 let error: string | null = null;
 let autostart = await autostartEnabled().catch(() => false);
 let tray: TrayIcon | null = null;
+let available: Update | null = null;
+let updates: View['updates'] = { version: null, checking: false, upToDate: false, progress: null, error: null };
 const version = await getVersion().catch(() => '');
 
 function refresh() {
-	const state: View = { connected: config, pending, error, engine: engine.state, autostart, canAutostart: os !== 'linux', version };
+	const state: View = { connected: config, pending, error, engine: engine.state, autostart, canAutostart: os !== 'linux', version, updates };
 	render(state, actions);
 	const label = !config ? 'à connecter' : engine.state.status === 'refused' ? 'clé refusée' : engine.state.status === 'synced' ? 'synchronisé' : 'en attente du jeu';
 	void tray?.setTooltip(`InnkeeperSync : ${label}`);
@@ -165,7 +167,9 @@ const actions = {
 	},
 	setNotify: async (on: boolean) => config && save({ ...config, notify: on }),
 	openSite: () => config && openUrl(config.siteUrl),
-	disconnect: () => save(null)
+	disconnect: () => save(null),
+	checkUpdate: () => checkForUpdate(true),
+	installUpdate: () => installUpdate()
 };
 export type Actions = typeof actions;
 
@@ -213,16 +217,40 @@ void handleLink((await currentLinks())?.[0]);
 setInterval(() => void engine.tick().catch((e) => console.error(e)), POLL_MS);
 void engine.tick();
 
-// Mises à jour : vérifiées au démarrage puis toutes les 6 heures, installées sans rien demander.
-async function updateIfAvailable() {
+// Mises à jour : vérifiées au démarrage puis toutes les 6 heures ; proposées par un bouton.
+// Lancée cachée avec Windows, l'application s'installe seule (personne n'est interrompu).
+async function checkForUpdate(manual = false) {
+	updates = { ...updates, checking: true, upToDate: false };
+	refresh();
 	try {
-		const update = await checkUpdate();
-		if (!update) return;
-		await update.downloadAndInstall();
+		available = await checkUpdate();
+		updates = { ...updates, checking: false, version: available?.version ?? null, upToDate: manual && !available, error: null };
+	} catch (e) {
+		console.error('Vérification des mises à jour impossible', e);
+		updates = { ...updates, checking: false, error: manual ? 'Impossible de vérifier les mises à jour pour l’instant.' : null };
+	}
+	refresh();
+}
+
+async function installUpdate() {
+	if (!available || updates.progress) return;
+	let total = 0;
+	let received = 0;
+	try {
+		await available.downloadAndInstall((ev) => {
+			if (ev.event === 'Started') total = ev.data.contentLength ?? 0;
+			else if (ev.event === 'Progress') received += ev.data.chunkLength;
+			updates = { ...updates, progress: ev.event === 'Finished' ? 'Installation…' : total ? `Téléchargement… ${Math.round((received / total) * 100)} %` : 'Téléchargement…' };
+			refresh();
+		});
 		await relaunch();
 	} catch (e) {
-		console.error('Mise à jour impossible', e);
+		updates = { ...updates, progress: null, error: `La mise à jour a échoué : ${e instanceof Error ? e.message : e}` };
+		refresh();
 	}
 }
-void updateIfAvailable();
-setInterval(() => void updateIfAvailable(), UPDATE_EVERY_MS);
+
+const startedHidden = !(await win.isVisible().catch(() => true));
+await checkForUpdate();
+if (available && startedHidden) void installUpdate();
+setInterval(() => void checkForUpdate(), UPDATE_EVERY_MS);

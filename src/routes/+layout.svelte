@@ -120,6 +120,7 @@
 			<span class="muted">
 				Guilde {GUILD_FACTION_LABELS[guild.faction]}{#if server}, serveur <abbr title={server.name}>{server.label}</abbr>,{/if} sur World of Warcraft Forever
 			</span>
+			{#if data.config.hasCharter}<a href="/charte" class="muted">Charte</a>{/if}
 			<a href="/confidentialite" class="muted">Confidentialité</a>
 			<a href={SOURCE_URL} class="muted" rel="noopener">Propulsé par Innkeeper</a>
 		</footer>

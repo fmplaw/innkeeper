@@ -13,6 +13,16 @@ export interface View {
 	autostart: boolean;
 	canAutostart: boolean;
 	version: string;
+	updates: {
+		/** Nouvelle version disponible, ou null. */
+		version: string | null;
+		checking: boolean;
+		/** Vérification demandée à la main : rien de nouveau. */
+		upToDate: boolean;
+		/** Téléchargement ou installation en cours. */
+		progress: string | null;
+		error: string | null;
+	};
 }
 
 type Child = Node | string | null | false | undefined | Child[];
@@ -143,10 +153,35 @@ function connected(v: View, a: Actions) {
 	];
 }
 
+/** Nouvelle version : un encadré en haut de la fenêtre, avec le bouton. */
+function updateBanner(v: View, a: Actions) {
+	const u = v.updates;
+	if (!u.version) return u.error ? h('p', { class: 'error' }, u.error) : null;
+	return h(
+		'section',
+		{ class: 'card update' },
+		h('div', {}, h('h2', {}, `Version ${u.version} disponible`), h('p', { class: 'muted small' }, u.progress ?? 'L’application redémarrera après la mise à jour.')),
+		u.progress ? null : h('button', { onclick: () => void a.installUpdate() }, 'Mettre à jour'),
+		u.error ? h('p', { class: 'error' }, u.error) : null
+	);
+}
+
+function footer(v: View, a: Actions) {
+	const u = v.updates;
+	const check = u.checking
+		? h('span', {}, ' · vérification…')
+		: u.upToDate
+			? h('span', {}, ' · à jour ✔')
+			: u.version
+				? null
+				: h('span', {}, ' · ', h('button', { class: 'link', onclick: () => void a.checkUpdate() }, 'Rechercher une mise à jour'));
+	return [h('span', {}, v.version ? `Version ${v.version}` : '', check), h('span', {}, 'Fermer la fenêtre ne coupe pas la synchronisation')];
+}
+
 export function render(v: View, a: Actions) {
 	const c = v.connected;
 	document.getElementById('who')!.textContent = c ? `${c.guild ?? host(c.siteUrl)} · ${c.player} · ${scopeText(c.scope)}` : 'Synchronisation avec le site de ta guilde';
-	const parts = v.pending ? confirm(v, a) : c ? connected(v, a) : welcome(v, a);
+	const parts = [updateBanner(v, a), ...(v.pending ? confirm(v, a) : c ? connected(v, a) : welcome(v, a))];
 	document.getElementById('view')!.replaceChildren(...(parts.filter(Boolean) as Node[]));
-	document.getElementById('foot')!.replaceChildren(h('span', {}, v.version ? `Version ${v.version}` : ''), h('span', {}, 'Fermer la fenêtre ne coupe pas la synchronisation'));
+	document.getElementById('foot')!.replaceChildren(...footer(v, a));
 }

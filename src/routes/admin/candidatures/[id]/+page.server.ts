@@ -16,6 +16,7 @@ import {
 	votesFor
 } from '$lib/server/recruitment';
 import type { Application } from '$lib/server/db/schema';
+import { getCharter } from '$lib/server/settings';
 import type { Actions, PageServerLoad } from './$types';
 
 function candidateOf(app: Application) {
@@ -46,8 +47,14 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 	}
 
 	const votes = votesFor(app.id);
+	// Charte modifiée après son acceptation : le candidat a accepté une version antérieure.
+	const charterUpdatedAt = getCharter()?.updatedAt ?? null;
+	const charterChangedAt =
+		app.charterAcceptedAt && charterUpdatedAt && charterUpdatedAt > app.charterAcceptedAt.getTime() + 1000 ? new Date(charterUpdatedAt) : null;
+
 	return {
 		app,
+		charterChangedAt,
 		candidate: { name: user?.displayName ?? '?', username: user?.discordUsername ?? '', avatar: user?.avatar ?? null },
 		discord,
 		votes,

@@ -63,7 +63,7 @@ Mes persos → **Synchronisation automatique** : la petite application **Innkeep
 3. Sur la page, clique sur **Connecter InnkeeperSync** : l'application s'ouvre et te montre le site de ta guilde ; vérifie-le et confirme. Elle trouve toute seule le dossier du jeu (sinon : « Choisir le dossier »).
 4. En jeu, tape `/innkeeper` de temps en temps, et ouvre tes fenêtres de métier pour envoyer tes recettes.
 
-Ensuite, InnkeeperSync se fait oublier : elle démarre avec Windows, reste près de l'horloge (fermer sa fenêtre ne l'arrête pas) et se met à jour toute seule. Un clic sur son icône montre l'état et les derniers envois.
+Ensuite, InnkeeperSync se fait oublier : elle démarre avec Windows et reste près de l'horloge (fermer sa fenêtre ne l'arrête pas). Quand une nouvelle version sort, la fenêtre l'annonce avec un bouton **Mettre à jour** ; au démarrage de Windows, elle s'installe toute seule. « Rechercher une mise à jour », en bas de la fenêtre, vérifie à la demande. Un clic sur son icône montre l'état et les derniers envois.
 
 Une clé de **membre** met à jour tes persos seulement ; une clé d'**officier** met à jour toute la guilde. Chaque connexion crée une clé, visible dans « Mes clés » et révocable d'un clic (PC changé, application désinstallée).
 
@@ -195,7 +195,7 @@ L'addon n'envoie rien sur Internet ; il écrit seulement ce fichier.
 
 - Admin → **Recrutement** : rôle d'arrivée, salons des annonces et des invitations, questions aux candidats, délais.
 - Admin → **Rôles Discord** : permission de chaque rôle (Officier, Membre, Aucune) et mode d'accès au site.
-- Admin → **Charte** : la charte et le règlement de la guilde, avec un aperçu en direct. Mise en forme : `# Titre`, `## Sous-titre`, `- élément de liste`, `**gras**`, `*italique*`, ligne vide entre les paragraphes. Sur la page, chaque `## Sous-titre` devient un encadré : regroupe par exemple les valeurs de la guilde sous un `# Titre`, une valeur par `##`. Une dernière ligne entièrement en gras, comme une devise, s'affiche en bandeau tout en bas. Une fois publiée, elle apparaît dans le menu de tous et les candidats doivent l'accepter pour postuler ; la candidature indique « charte acceptée ». La laisser vide la retire. Chaque modification est notée dans le journal.
+- Admin → **Charte** : la charte et le règlement de la guilde, avec un aperçu en direct. Mise en forme : `# Titre`, `## Sous-titre`, `- élément de liste`, `**gras**`, `*italique*`, ligne vide entre les paragraphes. Sur la page, chaque `## Sous-titre` devient un encadré : regroupe par exemple les valeurs de la guilde sous un `# Titre`, une valeur par `##`. Une dernière ligne entièrement en gras, comme une devise, s'affiche en bandeau tout en bas. Une fois publiée, elle apparaît dans le menu de tous et les candidats doivent l'accepter pour postuler ; la candidature l'indique par une pastille verte « ✔ Charte acceptée le … » (orange si la charte a été modifiée depuis). La laisser vide la retire. Chaque modification est notée dans le journal.
 - Admin → **Guilde** : **type de serveur** (JcJ, JcE, JdR ou Hardcore), affiché sur l'accueil et en bas de chaque page ; présentation, logo, bannière, ambitions, horaires, recrutement affiché sur l'accueil. La **faction** choisie donne aussi l'ambiance du site (fond chaud pour la Horde, bleu nuit pour l'Alliance, neutre pour une guilde mixte) ; la couleur d'accent reste au choix.
 
 ---

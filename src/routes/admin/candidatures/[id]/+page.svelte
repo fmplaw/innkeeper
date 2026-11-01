@@ -25,8 +25,13 @@
 		<h1>{data.candidate.name}</h1>
 		<p class="muted">
 			@{data.candidate.username} · déposée le {dateFormat.format(app.createdAt)}
-			{#if app.charterAcceptedAt}{' '}· charte acceptée{/if}
 		</p>
+		{#if app.charterAcceptedAt}
+			<p class="charter" class:changed={data.charterChangedAt}>
+				✔ Charte acceptée le {dateFormat.format(app.charterAcceptedAt)}
+				{#if data.charterChangedAt}{' '}· avant sa modification du {dateFormat.format(data.charterChangedAt)}{/if}
+			</p>
+		{/if}
 		{#if data.discord}
 			<p class="small">
 				{#if data.discord.member}
@@ -278,6 +283,21 @@
 	}
 	.ok {
 		color: #56d364;
+	}
+	.charter {
+		display: inline-block;
+		margin: 0.35rem 0;
+		padding: 0.15rem 0.6rem;
+		border-radius: 999px;
+		font-size: 0.85rem;
+		border: 1px solid color-mix(in srgb, #3fb950 55%, transparent);
+		background: color-mix(in srgb, #3fb950 12%, transparent);
+		color: #56d364;
+	}
+	.charter.changed {
+		border-color: color-mix(in srgb, #e3a03a 55%, transparent);
+		background: color-mix(in srgb, #e3a03a 12%, transparent);
+		color: #e3a03a;
 	}
 	.small {
 		font-size: 0.88rem;

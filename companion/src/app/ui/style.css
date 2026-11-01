@@ -229,3 +229,19 @@ details form {
 	justify-content: space-between;
 	font-size: 0.8rem;
 }
+/* Mise à jour disponible : encadré doré en haut de la fenêtre. */
+.update {
+	grid-template-columns: 1fr auto;
+	align-items: center;
+	border-color: color-mix(in srgb, var(--gold) 55%, var(--border));
+}
+.update h2 {
+	margin: 0;
+	color: var(--gold);
+}
+.update .error {
+	grid-column: 1 / -1;
+}
+#foot button.link {
+	font-size: inherit;
+}
