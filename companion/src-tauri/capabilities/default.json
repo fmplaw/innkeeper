@@ -27,6 +27,6 @@
 		{ "identifier": "fs:allow-read-dir", "allow": [{ "path": "**" }] },
 		{ "identifier": "fs:allow-exists", "allow": [{ "path": "**" }] },
 		{ "identifier": "fs:allow-stat", "allow": [{ "path": "**" }] },
-		{ "identifier": "fs:allow-read-file", "allow": [{ "path": "**/SavedVariables/InnkeeperSync.lua" }, { "path": "**\\SavedVariables\\InnkeeperSync.lua" }] }
+		{ "identifier": "fs:allow-read-file", "allow": [{ "path": "**/SavedVariables/InnkeeperSync.lua" }] }
 	]
 }
