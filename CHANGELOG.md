@@ -4,6 +4,8 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ## [Non publié]
 
+## [0.13.0] - 2026-11-01
+
 ### Ajouté
 
 - **Page Addons** : les addons conseillés par la guilde, gérés dans Admin → Addons (statut : indispensable, recommandé en raid, recommandé, utile, confort ; usage ; public visé par classe ou rôle ; « pourquoi » ; liens CurseForge, Wago ou autre ; ordre). Page en tableau, visible de tous, lien dans le menu dès qu'un addon est publié ; filtres par recherche, statut, usage et « Pour mon main ». Innkeeper Sync s'ajoute en un clic. Chaque changement est noté dans le journal.
@@ -105,7 +107,8 @@ Première version publique.
 - **Apparence** : palettes Horde, Alliance et multi-faction, logo, bannière et couleur d'accent de la guilde, affichage adapté aux téléphones.
 - **Exploitation** : image Docker multi-architecture publiée par la CI, sauvegardes de la base, point de contrôle `/healthz`.
 
-[Non publié]: https://github.com/fmplaw/innkeeper/compare/v0.12.2...HEAD
+[Non publié]: https://github.com/fmplaw/innkeeper/compare/v0.13.0...HEAD
+[0.13.0]: https://github.com/fmplaw/innkeeper/compare/v0.12.2...v0.13.0
 [0.12.2]: https://github.com/fmplaw/innkeeper/compare/v0.12.1...v0.12.2
 [0.12.1]: https://github.com/fmplaw/innkeeper/compare/v0.12.0...v0.12.1
 [0.12.0]: https://github.com/fmplaw/innkeeper/compare/v0.11.0...v0.12.0
