@@ -64,7 +64,9 @@ local function readRoster()
 	if total == 0 then return end
 	local roster = {}
 	for i = 1, total do
-		local name, rankName, rankIndex, level, _, zone, publicNote, officerNote, online, _, classFile = try(GetGuildRosterInfo, i)
+		-- Les notes du registre et la zone ne sont pas exportées : le site ne s'en sert pas, et
+		-- les notes d'officier n'ont pas à quitter le jeu (le fichier part sur Internet).
+		local name, rankName, rankIndex, level, _, _, _, _, online, _, classFile = try(GetGuildRosterInfo, i)
 		if name then
 			local years, months, days, hours = try(GetGuildRosterLastOnline, i)
 			roster[#roster + 1] = {
@@ -73,9 +75,6 @@ local function readRoster()
 				class = classFile,
 				rank = rankName,
 				rankIndex = rankIndex,
-				zone = zone,
-				publicNote = publicNote,
-				officerNote = officerNote,
 				online = online and true or false,
 				offline = { years = years or 0, months = months or 0, days = days or 0, hours = hours or 0 },
 			}
