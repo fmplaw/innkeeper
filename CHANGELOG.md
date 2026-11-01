@@ -31,6 +31,9 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 ### Corrigé
 
 - InnkeeperSync : un envoi resté sans réponse (site muet, connexion coupée en plein envoi) bloquait l'application jusqu'à son redémarrage, sans plus rien synchroniser ni afficher d'erreur. Chaque requête abandonne maintenant au bout d'une minute, et l'application réessaie plus tard comme pour un site injoignable.
+### Corrigé
+
+- InnkeeperSync : un fichier d'export illisible (encore tenu par le jeu, bloqué par un antivirus…) interrompait le relevé, et les fichiers des autres comptes WoW n'étaient plus envoyés tant qu'il restait illisible, sans aucun message. Il est maintenant relu plus tard, l'erreur s'affiche dans l'historique, et les autres comptes partent normalement.
 
 ## [0.13.0] - 2026-11-01
 
