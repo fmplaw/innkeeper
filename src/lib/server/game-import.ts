@@ -169,10 +169,13 @@ export function planImport(data: GameExport): ImportPlan {
 		const { c, player } = matches[0];
 		const update: CharacterUpdate = { characterId: c.id, name: c.name, player };
 		// Fichier renvoyé après coup (autre compte WoW du même PC, export d'un autre joueur…) :
-		// les données de la fiche sont plus récentes, on ne revient pas en arrière.
+		// les données de la fiche sont plus récentes, on ne revient pas en arrière. Seules ses
+		// recettes encore inconnues s'ajoutent : la fiche a pu être mise à jour par un registre
+		// de guilde, qui n'en contient pas, et une recette apprise ne se perd pas.
 		if (c.gameExportedAt && c.gameExportedAt.getTime() >= plan.exportedAt.getTime()) {
 			plan.outdated.push(c.name);
-			plan.updates.push({ ...update, outdated: true });
+			const added = data.player && nameKey(data.player.name) === key ? addRecipes(c.knownRecipes, recipes) : null;
+			plan.updates.push({ ...update, outdated: true, ...(added && { recipes: added }) });
 			continue;
 		}
 		const level = member?.level ?? (data.player && nameKey(data.player.name) === key ? data.player.level : undefined);
@@ -212,6 +215,26 @@ const sameProfessions = (a: ProfessionEntry[], b: ProfessionEntry[]) => JSON.str
 function mergeRecipes(current: KnownRecipes[] | null, incoming: KnownRecipes[]) {
 	const kept = (current ?? []).filter((r) => !incoming.some((i) => i.profession === r.profession));
 	return [...kept, ...incoming];
+}
+
+/** Recettes d'un export plus ancien : ajoute seulement celles que la fiche ne connaît pas (null si aucune). */
+function addRecipes(current: KnownRecipes[] | null, older: KnownRecipes[]) {
+	let added = false;
+	const result = (current ?? []).map((r) => ({ ...r, recipes: [...r.recipes] }));
+	for (const o of older) {
+		const known = result.find((r) => r.profession === o.profession);
+		if (!known) {
+			result.push(o);
+			added ||= o.recipes.length > 0;
+			continue;
+		}
+		for (const recipe of o.recipes) {
+			if (known.recipes.some((r) => r.id === recipe.id)) continue;
+			known.recipes.push(recipe);
+			added = true;
+		}
+	}
+	return added ? result : null;
 }
 
 /** Applique le plan ; renvoie le nombre de persos modifiés. */

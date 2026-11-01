@@ -172,6 +172,26 @@ describe('ordre des exports', () => {
 		expect(getCharacter(zuljin.id)).toMatchObject({ level: 43 });
 	});
 
+	it('les recettes d’un export plus ancien s’ajoutent quand même, sans rien retirer', () => {
+		createUser('u7');
+		const voljin = sheet('u7', 'Voljin');
+		const forge = (list: { id: number; name: string }[]) => ({ skill164: { skillLine: 164, skill: 150, list } });
+		const own = (exportedAt: number, list: { id: number; name: string }[]) => ({ format: 1, exportedAt, player: { name: 'Voljin', level: 30 }, recipes: forge(list) });
+		applyImport(planImport(own(1793500000, [{ id: 2662, name: 'Ceinture en cuivre' }])));
+		// Registre de guilde plus récent, envoyé par un officier : il ne contient aucune recette.
+		applyImport(planImport({ format: 1, exportedAt: 1793600000, roster: [{ name: 'Voljin', level: 31, class: 'SHAMAN', rank: 'Membre', offline: { days: 0 } }] }));
+
+		// Export du joueur arrivé en retard : niveau ignoré, mais la recette apprise entre-temps est gardée.
+		const late = planImport(own(1793550000, [{ id: 2662, name: 'Ceinture en cuivre' }, { id: 2663, name: 'Bracelets en cuivre' }]));
+		expect(late.outdated).toEqual(['Voljin']);
+		applyImport(late);
+		const saved = getCharacter(voljin.id)!;
+		expect(saved.level).toBe(31);
+		expect(saved.knownRecipes?.[0].recipes.map((r) => r.id)).toEqual([2662, 2663]);
+		// Le même fichier renvoyé n'apporte plus rien.
+		expect(planImport(own(1793550000, [{ id: 2663, name: 'Bracelets en cuivre' }])).updates[0].recipes).toBeUndefined();
+	});
+
 	it('un registre plus ancien que le dernier importé ne déplace pas la référence « vu en jeu »', async () => {
 		const { getGameImport } = await import('./settings');
 		const before = getGameImport();

@@ -8,42 +8,25 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 - **Accès des comptes extérieurs au serveur** : en mode « tout membre du serveur » (le mode par défaut), un compte Discord qui n'est pas sur le serveur de la guilde obtenait l'accès membre (roster, sorties, inscriptions, clés de synchronisation) au lieu de passer par la candidature. Le site enregistre désormais la présence sur le serveur à chaque connexion et à chaque relecture des nouveaux membres par le bot ; sans elle, aucun accès. Migration : les comptes qui avaient au moins un rôle sont considérés comme présents ; ceux qui n'en avaient aucun doivent se reconnecter une fois.
 - **Rôles à jour sans reconnexion** : avec le bot, les rôles d'un joueur et sa présence sur le serveur sont relus sur Discord au plus toutes les 10 minutes, pour les pages du site comme pour les clés InnkeeperSync. Un rôle retiré ou une exclusion du serveur s'applique donc en quelques minutes, au lieu de durer tant que la session restait ouverte (30 jours, prolongés à chaque visite). Si Discord ne répond pas, le site garde les rôles connus.
-### Corrigé
-
-- Une candidature validée deux fois (double clic, deux officiers en même temps) créait deux persos à la recrue et deux annonces. La décision ne s'enregistre plus que si la candidature est encore en attente ; un refus ou un retrait arrivé après coup est sans effet.
-### Corrigé
-
-- Sorties : une sortie commencée ou passée n'accepte plus d'inscription ni de désinscription depuis le site. Le formulaire était déjà masqué, mais l'envoi direct du formulaire passait encore et modifiait la liste dans Raid-Helper après coup.
-### Corrigé
-
-- Connexion Discord : la lecture du profil du joueur sur le serveur abandonne au bout de 10 secondes, comme les autres appels à Discord, au lieu d'attendre indéfiniment une réponse quand Discord est lent.
 - En-têtes de sécurité sur toutes les réponses du site : interdiction d'intégrer le site dans la page d'un autre (`X-Frame-Options`, `frame-ancestors`), ce qui empêche de piéger un officier par des clics détournés sur les actions d'admin ; pas de reniflage des types de fichiers (`nosniff`) pour les images envoyées ; adresse complète des pages non transmise aux sites externes (`Referrer-Policy`).
 - Images envoyées (logo, bannière, images des sorties) : le contenu du fichier doit correspondre au format annoncé (signature PNG, JPEG ou WebP). Jusqu'ici, seul le type déclaré par le navigateur comptait : un fichier quelconque renommé en `.png` était accepté puis servi publiquement comme image.
-### Corrigé
 
-- Mémoire du serveur : le cache des événements Raid-Helper (500 au plus), la liste des messages Discord écartés (5 000 au plus) et les tentatives de connexion admin (adresses expirées oubliées) ne grossissent plus sans limite. Il suffisait d'ouvrir `/sorties/<identifiant>` avec des identifiants inventés pour faire grossir le processus.
-### Corrigé
-
-- Import du jeu : les caractères accentués écrits sous forme d'octets échappés (`\195\169`) dans le fichier de l'addon donnaient « Ã© » au lieu de « é » (noms de persos, de métiers, de recettes). Les octets échappés sont maintenant décodés ensemble en UTF-8.
-### Corrigé
-
-- Bot Discord : quand Discord demande de ralentir (429) pour quelques secondes, le bot patiente puis réessaie au lieu d'échouer. Le repérage des sorties sans clé Raid-Helper lit les salons cinq par cinq au lieu de tous à la fois : sur un serveur aux nombreux salons, des sorties manquaient à la liste sans aucun message.
-### Corrigé
-
-- InnkeeperSync : un envoi resté sans réponse (site muet, connexion coupée en plein envoi) bloquait l'application jusqu'à son redémarrage, sans plus rien synchroniser ni afficher d'erreur. Chaque requête abandonne maintenant au bout d'une minute, et l'application réessaie plus tard comme pour un site injoignable.
-### Corrigé
-
-- InnkeeperSync : un fichier d'export illisible (encore tenu par le jeu, bloqué par un antivirus…) interrompait le relevé, et les fichiers des autres comptes WoW n'étaient plus envoyés tant qu'il restait illisible, sans aucun message. Il est maintenant relu plus tard, l'erreur s'affiche dans l'historique, et les autres comptes partent normalement.
 ### Modifié
 
 - Addon InnkeeperSync 1.2.1 : les notes du registre de guilde (publiques et d'officier) et la zone des membres ne sont plus exportées. Le site ne s'en servait pas, mais InnkeeperSync les envoyait avec le reste du fichier.
 
 ### Corrigé
 
+- Une candidature validée deux fois (double clic, deux officiers en même temps) créait deux persos à la recrue et deux annonces. La décision ne s'enregistre plus que si la candidature est encore en attente ; un refus ou un retrait arrivé après coup est sans effet.
+- Sorties : une sortie commencée ou passée n'accepte plus d'inscription ni de désinscription depuis le site. Le formulaire était déjà masqué, mais l'envoi direct du formulaire passait encore et modifiait la liste dans Raid-Helper après coup.
+- Connexion Discord : la lecture du profil du joueur sur le serveur abandonne au bout de 10 secondes, comme les autres appels à Discord, au lieu d'attendre indéfiniment une réponse quand Discord est lent.
+- Mémoire du serveur : le cache des événements Raid-Helper (500 au plus), la liste des messages Discord écartés (5 000 au plus) et les tentatives de connexion admin (adresses expirées oubliées) ne grossissent plus sans limite. Il suffisait d'ouvrir `/sorties/<identifiant>` avec des identifiants inventés pour faire grossir le processus.
+- Import du jeu : les caractères accentués écrits sous forme d'octets échappés (`\195\169`) dans le fichier de l'addon donnaient « Ã© » au lieu de « é » (noms de persos, de métiers, de recettes). Les octets échappés sont maintenant décodés ensemble en UTF-8.
+- Bot Discord : quand Discord demande de ralentir (429) pour quelques secondes, le bot patiente puis réessaie au lieu d'échouer. Le repérage des sorties sans clé Raid-Helper lit les salons cinq par cinq au lieu de tous à la fois : sur un serveur aux nombreux salons, des sorties manquaient à la liste sans aucun message.
+- InnkeeperSync : un envoi resté sans réponse (site muet, connexion coupée en plein envoi) bloquait l'application jusqu'à son redémarrage, sans plus rien synchroniser ni afficher d'erreur. Chaque requête abandonne maintenant au bout d'une minute, et l'application réessaie plus tard comme pour un site injoignable.
+- InnkeeperSync : un fichier d'export illisible (encore tenu par le jeu, bloqué par un antivirus…) interrompait le relevé, et les fichiers des autres comptes WoW n'étaient plus envoyés tant qu'il restait illisible, sans aucun message. Il est maintenant relu plus tard, l'erreur s'affiche dans l'historique, et les autres comptes partent normalement.
 - Addon InnkeeperSync 1.2.1 : l'export repart de zéro à chaque connexion d'un perso. Si Forever relit les SavedVariables (ce que la bêta ne faisait pas), les recettes d'un autre perso du même compte étaient attribuées au perso connecté, et un perso hors guilde renvoyait le registre de la guilde d'un autre.
-### Corrigé
-
-- Import du jeu : un export plus ancien que les données d'une fiche ne les remplace plus (niveau qui redescend, métiers et dernière connexion d'avant). C'était le cas avec deux comptes WoW sur le même PC, dont InnkeeperSync renvoie les deux fichiers à chaque démarrage, ou quand l'export d'un officier arrivait après celui, plus récent, d'un membre. L'aperçu de l'import liste les fiches ignorées pour cette raison, et un registre plus ancien ne déplace plus la référence « vu en jeu ».
+- Import du jeu : un export plus ancien que les données d'une fiche ne les remplace plus (niveau qui redescend, métiers et dernière connexion d'avant). C'était le cas avec deux comptes WoW sur le même PC, dont InnkeeperSync renvoie les deux fichiers à chaque démarrage, ou quand l'export d'un officier arrivait après celui, plus récent, d'un membre. L'aperçu de l'import liste les fiches ignorées pour cette raison, et un registre plus ancien ne déplace plus la référence « vu en jeu ». Seules les recettes encore inconnues d'un tel export s'ajoutent : un registre de guilde plus récent n'en contient pas, et une recette apprise ne se perd pas.
 
 ## [0.13.0] - 2026-11-01
 
