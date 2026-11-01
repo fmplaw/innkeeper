@@ -1,0 +1,322 @@
+import { randomBytes } from 'node:crypto';
+import { db, schema } from '../db';
+import type { ProfessionEntry } from '../db/schema';
+import { createLocalAdmin } from '../local-admin';
+import {
+	guildSchema,
+	recruitmentSchema,
+	setAccess,
+	setCharter,
+	setDemoMarker,
+	setDiscord,
+	setGameImport,
+	setGuild,
+	setRaidHelper,
+	setRecruitment
+} from '../settings';
+import type { DemoEvent } from './mock';
+
+// Guilde fictive du mode démo : « Les Gardiens de l'Aube », Alliance. Toutes les dates sont
+// relatives au moment du remplissage, pour que les sorties restent à venir.
+
+export const DEMO_GUILD_ID = '900000000000000001';
+export const DEMO_CHANNELS = {
+	official: { id: '900000000000000010', name: 'sorties-officielles' },
+	members: { id: '900000000000000011', name: 'sorties-membres' },
+	officers: { id: '900000000000000012', name: 'officiers' },
+	welcome: { id: '900000000000000013', name: 'bienvenue' }
+};
+export const DEMO_ROLES = { officer: '700000000000000001', member: '700000000000000002', newcomer: '700000000000000003' };
+
+const DAY = 86_400_000;
+const QUESTIONS = [
+	'Quelle est ton expérience de World of Warcraft ?',
+	'Quelles sont tes disponibilités pour jouer ?',
+	'Qu’est-ce qui te motive à rejoindre la guilde ?',
+	'Comment as-tu connu la guilde ?'
+];
+
+type Char = [name: string, surname: string, race: string, cls: string, spec: string, role: 'tank' | 'healer' | 'melee' | 'ranged', level: number, professions: [string, number][]];
+const { officer: R_OFF, member: R_MEM, newcomer: R_NEW } = DEMO_ROLES;
+
+// [pseudo, rôles Discord, persos (le premier est le main)]
+const PLAYERS: [string, string[], Char[]][] = [
+	['Aldren', [R_OFF, R_MEM], [['Aldren', 'Bouclier-d’Aube', 'human', 'paladin', 'protection', 'tank', 34, [['blacksmithing', 182], ['mining', 190]]], ['Mirabel', 'Bouclier-d’Aube', 'gnome', 'mage', 'frost', 'ranged', 17, [['tailoring', 95]]]]],
+	['Ysolde', [R_OFF, R_MEM], [['Ysolde', 'Clairval', 'night-elf', 'priest', 'holy', 'healer', 33, [['herbalism', 175], ['alchemy', 168]]]]],
+	['Thorgrim', [R_MEM], [['Thorgrim', 'Barbe-de-Fer', 'dwarf', 'warrior', 'fury', 'melee', 31, [['mining', 160], ['engineering', 152]]]]],
+	['Lysandre', [R_MEM], [['Lysandre', 'Valombre', 'human', 'mage', 'frost', 'ranged', 32, [['tailoring', 170], ['enchanting', 158]]]]],
+	['Pipwick', [R_MEM], [['Pipwick', 'Rouage', 'gnome', 'warlock', 'affliction', 'ranged', 29, [['tailoring', 140], ['enchanting', 131]]]]],
+	['Veyra', [R_MEM], [['Veyra', 'Feuillelune', 'night-elf', 'druid', 'restoration', 'healer', 30, [['herbalism', 165], ['alchemy', 150]]]]],
+	['Eodric', [R_MEM], [['Eodric', 'Mainfine', 'human', 'rogue', 'combat', 'melee', 33, [['leatherworking', 171], ['skinning', 180]]]]],
+	['Dorna', [R_MEM], [['Dorna', 'Pierrefeu', 'dwarf', 'hunter', 'marksmanship', 'ranged', 28, [['skinning', 150], ['leatherworking', 138]]]]],
+	['Halvard', [R_MEM], [['Halvard', 'Cendrelame', 'human', 'warrior', 'protection', 'tank', 30, [['blacksmithing', 145], ['mining', 155]]]]],
+	['Brunhild', [R_MEM], [['Brunhild', 'Marteau-Clair', 'dwarf', 'priest', 'discipline', 'healer', 27, [['first-aid', 150], ['cooking', 120]]]]],
+	['Fennick', [R_MEM], [['Fennick', 'Étincelle', 'gnome', 'mage', 'fire', 'ranged', 26, [['engineering', 130], ['mining', 140]]]]],
+	['Kerrin', [R_MEM], [['Kerrin', 'Sentebois', 'night-elf', 'hunter', 'survival', 'ranged', 25, [['herbalism', 120]]]]],
+	['Tamsin', [R_NEW], [['Tamsin', 'Noirsceau', 'human', 'warlock', 'demonology', 'ranged', 19, [['tailoring', 80]]]]],
+	['Quillon', [R_NEW], [['Quillon', 'Furtif', 'gnome', 'rogue', 'subtlety', 'melee', 16, []]]]
+];
+
+// Candidats (pas encore sur le serveur) : [pseudo, perso visé, réponses, avis des officiers]
+const APPLICANTS: [string, Char, string[], [string, 1 | -1][]][] = [
+	[
+		'Aelith',
+		['Aelith', 'Chantorée', 'night-elf', 'priest', 'holy', 'healer', 22, []],
+		["Joueuse depuis Vanilla, j'ai soigné en raid jusqu'à Wrath.", 'Tous les soirs sauf le jeudi, et le dimanche après-midi.', 'Une guilde posée pour découvrir Forever sans pression.', 'Par le Discord francophone de Forever.'],
+		[['Ysolde', 1], ['Aldren', 1]]
+	],
+	[
+		'Gorvan',
+		['Gorvan', 'Fendroc', 'dwarf', 'warrior', 'protection', 'tank', 18, []],
+		['Je reprends WoW après plusieurs années, surtout en tank.', 'Mercredi et dimanche soir, parfois en semaine.', "J'aime l'ambiance des raids organisés.", 'Un ami de Thorgrim.'],
+		[['Aldren', 1]]
+	]
+];
+
+/** Identifiant Discord fictif d'un joueur de la démo, d'après sa place dans la liste. */
+export const demoUserId = (pseudo: string) => {
+	const i = PLAYERS.findIndex(([p]) => p === pseudo);
+	if (i >= 0) return String(800000000000000001n + BigInt(i));
+	const j = APPLICANTS.findIndex(([p]) => p === pseudo);
+	if (j >= 0) return String(800000000000000101n + BigInt(j));
+	throw new Error(`Joueur de démo inconnu : ${pseudo}`);
+};
+
+const SPECS: Record<string, string> = {
+	'paladin:protection': 'Protection1',
+	'priest:holy': 'Holy',
+	'warrior:fury': 'Fury',
+	'mage:frost': 'Frost',
+	'warlock:affliction': 'Affliction',
+	'druid:restoration': 'Restoration',
+	'rogue:combat': 'Combat',
+	'hunter:marksmanship': 'Marksmanship',
+	'warrior:protection': 'Protection',
+	'priest:discipline': 'Discipline',
+	'mage:fire': 'Fire',
+	'hunter:survival': 'Survival',
+	'warlock:demonology': 'Demonology',
+	'rogue:subtlety': 'Subtlety'
+};
+const RH_ROLE = { tank: 'Tank', melee: 'Melee', ranged: 'Ranged', healer: 'Healer' };
+
+/** Remplit une base vide avec la guilde fictive ; renvoie les sorties simulées de Raid-Helper. */
+export function seedDemo(now = Date.now()): DemoEvent[] {
+	setGuild(
+		guildSchema.parse({
+			name: 'Les Gardiens de l’Aube',
+			faction: 'alliance',
+			serverType: 'pve',
+			tagline: 'Guilde PvE détendue, raids le mercredi et le dimanche',
+			description:
+				"Nous sommes une guilde francophone d'adultes qui jouent pour le plaisir de jouer ensemble : donjons en soirée, quêtes de groupe, et un roster de raid qui se prépare pour l'ouverture de Barrow Deeps.\n\nOn privilégie la bonne humeur et la ponctualité aux performances.",
+			ambitions: ['pve', 'casual'],
+			schedule: 'Raids : mercredi et dimanche, 21 h – 23 h 30\nDonjons et quêtes : tous les soirs, à la demande',
+			recruitment: { open: true, classes: ['priest', 'shaman', 'warrior'], roles: ['healer', 'tank'], text: 'On cherche surtout des soigneurs pour compléter le roster de raid.' },
+			accentColor: '#4f8fd6',
+			timezone: 'Europe/Paris',
+			publicStats: true
+		})
+	);
+	// Valeurs fictives : la simulation répond à la place de Discord et de Raid-Helper.
+	setDiscord({ clientId: '900000000000000100', clientSecret: 'demo-client-secret', guildId: DEMO_GUILD_ID, botToken: 'demo-bot-token' });
+	setAccess({ mode: 'mapped-roles' });
+	setRaidHelper({ apiKey: 'demo-raidhelper-key', defaultChannelId: DEMO_CHANNELS.official.id, memberChannelId: DEMO_CHANNELS.members.id, discordEvents: true });
+	setRecruitment(
+		recruitmentSchema.parse({
+			arrivalRoleId: R_NEW,
+			notifyChannelId: DEMO_CHANNELS.officers.id,
+			mentionRoleId: R_OFF,
+			inviteChannelId: DEMO_CHANNELS.welcome.id,
+			reapplyDays: 30,
+			reviewDays: 90,
+			questions: QUESTIONS
+		})
+	);
+	setGameImport({ appliedAt: Math.floor((now - 2 * 3_600_000) / 1000), exportedAt: Math.floor((now - 3 * 3_600_000) / 1000), rosterSize: 18 });
+	setCharter({ text: CHARTER, updatedAt: now, updatedBy: 'Aldren' });
+
+	for (const [id, name, permission, position] of [
+		[R_OFF, 'Officier', 'officer', 3],
+		[R_MEM, 'Membre', 'member', 2],
+		[R_NEW, 'Nouvelle recrue', 'member', 1]
+	] as const)
+		db().insert(schema.discordRoles).values({ id, name, permission, position }).onConflictDoNothing().run();
+
+	// Admin local : on y entre par le choix de profil, son mot de passe ne sert jamais.
+	createLocalAdmin('admin-demo', randomBytes(24).toString('base64url'));
+
+	const professions = (list: [string, number][]): ProfessionEntry[] => list.map(([id, level]) => ({ id, level }));
+	PLAYERS.forEach(([pseudo, roles, chars], i) => {
+		const userId = demoUserId(pseudo);
+		db()
+			.insert(schema.users)
+			.values({
+				discordId: userId,
+				discordUsername: pseudo.toLowerCase(),
+				displayName: pseudo,
+				roles,
+				inGuild: true,
+				rolesCheckedAt: new Date(now),
+				createdAt: new Date(now - (40 - i) * DAY),
+				lastLogin: new Date(now - (i % 5) * DAY),
+				joinedAt: new Date(now - (40 - i) * DAY)
+			})
+			.run();
+		chars.forEach(([name, surname, race, cls, spec, role, level, profs], k) => {
+			db()
+				.insert(schema.characters)
+				.values({
+					userId,
+					name,
+					surname,
+					race,
+					class: cls,
+					spec,
+					role,
+					isMain: k === 0,
+					level,
+					professions: professions(profs),
+					pve: role === 'healer' || role === 'tank' ? 'competitive' : 'casual',
+					pvp: i % 3 === 0 ? 'casual' : null,
+					lastOnlineAt: new Date(now - (i % 4) * DAY - 3_600_000),
+					gameSyncedAt: new Date(now - 2 * 3_600_000)
+				})
+				.run();
+		});
+	});
+
+	APPLICANTS.forEach(([pseudo, [name, surname, race, cls, spec, role, level], answers, votes], i) => {
+		const userId = demoUserId(pseudo);
+		db().insert(schema.users).values({ discordId: userId, discordUsername: pseudo.toLowerCase(), displayName: pseudo, roles: [], inGuild: false }).run();
+		const app = db()
+			.insert(schema.applications)
+			.values({
+				userId,
+				character: { name, surname, race, class: cls, spec, role, level, professions: [], pve: 'competitive', pvp: null },
+				answers: QUESTIONS.map((question, k) => ({ question, answer: answers[k] })),
+				charterAcceptedAt: new Date(now - (i + 1) * DAY),
+				createdAt: new Date(now - (i + 1) * DAY)
+			})
+			.returning()
+			.get();
+		for (const [voter, value] of votes) db().insert(schema.applicationVotes).values({ applicationId: app.id, voterId: demoUserId(voter), voterName: voter, value }).run();
+	});
+
+	const roster = db().insert(schema.rosters).values({ name: 'Roster Barrow Deeps', description: 'Groupe de 10 pour l’ouverture du raid', visibility: 'members' }).returning().get();
+	const mains = db().select().from(schema.characters).all().filter((c) => c.isMain);
+	for (const c of [...mains].sort((a, b) => b.level - a.level).slice(0, 10)) db().insert(schema.rosterMembers).values({ rosterId: roster.id, characterId: c.id }).run();
+
+	for (const [name, importance, usage, description, curseforgeUrl, otherUrl, roles] of ADDONS)
+		db().insert(schema.addons).values({ name, importance, usage, description, curseforgeUrl, otherUrl, roles }).run();
+
+	const events = demoEvents(now, mains);
+	for (const e of events)
+		db()
+			.insert(schema.outings)
+			.values({ eventId: e.id, kind: e.channelId === DEMO_CHANNELS.official.id ? 'official' : 'member', createdBy: e.leaderId, title: e.title, activity: e.activity, instanceId: e.instance, startTime: new Date(e.startTime * 1000) })
+			.run();
+
+	setDemoMarker();
+	return events;
+}
+
+// Sorties Raid-Helper simulées : dans 1, 2, 3 et 41 jours, à heure fixe.
+function demoEvents(now: number, mains: { userId: string; name: string; class: string; spec: string | null; role: keyof typeof RH_ROLE }[]): DemoEvent[] {
+	const at = (days: number, hour: number) => {
+		const d = new Date(now + days * DAY);
+		d.setUTCHours(hour - 1, 0, 0, 0);
+		return Math.floor(d.getTime() / 1000);
+	};
+	const signUps = (list: [string, string?][]) =>
+		list.map(([pseudo, status], k) => {
+			const c = mains.find((m) => m.userId === demoUserId(pseudo))!;
+			return {
+				id: k + 1,
+				userId: c.userId,
+				name: c.name,
+				className: status ?? RH_ROLE[c.role],
+				specName: status && status !== 'Bench' ? undefined : SPECS[`${c.class}:${c.spec}`],
+				status: 'primary',
+				position: k + 1,
+				entryTime: Math.floor(now / 1000) - (20 - k) * 3600
+			};
+		});
+	const event = (id: string, title: string, official: boolean, leader: string, startTime: number, description: string, activity: string, instance: string | null, limit: number, list: [string, string?][]): DemoEvent => {
+		const channel = official ? DEMO_CHANNELS.official : DEMO_CHANNELS.members;
+		return {
+			id,
+			serverId: DEMO_GUILD_ID,
+			title,
+			description,
+			leaderName: leader,
+			leaderId: demoUserId(leader),
+			channelId: channel.id,
+			channelName: channel.name,
+			startTime,
+			endTime: startTime + 9000,
+			advancedSettings: { limit, duration: 150 },
+			signUps: signUps(list),
+			activity,
+			instance
+		};
+	};
+	return [
+		event('910000000000000001', 'Soirée donjon : Les Mortemines', true, 'Aldren', at(1, 21), 'Run complet avec la quête des Défias. Prévoyez potions et nourriture.', 'dungeon', 'deadmines', 5, [
+			['Aldren'],
+			['Ysolde'],
+			['Thorgrim'],
+			['Lysandre'],
+			['Eodric'],
+			['Dorna', 'Bench'],
+			['Pipwick', 'Tentative']
+		]),
+		event('910000000000000002', 'Raid : Barrow Deeps (ouverture)', true, 'Ysolde', at(41, 21), 'Première soirée sur le nouveau raid. Composition indicative, on ajuste selon les présents.', 'raid', 'barrow-deeps', 10, [
+			['Aldren'],
+			['Halvard'],
+			['Ysolde'],
+			['Veyra'],
+			['Brunhild'],
+			['Thorgrim'],
+			['Eodric'],
+			['Lysandre'],
+			['Pipwick'],
+			['Dorna'],
+			['Fennick', 'Bench'],
+			['Kerrin', 'Late'],
+			['Tamsin', 'Absence']
+		]),
+		event('910000000000000003', 'Quêtes de groupe aux Carmines', false, 'Pipwick', at(2, 20), 'Les quêtes élites de la région, tranquille.', 'quests', null, 5, [['Pipwick'], ['Fennick'], ['Tamsin'], ['Quillon']]),
+		event('910000000000000004', 'Farm cuir et herbes', false, 'Veyra', at(3, 18), 'Une heure de récolte en duo ou trio.', 'farm', null, 0, [['Veyra'], ['Kerrin']])
+	];
+}
+
+const ADDONS: [string, 'essential' | 'raid' | 'recommended' | 'useful', 'guild' | 'dungeons' | 'quests' | 'professions' | 'pvp' | 'interface', string, string | null, string | null, ('tank' | 'healer')[]][] = [
+	['Innkeeper Sync', 'essential', 'guild', 'Exporte ton registre de guilde, tes métiers et tes recettes pour le site de la guilde.', 'https://www.curseforge.com/projects/1777916', '/addon/InnkeeperSync.zip', []],
+	['Deadly Boss Mods', 'raid', 'dungeons', 'Alertes de boss : toute la guilde utilise le même, pour entendre les mêmes annonces.', 'https://www.curseforge.com/wow/addons/deadly-boss-mods', null, []],
+	['Questie', 'recommended', 'quests', 'Toutes les quêtes disponibles sur la carte, avec les maîtres de métier et les boîtes aux lettres.', 'https://www.curseforge.com/wow/addons/questie', null, []],
+	['Auctionator', 'recommended', 'professions', 'Hôtel des ventes plus simple : prix dans les infobulles, mise en vente en un clic.', 'https://www.curseforge.com/wow/addons/auctionator', null, []],
+	['EasyMarks', 'recommended', 'dungeons', 'Marquer les cibles en un clic.', null, null, ['tank']],
+	['Details!', 'useful', 'interface', 'Le compteur de dégâts est intégré au jeu ; Details! l’habille autrement.', 'https://www.curseforge.com/wow/addons/details', null, []]
+];
+
+const CHARTER = `Bienvenue chez les Gardiens de l'Aube ! Quelques règles simples pour que chacun s'y sente bien, en jeu comme sur Discord.
+
+# Nos valeurs
+
+## Respect
+Pour chacun, en jeu comme sur Discord. Pas d'insultes, pas de moqueries sur le niveau ou l'équipement.
+
+## Aucune obligation
+Chacun joue à son rythme, selon ses disponibilités. La vie réelle passe avant le jeu.
+
+## Entraide
+On se soutient, on partage, on apprend ensemble.
+
+# Les salons Discord
+
+- **#annonces** : lecture seule.
+- **#sorties-officielles** : raids et événements organisés par les officiers.
+- **#sorties-membres** : donjons, quêtes et farm proposés par les membres.
+
+**Que la Lumière guide nos pas !**`;

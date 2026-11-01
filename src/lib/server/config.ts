@@ -8,6 +8,7 @@ import {
 } from '$lib/game/forever';
 import { DEFAULT_ACCENTS, getCharter, getGuild } from './settings';
 import { db, schema } from './db';
+import { demoEnabled } from './demo';
 
 /** Données transmises au navigateur : jeu Forever + profil public de la guilde. */
 export function publicConfig() {
@@ -30,6 +31,8 @@ export function publicConfig() {
 		hasCharter: Boolean(getCharter()),
 		// Lien « Addons » dans le menu, seulement quand la guilde en conseille.
 		hasAddons: Boolean(db().select({ id: schema.addons.id }).from(schema.addons).limit(1).get()),
+		// Site de démonstration : bandeau en haut de chaque page.
+		demo: demoEnabled(),
 		maxLevel: MAX_LEVEL,
 		dualSpecLevel: DUAL_SPEC_LEVEL,
 		races: racesFor(faction),

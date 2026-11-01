@@ -64,9 +64,10 @@ Captures prises sur une guilde de démonstration fictive.
 6. [Addon InnkeeperSync](#addon-innkeepersync)
 7. [Sécurité et données personnelles](#sécurité-et-données-personnelles)
 8. [Exploitation](#exploitation)
-9. [Développement](#développement)
-10. [Limites connues](#limites-connues)
-11. [Licence](#licence)
+9. [Mode démo](#mode-démo)
+10. [Développement](#développement)
+11. [Limites connues](#limites-connues)
+12. [Licence](#licence)
 
 ---
 
@@ -367,9 +368,30 @@ Un addon WoW n'a aucun accès au réseau, et le jeu n'écrit son fichier qu'à l
 
 ---
 
+## Mode démo
+
+Pour essayer Innkeeper, prévisualiser une branche ou prendre des captures, sans Discord ni Raid-Helper :
+
+```sh
+docker run --rm -p 3000:3000 -e INNKEEPER_DEMO=1 -e ORIGIN=http://localhost:3000 ghcr.io/fmplaw/innkeeper:latest
+```
+
+Puis ouvre <http://localhost:3000/connexion> et choisis un profil : admin de l'instance, officier, membre, nouvelle recrue ou candidat. Un bandeau rappelle sur chaque page qu'il s'agit d'une démo, avec un lien pour changer de profil.
+
+- **Données** : la guilde fictive « Les Gardiens de l'Aube » (Alliance), 14 joueurs et leurs persos, 2 candidatures, un roster, la charte, des addons conseillés et 4 sorties. Sans volume, tout repart de zéro au redémarrage.
+- **Discord et Raid-Helper simulés** : le site leur parle comme d'habitude, mais une simulation répond à leur place à partir de la base de démo (rôles, membres, salons, sorties, inscriptions). Aucun autre appel ne sort.
+- **Garde-fou** : le mode démo ne démarre que sur une base vide (il la remplit et la marque) ou déjà de démo. Sur une vraie base, il refuse de démarrer : il permettrait à n'importe qui d'entrer sous l'identité d'un joueur.
+- **Limites** : pas de vraie connexion Discord ; l'entrée d'une recrue acceptée sur le serveur (lien Discord) n'aboutit pas.
+
+En développement : `INNKEEPER_DEMO=1 DATABASE_PATH=./data/demo.db npm run dev`.
+
+---
+
 ## Développement
 
 Node 22.12 ou plus récent.
+
+**Une branche par changement** : `feat/…` (fonctionnalité), `fix/…` (correctif), `docs/…`, puis une pull request vers `main`. `main` ne reçoit que des PR fusionnées, tests au vert ; c'est elle qu'on déploie.
 
 ```sh
 npm install
