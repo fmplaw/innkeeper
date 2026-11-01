@@ -4,6 +4,10 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ## [Non publié]
 
+### Modifié
+
+- Addon InnkeeperSync 1.2.1 : les notes du registre de guilde (publiques et d'officier) et la zone des membres ne sont plus exportées. Le site ne s'en servait pas, mais InnkeeperSync les envoyait avec le reste du fichier.
+
 ### Corrigé
 
 - Addon InnkeeperSync 1.2.1 : l'export repart de zéro à chaque connexion d'un perso. Si Forever relit les SavedVariables (ce que la bêta ne faisait pas), les recettes d'un autre perso du même compte étaient attribuées au perso connecté, et un perso hors guilde renvoyait le registre de la guilde d'un autre.

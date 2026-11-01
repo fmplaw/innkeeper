@@ -6,6 +6,8 @@ Exporte le registre de guilde, les métiers et les recettes pour Innkeeper, le p
 
 ## 1.2.1
 
+- Guild roster notes (public and officer) and zones are no longer exported: the site does not use them, and the file is uploaded to the Internet.
+- Les notes du registre de guilde (publiques et d'officier) et la zone ne sont plus exportées : le site ne s'en sert pas, et le fichier part sur Internet.
 - Each character login starts a fresh export: if the game reloads saved variables, recipes or the guild roster of another character on the same account are no longer sent with the current one.
 - Chaque connexion d'un perso repart d'un export vierge : si le jeu relit les SavedVariables, les recettes ou le registre de guilde d'un autre perso du même compte ne sont plus envoyés avec celui du perso connecté.
 
