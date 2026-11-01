@@ -1,11 +1,14 @@
 <script lang="ts">
 	import CharacterForm from '$lib/components/CharacterForm.svelte';
+	import HomonymWarning from '$lib/components/HomonymWarning.svelte';
 	import { fullName } from '$lib/labels';
 
 	let { data, form } = $props();
 </script>
 
 <h1>Modifier {fullName(data.character)}</h1>
+
+<HomonymWarning homonyms={data.homonyms} viewerId={data.character.userId} />
 
 {#if form?.message}<p class="card error">{form.message}</p>{/if}
 

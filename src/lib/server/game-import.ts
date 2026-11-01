@@ -115,6 +115,34 @@ export interface ImportPlan {
 	rosterSize: number;
 }
 
+export interface Homonym {
+	characterId: number;
+	name: string;
+	userId: string;
+	player: string;
+}
+
+/**
+ * Autres fiches qui portent le même nom que chacun de ces persos, d'après la comparaison de
+ * l'import : l'import n'en met à jour aucune (voir `ambiguous`). Clé : id du perso.
+ */
+export function homonyms(characterIds: number[]): Record<number, Homonym[]> {
+	if (!characterIds.length) return {};
+	const all = db()
+		.select({ characterId: schema.characters.id, name: schema.characters.name, userId: schema.characters.userId, player: schema.users.displayName })
+		.from(schema.characters)
+		.innerJoin(schema.users, eq(schema.users.discordId, schema.characters.userId))
+		.all();
+	const byName = Map.groupBy(all, (c) => nameKey(c.name));
+	const result: Record<number, Homonym[]> = {};
+	for (const c of all) {
+		if (!characterIds.includes(c.characterId)) continue;
+		const others = (byName.get(nameKey(c.name)) ?? []).filter((o) => o.characterId !== c.characterId);
+		if (others.length) result[c.characterId] = others;
+	}
+	return result;
+}
+
 /**
  * Compare l'export aux fiches. Pour les métiers, le jeu met à jour les niveaux et ajoute
  * ceux qui manquent, sans retirer les autres (l'onglet de guilde n'affiche peut-être pas

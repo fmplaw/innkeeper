@@ -8,6 +8,10 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 - **Admin → Rôles Discord réservé à l'admin local** : un officier pouvait donner la permission Officier à n'importe quel rôle (y compris le sien ou celui d'un ami) ou ouvrir le site à tout le serveur Discord. La page, comme la connexion Discord, n'est plus accessible qu'au compte admin local.
 
+### Ajouté
+
+- **Fiches du même nom signalées** : quand deux fiches portent le même nom de perso, l'import du jeu n'en met à jour aucune. Un avertissement l'explique désormais dans Mes persos et sur la page de modification du perso, et un badge « nom en double » apparaît dans Admin → Joueurs.
+
 ## [0.13.1] - 2026-11-01
 
 ### Sécurité

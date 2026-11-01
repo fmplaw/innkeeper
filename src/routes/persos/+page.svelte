@@ -1,5 +1,6 @@
 <script lang="ts">
 	import GameBadge from '$lib/components/GameBadge.svelte';
+	import HomonymWarning from '$lib/components/HomonymWarning.svelte';
 	import { enhance } from '$app/forms';
 	import InterestBadges from '$lib/components/InterestBadges.svelte';
 	import { className, classColor, fullName, professionNames, raceName, specRole } from '$lib/labels';
@@ -29,6 +30,7 @@
 			{#if c.isMain}<span class="badge main">Main</span>{:else}<span class="badge">Reroll</span>{/if}
 			<GameBadge character={c} importAt={data.gameImportAt} showPending />
 		</div>
+		<HomonymWarning homonyms={data.homonyms[c.id]} viewerId={data.user?.id} />
 		<p>
 			Niv. {c.level}
 			{raceName(cfg, c.race)}

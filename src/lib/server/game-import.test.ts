@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { createUser, horde } from '../../test/helpers';
 import { createCharacter, getCharacter } from './characters';
-import { applyImport, ImportError, planImport, readExport } from './game-import';
+import { applyImport, homonyms, ImportError, planImport, readExport } from './game-import';
 import { parseSavedVariables, toPlain } from './lua-saved-variables';
 
 horde();
@@ -197,5 +197,22 @@ describe('ordre des exports', () => {
 		const before = getGameImport();
 		applyImport(planImport(exportAt(1793400000, 10)));
 		expect(getGameImport()).toEqual(before);
+	});
+});
+
+describe('fiches du même nom', () => {
+	it('signale les autres fiches du même nom, que l’import ne met pas à jour', () => {
+		createUser('h1');
+		createUser('h2');
+		const mine = sheet('h1', 'Rokhan');
+		const other = sheet('h2', 'rokhan', { isMain: true });
+		const alone = sheet('h1', 'Zalazane', { isMain: false });
+
+		const found = homonyms([mine.id, alone.id]);
+		expect(found[mine.id]).toEqual([{ characterId: other.id, name: other.name, userId: 'h2', player: 'Joueur h2' }]);
+		expect(found[alone.id]).toBeUndefined();
+		// Même règle que l'import : les deux fiches restent sans mise à jour.
+		expect(planImport({ format: 1, exportedAt: 1793600000, roster: [{ name: 'Rokhan', level: 20, class: 'SHAMAN', rank: 'Membre', offline: { days: 0 } }] }).ambiguous).toEqual(['Rokhan']);
+		expect(homonyms([])).toEqual({});
 	});
 });

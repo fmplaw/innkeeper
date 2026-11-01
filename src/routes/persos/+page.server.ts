@@ -1,12 +1,14 @@
 import { error, fail } from '@sveltejs/kit';
 import { audit } from '$lib/server/audit';
 import { canEdit, characterTarget, deleteCharacter, getCharacter, listCharacters, setMain } from '$lib/server/characters';
+import { homonyms } from '$lib/server/game-import';
 import { requireUser } from '$lib/server/guards';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = ({ locals }) => {
 	const user = requireUser(locals);
-	return { characters: listCharacters(user.id) };
+	const characters = listCharacters(user.id);
+	return { characters, homonyms: homonyms(characters.map((c) => c.id)) };
 };
 
 async function editableFromForm(locals: App.Locals, request: Request) {

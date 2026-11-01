@@ -1,5 +1,6 @@
 import { asc } from 'drizzle-orm';
 import { listCharacters } from '$lib/server/characters';
+import { homonyms } from '$lib/server/game-import';
 import { permissionFor } from '$lib/server/permissions';
 import { db, schema } from '$lib/server/db';
 import { requireOfficer } from '$lib/server/guards';
@@ -40,5 +41,5 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		}
 	}
 
-	return { players, missing, missingError, welcome: url.searchParams.has('bienvenue'), discordReady: Boolean(getDiscord()) };
+	return { players, homonyms: homonyms(characters.map((c) => c.id)), missing, missingError, welcome: url.searchParams.has('bienvenue'), discordReady: Boolean(getDiscord()) };
 };

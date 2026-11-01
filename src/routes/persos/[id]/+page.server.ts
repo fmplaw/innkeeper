@@ -10,6 +10,7 @@ import {
 	updateCharacter
 } from '$lib/server/characters';
 import { audit, diff } from '$lib/server/audit';
+import { homonyms } from '$lib/server/game-import';
 import { requireViewer } from '$lib/server/guards';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -25,7 +26,7 @@ const backTo = (locals: App.Locals, ownerId: string) => (ownerId === locals.user
 
 export const load: PageServerLoad = ({ locals, params }) => {
 	const { character } = loadEditable(locals, params.id);
-	return { character, mainName: character.isMain ? null : (getMain(character.userId)?.name ?? null) };
+	return { character, mainName: character.isMain ? null : (getMain(character.userId)?.name ?? null), homonyms: homonyms([character.id])[character.id] ?? [] };
 };
 
 export const actions: Actions = {

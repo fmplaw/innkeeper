@@ -54,6 +54,7 @@ Menu **Mes persos** → **Ajouter un perso**.
 - **⚠ pas trouvé en jeu** : aucun perso de ce nom dans la guilde. Vérifie l'orthographe du nom sur ta fiche ;
 - **« pas encore vérifié »** : la fiche a été créée après le dernier import.
 
+**Nom en double** : si une autre fiche du site porte le même nom que ton perso, un avertissement s'affiche sous ce perso. L'import du jeu relie les fiches par leur nom : tant que deux fiches portent le même, aucune des deux n'est mise à jour. Corrige l'orthographe, ou préviens un officier si quelqu'un a créé une fiche à ton nom (les officiers voient un badge « nom en double » dans Admin → Joueurs).
 
 ### Synchronisation automatique (application pour PC)
 
