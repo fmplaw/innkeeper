@@ -4,6 +4,10 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ## [Non publié]
 
+### Corrigé
+
+- Une candidature validée deux fois (double clic, deux officiers en même temps) créait deux persos à la recrue et deux annonces. La décision ne s'enregistre plus que si la candidature est encore en attente ; un refus ou un retrait arrivé après coup est sans effet.
+
 ## [0.13.0] - 2026-11-01
 
 ### Ajouté
