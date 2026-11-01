@@ -250,7 +250,7 @@ Ce que fait le bot :
 
 ### 3. Rôles et accès
 
-Admin → **Rôles Discord** :
+Admin → **Rôles Discord** (réservé à l'**admin local** : ces réglages décident qui est officier et qui entre sur le site) :
 
 - chaque rôle reçoit une permission : **Officier**, **Membre** ou **Aucune** (invités extérieurs, par exemple) ;
 - **mode d'accès** : tout membre du serveur, ou seulement les rôles désignés (conseillé dès que le serveur accueille des personnes extérieures à la guilde).

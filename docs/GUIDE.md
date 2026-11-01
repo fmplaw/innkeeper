@@ -54,6 +54,7 @@ Menu **Mes persos** → **Ajouter un perso**.
 - **⚠ pas trouvé en jeu** : aucun perso de ce nom dans la guilde. Vérifie l'orthographe du nom sur ta fiche ;
 - **« pas encore vérifié »** : la fiche a été créée après le dernier import.
 
+
 ### Synchronisation automatique (application pour PC)
 
 Mes persos → **Synchronisation automatique** : la petite application **InnkeeperSync**, sur ton PC, envoie au site les données de l'addon chaque fois que le jeu les enregistre (à la déconnexion ou après un `/reload`). Plus de fichier à déposer à la main.
@@ -196,7 +197,7 @@ L'addon n'envoie rien sur Internet ; il écrit seulement ce fichier. Il n'export
 ### Recrutement et rôles
 
 - Admin → **Recrutement** : rôle d'arrivée, salons des annonces et des invitations, questions aux candidats, délais.
-- Admin → **Rôles Discord** : permission de chaque rôle (Officier, Membre, Aucune) et mode d'accès au site.
+- Admin → **Rôles Discord** (admin local seulement) : permission de chaque rôle (Officier, Membre, Aucune) et mode d'accès au site. Un officier ne peut donc ni nommer d'autres officiers ni ouvrir le site : pour un nouveau rang, demande à la personne qui tient le compte admin local.
 - Admin → **Charte** : la charte et le règlement de la guilde, avec un aperçu en direct. Mise en forme : `# Titre`, `## Sous-titre`, `- élément de liste`, `**gras**`, `*italique*`, ligne vide entre les paragraphes. Sur la page, chaque `## Sous-titre` devient un encadré : regroupe par exemple les valeurs de la guilde sous un `# Titre`, une valeur par `##`. Une dernière ligne entièrement en gras, comme une devise, s'affiche en bandeau tout en bas. Une fois publiée, elle apparaît dans le menu de tous et les candidats doivent l'accepter pour postuler ; la candidature l'indique par une pastille verte « ✔ Charte acceptée le … » (orange si la charte a été modifiée depuis). La laisser vide la retire. Chaque modification est notée dans le journal.
 - Admin → **Addons** : la liste des addons conseillés, publiée sur la page Addons (visible de tous, même sans connexion ; le lien apparaît dans le menu dès qu'il y a un addon). Pour chacun : importance (Indispensable, Recommandé en raid, Recommandé, Utile, Confort), usage, public visé (classes, rôles ; rien de coché = tout le monde), une phrase sur ce qu'il fait et pourquoi la guilde le conseille, liens CurseForge, Wago ou autre. ▲▼ pour l'ordre dans chaque niveau. Un bouton ajoute **Innkeeper Sync** en un clic. Gardez peu d'indispensables : un nouveau doit voir l'essentiel d'un coup d'œil.
 - Admin → **Guilde** : **type de serveur** (JcJ, JcE, JdR ou Hardcore), affiché sur l'accueil et en bas de chaque page ; présentation, logo, bannière, ambitions, horaires, recrutement affiché sur l'accueil. La **faction** choisie donne aussi l'ambiance du site (fond chaud pour la Horde, bleu nuit pour l'Alliance, neutre pour une guilde mixte) ; la couleur d'accent reste au choix.

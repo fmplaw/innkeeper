@@ -4,6 +4,10 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ## [Non publié]
 
+### Sécurité
+
+- **Admin → Rôles Discord réservé à l'admin local** : un officier pouvait donner la permission Officier à n'importe quel rôle (y compris le sien ou celui d'un ami) ou ouvrir le site à tout le serveur Discord. La page, comme la connexion Discord, n'est plus accessible qu'au compte admin local.
+
 ## [0.13.1] - 2026-11-01
 
 ### Sécurité

@@ -15,8 +15,7 @@
 		{ href: '/admin/rosters', label: 'Rosters' },
 		{ href: '/admin/sorties', label: 'Sorties' },
 		{ href: '/admin/import', label: 'Import du jeu' },
-		{ href: '/admin/roles', label: 'Rôles Discord' },
-		...(data.admin ? [{ href: '/admin/discord', label: 'Connexion Discord' }, { href: '/admin/compte', label: 'Compte admin' }, { href: '/admin/journal', label: 'Journal' }] : [])
+		...(data.admin ? [{ href: '/admin/roles', label: 'Rôles Discord' }, { href: '/admin/discord', label: 'Connexion Discord' }, { href: '/admin/compte', label: 'Compte admin' }, { href: '/admin/journal', label: 'Journal' }] : [])
 	]);
 	const showNav = $derived(page.url.pathname !== '/admin/connexion' && (data.admin || data.user?.permission === 'officer'));
 </script>
