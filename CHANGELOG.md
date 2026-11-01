@@ -17,6 +17,7 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 ### Corrigé
 
 - Connexion Discord : la lecture du profil du joueur sur le serveur abandonne au bout de 10 secondes, comme les autres appels à Discord, au lieu d'attendre indéfiniment une réponse quand Discord est lent.
+- En-têtes de sécurité sur toutes les réponses du site : interdiction d'intégrer le site dans la page d'un autre (`X-Frame-Options`, `frame-ancestors`), ce qui empêche de piéger un officier par des clics détournés sur les actions d'admin ; pas de reniflage des types de fichiers (`nosniff`) pour les images envoyées ; adresse complète des pages non transmise aux sites externes (`Referrer-Policy`).
 
 ## [0.13.0] - 2026-11-01
 
