@@ -3,6 +3,8 @@
 
 	let { data, form } = $props();
 	const day = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium' });
+	const discordAdmins = $derived(data.discordAccounts.filter((a) => a.instanceAdmin));
+	const others = $derived(data.discordAccounts.filter((a) => !a.instanceAdmin));
 </script>
 
 <h1>Compte admin local</h1>
@@ -38,10 +40,11 @@
 
 {#if !data.mustChangePassword}
 	<section class="card admins">
-		<h2>Admins de l'instance</h2>
+		<h2>Comptes admin locaux</h2>
 		<p class="muted small">
 			Un admin a tous les droits, sans être officier : candidatures et votes, notes des officiers, journal, connexion
 			Discord et jeton du bot, clé Raid-Helper, rôles Discord. Chacun a son propre compte : le journal dit qui a fait quoi.
+			Les comptes locaux restent l'accès de secours si Discord ne répond plus.
 		</p>
 
 		<ul>
@@ -91,6 +94,47 @@
 			</div>
 			<button>Créer le compte</button>
 		</form>
+	</section>
+
+	<section class="card admins">
+		<h2>Admins Discord</h2>
+		<p class="muted small">
+			Un joueur désigné ici a les droits d'admin avec sa connexion Discord habituelle, même s'il n'est pas officier :
+			plus besoin du compte local au quotidien. Seul un compte admin local peut nommer ou retirer un admin Discord.
+		</p>
+		{#if discordAdmins.length}
+			<ul>
+				{#each discordAdmins as a (a.id)}
+					<li>
+						<span><strong>{a.displayName}</strong> <span class="muted small">@{a.username}</span></span>
+						<form method="POST" action="?/discordAdmin" use:enhance>
+							<input type="hidden" name="id" value={a.id} />
+							<input type="hidden" name="grant" value="0" />
+							<button class="danger small-button">Retirer</button>
+						</form>
+					</li>
+				{/each}
+			</ul>
+		{:else}
+			<p class="muted small">Aucun admin Discord pour l'instant.</p>
+		{/if}
+		{#if form?.discordError}<p class="error">{form.discordError}</p>{/if}
+		{#if form?.discordChanged}
+			<p class="ok-text">{form.discordChanged} {form.granted ? 'est maintenant admin de l’instance.' : 'n’est plus admin de l’instance.'}</p>
+		{/if}
+		{#if others.length}
+			<form method="POST" action="?/discordAdmin" class="row add" use:enhance>
+				<input type="hidden" name="grant" value="1" />
+				<div>
+					<label for="discord-admin">Nommer admin (comptes déjà connectés au site)</label>
+					<select id="discord-admin" name="id" required>
+						<option value="">Choisir un joueur…</option>
+						{#each others as a (a.id)}<option value={a.id}>{a.displayName} (@{a.username})</option>{/each}
+					</select>
+				</div>
+				<button>Nommer admin</button>
+			</form>
+		{/if}
 	</section>
 {/if}
 
@@ -154,7 +198,8 @@
 		align-items: flex-end;
 		gap: 0.75rem;
 	}
-	.add input {
+	.add input,
+	.add select {
 		width: auto;
 	}
 	.created {

@@ -18,7 +18,15 @@ export function requireOfficer(locals: App.Locals) {
 	if (user.permission !== 'officer') error(403, 'Réservé aux officiers');
 }
 
-/** Admin local uniquement (connexion Discord de l'instance). */
+/** Admin de l'instance : l'admin local, ou un compte Discord qu'il a désigné comme admin. */
+export const isInstanceAdmin = (locals: App.Locals) => Boolean(locals.admin || locals.user?.instanceAdmin);
+
+/** Réglages de l'instance (connexion Discord, rôles, journal…) : admin local ou admin Discord. */
+export function requireInstanceAdmin(locals: App.Locals) {
+	if (!isInstanceAdmin(locals)) redirect(303, '/admin/connexion');
+}
+
+/** Admin local uniquement : comptes admin, désignation des admins Discord, installation. */
 export function requireLocalAdmin(locals: App.Locals) {
 	if (!locals.admin) redirect(303, '/admin/connexion');
 	return locals.admin;

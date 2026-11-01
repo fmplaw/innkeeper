@@ -1,22 +1,22 @@
 import { fail } from '@sveltejs/kit';
 import { PERMISSIONS } from '$lib/server/db/schema';
 import { audit } from '$lib/server/audit';
-import { requireLocalAdmin } from '$lib/server/guards';
+import { requireInstanceAdmin } from '$lib/server/guards';
 import { listRoles, syncRolesFromBot, updateRole } from '$lib/server/permissions';
 import { accessSchema, getAccess, getDiscord, setAccess } from '$lib/server/settings';
 import type { Actions, PageServerLoad } from './$types';
 
-// Réservé à l'admin local : les permissions décident qui est officier et qui entre sur le site,
-// un officier ne doit pas pouvoir se donner des pairs ni ouvrir le site seul.
+// Réservé aux admins de l'instance : les permissions décident qui est officier et qui entre sur
+// le site, un officier ne doit pas pouvoir se donner des pairs ni ouvrir le site seul.
 export const load: PageServerLoad = ({ locals }) => {
-	requireLocalAdmin(locals);
+	requireInstanceAdmin(locals);
 	const discord = getDiscord();
 	return { roles: listRoles(), access: getAccess(), discordReady: Boolean(discord), hasBot: Boolean(discord?.botToken) };
 };
 
 export const actions: Actions = {
 	save: async ({ locals, request }) => {
-		requireLocalAdmin(locals);
+		requireInstanceAdmin(locals);
 		const form = await request.formData();
 		// Sans choix transmis (formulaire incomplet), le mode actuel est conservé.
 		const access = accessSchema.safeParse({ mode: form.get('access') ?? getAccess().mode });
@@ -40,7 +40,7 @@ export const actions: Actions = {
 		return { saved: true };
 	},
 	sync: async ({ locals }) => {
-		requireLocalAdmin(locals);
+		requireInstanceAdmin(locals);
 		try {
 			const synced = await syncRolesFromBot();
 			audit(locals, 'roles.sync', undefined, { roles: synced });

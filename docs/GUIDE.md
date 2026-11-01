@@ -198,7 +198,7 @@ L'addon n'envoie rien sur Internet ; il écrit seulement ce fichier. Il n'export
 ### Recrutement et rôles
 
 - Admin → **Recrutement** : rôle d'arrivée, salons des annonces et des invitations, questions aux candidats, délais.
-- Admin → **Rôles Discord** (admin local seulement) : permission de chaque rôle (Officier, Membre, Aucune) et mode d'accès au site. Un officier ne peut donc ni nommer d'autres officiers ni ouvrir le site : pour un nouveau rang, demande à la personne qui tient le compte admin local.
+- Admin → **Rôles Discord** (admins de l'instance seulement) : permission de chaque rôle (Officier, Membre, Aucune) et mode d'accès au site. Un officier ne peut donc ni nommer d'autres officiers ni ouvrir le site : pour un nouveau rang, demande à un admin de l'instance.
 - Admin → **Charte** : la charte et le règlement de la guilde, avec un aperçu en direct. Mise en forme : `# Titre`, `## Sous-titre`, `- élément de liste`, `**gras**`, `*italique*`, ligne vide entre les paragraphes. Sur la page, chaque `## Sous-titre` devient un encadré : regroupe par exemple les valeurs de la guilde sous un `# Titre`, une valeur par `##`. Une dernière ligne entièrement en gras, comme une devise, s'affiche en bandeau tout en bas. Une fois publiée, elle apparaît dans le menu de tous et les candidats doivent l'accepter pour postuler ; la candidature l'indique par une pastille verte « ✔ Charte acceptée le … » (orange si la charte a été modifiée depuis). La laisser vide la retire. Chaque modification est notée dans le journal.
 - Admin → **Addons** : la liste des addons conseillés, publiée sur la page Addons (visible de tous, même sans connexion ; le lien apparaît dans le menu dès qu'il y a un addon). Pour chacun : importance (Indispensable, Recommandé en raid, Recommandé, Utile, Confort), usage, public visé (classes, rôles ; rien de coché = tout le monde), une phrase sur ce qu'il fait et pourquoi la guilde le conseille, liens CurseForge, Wago ou autre. ▲▼ pour l'ordre dans chaque niveau. Un bouton ajoute **Innkeeper Sync** en un clic. Gardez peu d'indispensables : un nouveau doit voir l'essentiel d'un coup d'œil.
 - Admin → **Guilde** : **type de serveur** (JcJ, JcE, JdR ou Hardcore), affiché sur l'accueil et en bas de chaque page ; présentation, logo, bannière, ambitions, horaires, recrutement affiché sur l'accueil. La **faction** choisie donne aussi l'ambiance du site (fond chaud pour la Horde, bleu nuit pour l'Alliance, neutre pour une guilde mixte) ; la couleur d'accent reste au choix.
@@ -207,17 +207,19 @@ L'addon n'envoie rien sur Internet ; il écrit seulement ce fichier. Il n'export
 
 ## Pour l'admin du site
 
-Le compte **admin local** (créé à l'installation) gère ce qui touche à l'instance. Il peut y en avoir plusieurs (voir « Admins de l'instance » plus bas) :
+Les **admins de l'instance** gèrent ce qui touche à l'instance : le compte **admin local** (créé à l'installation, il peut y en avoir plusieurs) et les **admins Discord** qu'il désigne (voir plus bas) :
 
 - **Connexion Discord** : application, serveur, jeton et invitation du bot ;
 - **clé API Raid-Helper** (Admin → Sorties) ;
 - **Journal** : toutes les actions des officiers (fiches modifiées, décisions, sorties…), avec filtres, conservées un an ;
 - **Rôles Discord** : permissions des rôles et mode d'accès au site ;
-- **Compte admin** : changement de mot de passe, et admins de l'instance.
+- **Compte admin** (compte local seulement) : mot de passe, comptes admin locaux et admins Discord.
 
 Le compte admin local reste utilisable si Discord ne répond plus : `<adresse du site>/admin/connexion`.
 
-**Admins de l'instance** (Admin → Compte admin) : pour ne pas être seul à tenir le site, ajoute un autre admin. Choisis son identifiant : le site génère un **mot de passe provisoire**, affiché une seule fois, à lui transmettre par un moyen privé. À sa première connexion sur `/admin/connexion`, il doit le remplacer avant d'accéder au reste. Chacun a son compte, et le journal dit qui a fait quoi. Un admin a **tous les droits**, même s'il n'est pas officier (candidatures et votes, notes des officiers, journal, Discord, Raid-Helper, rôles) : préviens les officiers. On peut retirer un admin (ses sessions sont fermées aussitôt), jamais soi-même ni le dernier.
+**Admins Discord** (Admin → Compte admin, section « Admins Discord ») : le compte local nomme admin un joueur qui s'est déjà connecté au site. Ce joueur a alors les droits d'admin avec sa connexion Discord habituelle, même s'il n'est pas officier, sans passer par le compte local au quotidien : Connexion Discord, Rôles Discord, Journal, clé Raid-Helper, et tout ce que fait un officier. Seul un compte local nomme ou retire un admin Discord et gère les comptes locaux : si un compte Discord était piraté, il ne pourrait pas s'en prendre à l'accès de secours.
+
+**Comptes admin locaux** (Admin → Compte admin) : pour ne pas être seul à tenir le site, ajoute un autre admin. Choisis son identifiant : le site génère un **mot de passe provisoire**, affiché une seule fois, à lui transmettre par un moyen privé. À sa première connexion sur `/admin/connexion`, il doit le remplacer avant d'accéder au reste. Chacun a son compte, et le journal dit qui a fait quoi. Un admin a **tous les droits**, même s'il n'est pas officier (candidatures et votes, notes des officiers, journal, Discord, Raid-Helper, rôles) : préviens les officiers. On peut retirer un admin (ses sessions sont fermées aussitôt), jamais soi-même ni le dernier.
 
 ---
 

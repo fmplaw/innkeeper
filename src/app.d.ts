@@ -9,6 +9,8 @@ declare global {
 				displayName: string;
 				avatar: string | null;
 				permission: Permission;
+				// Admin de l'instance (désigné par l'admin local) : droits de l'admin local en plus.
+				instanceAdmin: boolean;
 			} | null;
 			// Connecté avec Discord sans être membre de la guilde : candidat potentiel.
 			candidate: { id: string; displayName: string; avatar: string | null } | null;

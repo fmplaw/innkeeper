@@ -15,7 +15,15 @@
 		{ href: '/admin/rosters', label: 'Rosters' },
 		{ href: '/admin/sorties', label: 'Sorties' },
 		{ href: '/admin/import', label: 'Import du jeu' },
-		...(data.admin ? [{ href: '/admin/roles', label: 'Rôles Discord' }, { href: '/admin/discord', label: 'Connexion Discord' }, { href: '/admin/compte', label: 'Compte admin' }, { href: '/admin/journal', label: 'Journal' }] : [])
+		...(data.instanceAdmin
+			? [
+					{ href: '/admin/roles', label: 'Rôles Discord' },
+					{ href: '/admin/discord', label: 'Connexion Discord' },
+					{ href: '/admin/journal', label: 'Journal' }
+				]
+			: []),
+		// Comptes admin et désignation des admins Discord : compte local seulement (accès de secours).
+		...(data.admin ? [{ href: '/admin/compte', label: 'Compte admin' }] : [])
 	]);
 	const showNav = $derived(page.url.pathname !== '/admin/connexion' && (data.admin || data.user?.permission === 'officer'));
 </script>

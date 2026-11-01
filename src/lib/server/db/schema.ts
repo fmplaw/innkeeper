@@ -32,6 +32,9 @@ export const users = sqliteTable('users', {
 	// Présent sur le serveur de guilde à la dernière lecture : sans lui, aucun accès au site,
 	// même en mode « tout membre du serveur » (une liste de rôles vide ne le dit pas).
 	inGuild: integer('in_guild', { mode: 'boolean' }).notNull().default(false),
+	// Admin de l'instance avec son compte Discord (désigné par l'admin local) : mêmes droits que
+	// l'admin local, sans avoir à s'y connecter ; le compte local reste l'accès de secours.
+	instanceAdmin: integer('instance_admin', { mode: 'boolean' }).notNull().default(false),
 	// Dernière lecture des rôles sur Discord (connexion, ou relecture par le bot).
 	rolesCheckedAt: integer('roles_checked_at', { mode: 'timestamp' }),
 	createdAt: timestamp('created_at'),

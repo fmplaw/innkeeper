@@ -6,10 +6,11 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ### Sécurité
 
-- **Admin → Rôles Discord réservé à l'admin local** : un officier pouvait donner la permission Officier à n'importe quel rôle (y compris le sien ou celui d'un ami) ou ouvrir le site à tout le serveur Discord. La page, comme la connexion Discord, n'est plus accessible qu'au compte admin local.
+- **Admin → Rôles Discord réservé aux admins de l'instance** : un officier pouvait donner la permission Officier à n'importe quel rôle (y compris le sien ou celui d'un ami) ou ouvrir le site à tout le serveur Discord. La page, comme la connexion Discord, n'est plus accessible qu'à l'admin local et aux admins Discord qu'il désigne.
 
 ### Ajouté
 
+- **Admins Discord** : depuis Admin → Compte admin, le compte admin local nomme admin de l'instance un joueur déjà connecté au site. Il a alors les droits d'admin (connexion Discord, rôles, journal, clé Raid-Helper, et tout ce que fait un officier) avec sa connexion Discord habituelle, même sans être officier. Le compte local reste l'accès de secours, et lui seul nomme ou retire les admins Discord et gère les comptes locaux. Nominations et retraits sont notés dans le journal.
 - **Plusieurs admins de l'instance** : Admin → Compte admin liste les comptes admin local et permet d'en ajouter un (mot de passe provisoire généré, affiché une seule fois, à changer avant d'accéder au reste de l'admin) ou d'en retirer un (jamais soi-même ni le dernier ; ses sessions sont fermées aussitôt). Ajouts et retraits sont notés dans le journal.
 - **Fiches du même nom signalées** : quand deux fiches portent le même nom de perso, l'import du jeu n'en met à jour aucune. Un avertissement l'explique désormais dans Mes persos et sur la page de modification du perso, et un badge « nom en double » apparaît dans Admin → Joueurs.
 

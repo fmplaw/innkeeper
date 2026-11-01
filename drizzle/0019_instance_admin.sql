@@ -1,0 +1,1 @@
+ALTER TABLE `users` ADD `instance_admin` integer DEFAULT false NOT NULL;

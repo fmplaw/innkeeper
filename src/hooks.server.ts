@@ -6,7 +6,7 @@ import { handle as authHandle } from './auth';
 import { db, schema } from '$lib/server/db';
 import { purgeAuditLog } from '$lib/server/audit';
 import { hasLocalAdmin, mustChangePasswordFirst, sessionAdmin, setupCode } from '$lib/server/local-admin';
-import { permissionFor, refreshMembership } from '$lib/server/permissions';
+import { refreshMembership, sitePermission } from '$lib/server/permissions';
 import { withSecurityHeaders } from '$lib/server/security-headers';
 import { getDiscord, isSetupComplete } from '$lib/server/settings';
 
@@ -54,9 +54,9 @@ const sessionHandle: Handle = async ({ event, resolve }) => {
 	if (discordId) {
 		await refreshMembership(discordId);
 		const user = db().select().from(schema.users).where(eq(schema.users.discordId, discordId)).get();
-		const permission = user && permissionFor(user);
+		const permission = user && sitePermission(user);
 		if (user && permission) {
-			event.locals.user = { id: user.discordId, displayName: user.displayName, avatar: user.avatar, permission };
+			event.locals.user = { id: user.discordId, displayName: user.displayName, avatar: user.avatar, permission, instanceAdmin: user.instanceAdmin };
 		} else if (user) {
 			// Connecté avec Discord mais pas membre : accès à sa candidature seulement.
 			event.locals.candidate = { id: user.discordId, displayName: user.displayName, avatar: user.avatar };

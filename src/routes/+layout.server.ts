@@ -14,6 +14,8 @@ export const load: LayoutServerLoad = ({ locals, url }) => {
 		user: locals.user,
 		candidate: locals.candidate,
 		admin: locals.admin,
+		// Admin local ou admin Discord : réglages de l'instance.
+		instanceAdmin: Boolean(locals.admin || locals.user?.instanceAdmin),
 		config: publicConfig(),
 		pendingApplications: officer ? pendingCount() : 0,
 		dueReviews: officer ? dueReviewCount() : 0,

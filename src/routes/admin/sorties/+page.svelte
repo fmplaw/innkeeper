@@ -38,7 +38,7 @@
 	<div class="grid">
 		<div>
 			<label for="apiKey">Clé API du serveur {data.hasKey ? '' : '*'}</label>
-			{#if data.admin}
+			{#if data.instanceAdmin}
 				<input id="apiKey" name="apiKey" type="password" autocomplete="off" placeholder={data.hasKey ? 'Inchangée (laisser vide)' : ''} />
 				<p class="hint muted">
 					Un administrateur du serveur Discord tape <code>/apikey</code> : Raid-Helper lui répond en privé. La clé est

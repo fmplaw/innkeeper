@@ -1,7 +1,7 @@
 import { and, desc, eq, gte, inArray, lt, type SQL } from 'drizzle-orm';
 import { AUDIT_ACTIONS, AUDIT_GROUPS } from '$lib/audit';
 import { db, schema } from '$lib/server/db';
-import { requireLocalAdmin } from '$lib/server/guards';
+import { requireInstanceAdmin } from '$lib/server/guards';
 import { getGuild } from '$lib/server/settings';
 import type { PageServerLoad } from './$types';
 
@@ -10,7 +10,7 @@ const PAGE_SIZE = 100;
 
 // Journal d'audit : réservé à l'admin de l'instance (requêtes, litiges entre officiers).
 export const load: PageServerLoad = ({ locals, url }) => {
-	requireLocalAdmin(locals);
+	requireInstanceAdmin(locals);
 
 	const filters = {
 		qui: url.searchParams.get('qui') ?? '',

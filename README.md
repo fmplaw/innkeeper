@@ -181,7 +181,7 @@ scripts/backup.mjs          sauvegarde à chaud de la base
    docker compose logs site
    ```
 4. Ouvre `<ORIGIN>/installation` et suis l'assistant :
-   - **compte admin local** : il configure l'instance et reste disponible en secours si Discord ne répond plus. D'autres admins peuvent être ajoutés ensuite (Admin → Compte admin, mot de passe provisoire à changer à la première connexion) ;
+   - **compte admin local** : il configure l'instance et reste disponible en secours si Discord ne répond plus. D'autres admins peuvent être ajoutés ensuite (Admin → Compte admin) : comptes locaux (mot de passe provisoire à changer à la première connexion) ou **admins Discord**, des joueurs déjà connectés qui ont alors les droits d'admin avec leur connexion Discord, le compte local restant l'accès de secours ;
    - **application Discord** : voir [Configuration Discord](#configuration-discord) ;
    - **profil de guilde** : nom, faction, type de serveur, logo, bannière, couleur, présentation, ambitions, horaires, recrutement.
 
@@ -250,7 +250,7 @@ Ce que fait le bot :
 
 ### 3. Rôles et accès
 
-Admin → **Rôles Discord** (réservé à l'**admin local** : ces réglages décident qui est officier et qui entre sur le site) :
+Admin → **Rôles Discord** (réservé aux **admins de l'instance** : ces réglages décident qui est officier et qui entre sur le site) :
 
 - chaque rôle reçoit une permission : **Officier**, **Membre** ou **Aucune** (invités extérieurs, par exemple) ;
 - **mode d'accès** : tout membre du serveur, ou seulement les rôles désignés (conseillé dès que le serveur accueille des personnes extérieures à la guilde).
@@ -272,7 +272,7 @@ Les événements Raid-Helper du serveur sont lisibles sans clé : composition pa
 ### Clé API (création, inscription, modification)
 
 1. Un administrateur du serveur tape `/apikey` dans Discord : Raid-Helper répond en privé. Ne colle jamais cette clé dans un salon.
-2. Admin → **Sorties** (connecté en admin local) : colle la clé, elle est vérifiée avant d'être enregistrée.
+2. Admin → **Sorties** (connecté en admin de l'instance) : colle la clé, elle est vérifiée avant d'être enregistrée.
 3. Choisis le **salon des sorties officielles** et le **salon des sorties des membres**.
 
 ### Salons de sorties conseillés
@@ -347,8 +347,8 @@ Un addon WoW n'a aucun accès au réseau, et le jeu n'écrit son fichier qu'à l
 
 - **Aucun mot de passe Discord** ne transite par le site (OAuth officiel).
 - **Admin local** : mot de passe haché (scrypt), cookie de session signé, 10 tentatives de connexion par adresse.
-- **Secrets** (clé Discord, jeton du bot, clé Raid-Helper, secret des sessions) stockés en base, jamais renvoyés au navigateur ; la clé Raid-Helper n'est modifiable que par l'admin local.
-- **Journal des actions** des officiers (Admin → Journal, réservé à l'admin local), conservé un an.
+- **Secrets** (clé Discord, jeton du bot, clé Raid-Helper, secret des sessions) stockés en base, jamais renvoyés au navigateur ; la clé Raid-Helper n'est modifiable que par un admin de l'instance.
+- **Journal des actions** des officiers (Admin → Journal, réservé aux admins de l'instance), conservé un an.
 - **Visibilité** : notes des fiches et suivi des nouveaux membres réservés aux officiers ; candidats limités à leur propre candidature.
 - **Cookies** : seulement ceux de session ; aucun pistage ni publicité. Détail public sur `/confidentialite`.
 

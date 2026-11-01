@@ -29,7 +29,7 @@ export function horde() {
  * Les fonctions ajoutées par Auth.js (auth, signIn…) ne servent pas au code testé.
  */
 export const asMember = (id: string, permission: 'member' | 'officer' = 'member') =>
-	({ user: { id, displayName: `Joueur ${id}`, avatar: null, permission }, candidate: null, admin: null }) as unknown as App.Locals;
+	({ user: { id, displayName: `Joueur ${id}`, avatar: null, permission, instanceAdmin: false }, candidate: null, admin: null }) as unknown as App.Locals;
 export const asAdmin = () => ({ user: null, candidate: null, admin: { id: 1, username: 'admin', mustChangePassword: false } }) as unknown as App.Locals;
 
 /** Perso valide pour un orc chaman restauration, à surcharger au besoin. */

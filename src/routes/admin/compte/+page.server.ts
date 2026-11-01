@@ -1,12 +1,13 @@
 import { fail } from '@sveltejs/kit';
 import { addLocalAdmin, listLocalAdmins, login, openSession, removeLocalAdmin, setLocalAdminPassword } from '$lib/server/local-admin';
 import { audit } from '$lib/server/audit';
+import { discordAccounts, setInstanceAdmin } from '$lib/server/permissions';
 import { requireLocalAdmin } from '$lib/server/guards';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = ({ locals }) => {
 	const admin = requireLocalAdmin(locals);
-	return { username: admin.username, adminId: admin.id, mustChangePassword: admin.mustChangePassword, admins: listLocalAdmins() };
+	return { username: admin.username, adminId: admin.id, mustChangePassword: admin.mustChangePassword, admins: listLocalAdmins(), discordAccounts: discordAccounts() };
 };
 
 export const actions: Actions = {
@@ -43,5 +44,16 @@ export const actions: Actions = {
 		if ('error' in result) return fail(400, { removeError: result.error });
 		audit(locals, 'admin.remove', { label: result.removed.username });
 		return { removed: result.removed.username };
+	},
+	// Admins Discord : désignés par le compte local seulement, pour qu'un compte Discord piraté
+	// ne puisse ni nommer d'autres admins ni toucher à l'accès de secours.
+	discordAdmin: async ({ locals, request }) => {
+		requireLocalAdmin(locals);
+		const form = await request.formData();
+		const grant = form.get('grant') === '1';
+		const account = setInstanceAdmin(String(form.get('id') ?? ''), grant);
+		if (!account) return fail(400, { discordError: 'Compte Discord inconnu : il doit s’être connecté au site au moins une fois.' });
+		audit(locals, grant ? 'admin.discord-add' : 'admin.discord-remove', { label: account.displayName });
+		return { discordChanged: account.displayName, granted: grant };
 	}
 };

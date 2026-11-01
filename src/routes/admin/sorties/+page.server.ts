@@ -4,7 +4,7 @@ import { INSTANCES } from '$lib/game/forever';
 import { removeActivityImage, saveActivityImage } from '$lib/server/activity-images';
 import { audit, diff } from '$lib/server/audit';
 import { BotError, botReady, textChannels } from '$lib/server/bot';
-import { requireOfficer } from '$lib/server/guards';
+import { isInstanceAdmin, requireOfficer } from '$lib/server/guards';
 import { createTemplate, deleteTemplate, getTemplate, listTemplates, templateSchema, updateTemplate } from '$lib/server/outings';
 import { verifyApiKey } from '$lib/server/raidhelper';
 import { listRosters } from '$lib/server/rosters';
@@ -63,7 +63,7 @@ export const actions: Actions = {
 		const form = await request.formData();
 		const current = getRaidHelper();
 		const newKey = String(form.get('apiKey') ?? '').trim();
-		if ((newKey || form.has('removeKey')) && !locals.admin) return fail(403, { error: 'Seul l’admin d’instance peut changer la clé API.' });
+		if ((newKey || form.has('removeKey')) && !isInstanceAdmin(locals)) return fail(403, { error: 'Seul l’admin d’instance peut changer la clé API.' });
 		const parsed = raidHelperSchema.safeParse({
 			apiKey: form.has('removeKey') ? null : newKey || current.apiKey,
 			defaultChannelId: form.get('defaultChannelId') ?? '',

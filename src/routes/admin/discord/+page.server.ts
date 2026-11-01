@@ -2,13 +2,13 @@ import { fail } from '@sveltejs/kit';
 import { botGuild, botInviteUrl } from '$lib/server/discord';
 import { discordFormValues, parseDiscordForm } from '$lib/server/discord-form';
 import { audit } from '$lib/server/audit';
-import { requireLocalAdmin } from '$lib/server/guards';
+import { requireInstanceAdmin } from '$lib/server/guards';
 import { syncRolesFromBot } from '$lib/server/permissions';
 import { getDiscord, getGuild, setDiscord } from '$lib/server/settings';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals, url }) => {
-	requireLocalAdmin(locals);
+	requireInstanceAdmin(locals);
 	const discord = getDiscord();
 	return {
 		values: discordFormValues(discord),
@@ -25,7 +25,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 
 export const actions: Actions = {
 	save: async ({ locals, request }) => {
-		requireLocalAdmin(locals);
+		requireInstanceAdmin(locals);
 		const before = getDiscord();
 		const parsed = await parseDiscordForm(await request.formData(), before);
 		if (!parsed.data) return fail(400, { errors: parsed.errors, values: parsed.values });

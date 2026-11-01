@@ -31,6 +31,10 @@ export function permissionFor({ roles, inGuild }: { roles: string[]; inGuild: bo
 	return getAccess().mode === 'all-members' ? 'member' : null;
 }
 
+/** Permission sur le site d'un compte : un admin de l'instance a tous les droits d'un officier, quels que soient ses rôles. */
+export const sitePermission = (user: { roles: string[]; inGuild: boolean; instanceAdmin: boolean }): Permission | null =>
+	user.instanceAdmin ? 'officer' : permissionFor(user);
+
 /**
  * Connexion Discord : met à jour le joueur avec son profil et sa situation sur le serveur
  * (`member` : réponse de Discord, `null` s'il n'est pas sur le serveur de la guilde).
@@ -140,4 +144,21 @@ export async function syncRolesFromBot() {
 	}
 	rolePermissions = null;
 	return count;
+}
+
+/**
+ * Comptes Discord du site, pour désigner les admins de l'instance : ceux qui le sont déjà
+ * d'abord, puis par nom. Seul un compte qui s'est déjà connecté peut être choisi.
+ */
+export function discordAccounts() {
+	return db()
+		.select({ id: schema.users.discordId, displayName: schema.users.displayName, username: schema.users.discordUsername, instanceAdmin: schema.users.instanceAdmin })
+		.from(schema.users)
+		.all()
+		.sort((a, b) => Number(b.instanceAdmin) - Number(a.instanceAdmin) || a.displayName.localeCompare(b.displayName, 'fr'));
+}
+
+/** Désigne ou retire un admin Discord de l'instance ; renvoie le compte, ou null s'il est inconnu. */
+export function setInstanceAdmin(discordId: string, instanceAdmin: boolean) {
+	return db().update(schema.users).set({ instanceAdmin }).where(eq(schema.users.discordId, discordId)).returning({ displayName: schema.users.displayName }).get() ?? null;
 }
