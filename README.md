@@ -181,7 +181,7 @@ scripts/backup.mjs          sauvegarde à chaud de la base
    docker compose logs site
    ```
 4. Ouvre `<ORIGIN>/installation` et suis l'assistant :
-   - **compte admin local** : il configure l'instance et reste disponible en secours si Discord ne répond plus ;
+   - **compte admin local** : il configure l'instance et reste disponible en secours si Discord ne répond plus. D'autres admins peuvent être ajoutés ensuite (Admin → Compte admin, mot de passe provisoire à changer à la première connexion) ;
    - **application Discord** : voir [Configuration Discord](#configuration-discord) ;
    - **profil de guilde** : nom, faction, type de serveur, logo, bannière, couleur, présentation, ambitions, horaires, recrutement.
 

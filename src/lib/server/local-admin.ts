@@ -4,7 +4,8 @@ import { eq } from 'drizzle-orm';
 import { db, schema } from './db';
 import { getAuthSecret } from './settings';
 
-// Compte admin local d'instance : installation et accès de secours, hors Discord.
+// Comptes admin local d'instance : installation et accès de secours, hors Discord. Le premier
+// est créé par l'assistant d'installation ; un admin peut en ajouter d'autres (Compte admin).
 
 const COOKIE = 'admin_session';
 const SESSION_TTL_S = 12 * 3600;
@@ -35,7 +36,54 @@ export function createLocalAdmin(username: string, password: string) {
 }
 
 export function setLocalAdminPassword(id: number, password: string) {
-	db().update(schema.localAdmins).set({ passwordHash: hashPassword(password) }).where(eq(schema.localAdmins.id, id)).run();
+	db().update(schema.localAdmins).set({ passwordHash: hashPassword(password), mustChangePassword: false }).where(eq(schema.localAdmins.id, id)).run();
+}
+
+// Pages ouvertes à un admin qui n'a pas encore remplacé son mot de passe provisoire.
+const PASSWORD_CHANGE_OPEN = ['/admin/compte', '/admin/connexion', '/healthz', '/logo', '/banniere'];
+
+/** Admin ajouté avec un mot de passe provisoire : il le change avant de pouvoir agir ailleurs. */
+export const mustChangePasswordFirst = (admin: { mustChangePassword: boolean } | null, path: string) =>
+	Boolean(admin?.mustChangePassword) && !PASSWORD_CHANGE_OPEN.some((p) => path === p || path.startsWith(`${p}/`));
+
+export const USERNAME_PATTERN = /^[a-zA-Z0-9._-]{3,32}$/;
+export const USERNAME_HINT = '3 à 32 caractères : lettres, chiffres, point, tiret, tiret bas.';
+
+export function listLocalAdmins() {
+	return db()
+		.select({ id: schema.localAdmins.id, username: schema.localAdmins.username, createdBy: schema.localAdmins.createdBy, createdAt: schema.localAdmins.createdAt, mustChangePassword: schema.localAdmins.mustChangePassword })
+		.from(schema.localAdmins)
+		.orderBy(schema.localAdmins.id)
+		.all();
+}
+
+/**
+ * Ajout d'un admin par un autre : mot de passe provisoire généré, à transmettre une seule fois,
+ * que le nouvel admin doit changer avant de pouvoir faire quoi que ce soit.
+ */
+export function addLocalAdmin(username: string, createdBy: string) {
+	if (!USERNAME_PATTERN.test(username)) return { error: USERNAME_HINT } as const;
+	const taken = db().select({ id: schema.localAdmins.id }).from(schema.localAdmins).where(eq(schema.localAdmins.username, username)).get();
+	if (taken) return { error: 'Cet identifiant est déjà pris.' } as const;
+	const password = randomBytes(15).toString('base64url');
+	const admin = db()
+		.insert(schema.localAdmins)
+		.values({ username, passwordHash: hashPassword(password), mustChangePassword: true, createdBy })
+		.returning()
+		.get();
+	return { admin, password } as const;
+}
+
+/** Retire un admin ; jamais soi-même ni le dernier (l'instance resterait sans accès de secours). */
+export function removeLocalAdmin(id: number, by: { id: number }) {
+	if (id === by.id) return { error: 'Tu ne peux pas retirer ton propre compte.' } as const;
+	const admins = listLocalAdmins();
+	const target = admins.find((a) => a.id === id);
+	if (!target) return { error: 'Compte introuvable.' } as const;
+	if (admins.length <= 1) return { error: 'Il faut garder au moins un admin.' } as const;
+	// Ses sessions tombent avec lui : sessionAdmin ne trouve plus le compte.
+	db().delete(schema.localAdmins).where(eq(schema.localAdmins.id, id)).run();
+	return { removed: target } as const;
 }
 
 // Le hash du mot de passe entre dans la signature : changer le mot de passe
@@ -69,7 +117,7 @@ export function sessionAdmin(cookies: Cookies) {
 	const expected = Buffer.from(sign(id, exp, admin.passwordHash));
 	const given = Buffer.from(sig);
 	if (expected.length !== given.length || !timingSafeEqual(expected, given)) return null;
-	return { id: admin.id, username: admin.username };
+	return { id: admin.id, username: admin.username, mustChangePassword: admin.mustChangePassword };
 }
 
 // Limite de tentatives par adresse : 10 essais par quart d'heure.

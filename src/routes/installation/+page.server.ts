@@ -4,7 +4,9 @@ import {
 	consumeSetupCode,
 	createLocalAdmin,
 	hasLocalAdmin,
-	openSession
+	openSession,
+	USERNAME_HINT,
+	USERNAME_PATTERN
 } from '$lib/server/local-admin';
 import { auditLogin } from '$lib/server/audit';
 import { isSetupComplete } from '$lib/server/settings';
@@ -27,8 +29,7 @@ export const actions: Actions = {
 			fail(400, { values, errors: { [field]: message } as Record<string, string> });
 
 		if (!checkSetupCode(code)) return invalid('code', 'Code incorrect : copie-le depuis les logs du conteneur.');
-		if (!/^[a-zA-Z0-9._-]{3,32}$/.test(username))
-			return invalid('username', '3 à 32 caractères : lettres, chiffres, point, tiret, tiret bas.');
+		if (!USERNAME_PATTERN.test(username)) return invalid('username', USERNAME_HINT);
 		if (password.length < 12) return invalid('password', '12 caractères minimum.');
 		if (password !== form.get('confirm')) return invalid('confirm', 'Les deux mots de passe diffèrent.');
 

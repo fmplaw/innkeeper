@@ -99,6 +99,10 @@ export const localAdmins = sqliteTable('local_admins', {
 	id: integer('id').primaryKey({ autoIncrement: true }),
 	username: text('username').notNull().unique(),
 	passwordHash: text('password_hash').notNull(),
+	// Compte ajouté par un autre admin avec un mot de passe provisoire : à changer avant tout.
+	mustChangePassword: integer('must_change_password', { mode: 'boolean' }).notNull().default(false),
+	// Admin qui a ajouté ce compte (null pour celui de l'installation).
+	createdBy: text('created_by'),
 	createdAt: timestamp('created_at')
 });
 

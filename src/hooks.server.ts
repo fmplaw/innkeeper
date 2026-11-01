@@ -5,7 +5,7 @@ import { env } from '$env/dynamic/private';
 import { handle as authHandle } from './auth';
 import { db, schema } from '$lib/server/db';
 import { purgeAuditLog } from '$lib/server/audit';
-import { hasLocalAdmin, sessionAdmin, setupCode } from '$lib/server/local-admin';
+import { hasLocalAdmin, mustChangePasswordFirst, sessionAdmin, setupCode } from '$lib/server/local-admin';
 import { permissionFor, refreshMembership } from '$lib/server/permissions';
 import { withSecurityHeaders } from '$lib/server/security-headers';
 import { getDiscord, isSetupComplete } from '$lib/server/settings';
@@ -48,6 +48,7 @@ const sessionHandle: Handle = async ({ event, resolve }) => {
 	event.locals.user = null;
 	event.locals.candidate = null;
 	event.locals.admin = sessionAdmin(event.cookies);
+	if (mustChangePasswordFirst(event.locals.admin, event.url.pathname)) redirect(303, '/admin/compte');
 
 	const discordId = (await event.locals.auth())?.user?.id;
 	if (discordId) {

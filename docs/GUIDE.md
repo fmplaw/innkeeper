@@ -207,14 +207,17 @@ L'addon n'envoie rien sur Internet ; il écrit seulement ce fichier. Il n'export
 
 ## Pour l'admin du site
 
-Le compte **admin local** (créé à l'installation) gère ce qui touche à l'instance :
+Le compte **admin local** (créé à l'installation) gère ce qui touche à l'instance. Il peut y en avoir plusieurs (voir « Admins de l'instance » plus bas) :
 
 - **Connexion Discord** : application, serveur, jeton et invitation du bot ;
 - **clé API Raid-Helper** (Admin → Sorties) ;
 - **Journal** : toutes les actions des officiers (fiches modifiées, décisions, sorties…), avec filtres, conservées un an ;
-- **Compte admin** : changement de mot de passe.
+- **Rôles Discord** : permissions des rôles et mode d'accès au site ;
+- **Compte admin** : changement de mot de passe, et admins de l'instance.
 
 Le compte admin local reste utilisable si Discord ne répond plus : `<adresse du site>/admin/connexion`.
+
+**Admins de l'instance** (Admin → Compte admin) : pour ne pas être seul à tenir le site, ajoute un autre admin. Choisis son identifiant : le site génère un **mot de passe provisoire**, affiché une seule fois, à lui transmettre par un moyen privé. À sa première connexion sur `/admin/connexion`, il doit le remplacer avant d'accéder au reste. Chacun a son compte, et le journal dit qui a fait quoi. Un admin a **tous les droits**, même s'il n'est pas officier (candidatures et votes, notes des officiers, journal, Discord, Raid-Helper, rôles) : préviens les officiers. On peut retirer un admin (ses sessions sont fermées aussitôt), jamais soi-même ni le dernier.
 
 ---
 

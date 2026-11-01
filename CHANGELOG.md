@@ -10,6 +10,7 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ### Ajouté
 
+- **Plusieurs admins de l'instance** : Admin → Compte admin liste les comptes admin local et permet d'en ajouter un (mot de passe provisoire généré, affiché une seule fois, à changer avant d'accéder au reste de l'admin) ou d'en retirer un (jamais soi-même ni le dernier ; ses sessions sont fermées aussitôt). Ajouts et retraits sont notés dans le journal.
 - **Fiches du même nom signalées** : quand deux fiches portent le même nom de perso, l'import du jeu n'en met à jour aucune. Un avertissement l'explique désormais dans Mes persos et sur la page de modification du perso, et un badge « nom en double » apparaît dans Admin → Joueurs.
 
 ### Corrigé

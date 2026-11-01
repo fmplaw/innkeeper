@@ -40,7 +40,9 @@ export const AUDIT_ACTIONS = {
 	'admin.create': { group: 'Admin local', label: 'a créé le compte admin local' },
 	'admin.login': { group: 'Admin local', label: "s'est connecté en admin local" },
 	'admin.login-failed': { group: 'Admin local', label: 'Échec de connexion admin' },
-	'admin.password': { group: 'Admin local', label: 'a changé le mot de passe admin' }
+	'admin.password': { group: 'Admin local', label: 'a changé le mot de passe admin' },
+	'admin.add': { group: 'Admin local', label: 'a ajouté un admin' },
+	'admin.remove': { group: 'Admin local', label: 'a retiré un admin' }
 } as const;
 
 export type AuditAction = keyof typeof AUDIT_ACTIONS;

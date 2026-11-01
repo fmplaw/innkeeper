@@ -13,7 +13,7 @@ declare global {
 			// Connecté avec Discord sans être membre de la guilde : candidat potentiel.
 			candidate: { id: string; displayName: string; avatar: string | null } | null;
 			// Admin local d'instance (hors Discord).
-			admin: { id: number; username: string } | null;
+			admin: { id: number; username: string; mustChangePassword: boolean } | null;
 		}
 	}
 }
