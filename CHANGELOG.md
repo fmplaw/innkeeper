@@ -4,6 +4,10 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ## [Non publié]
 
+### Corrigé
+
+- Mémoire du serveur : le cache des événements Raid-Helper (500 au plus), la liste des messages Discord écartés (5 000 au plus) et les tentatives de connexion admin (adresses expirées oubliées) ne grossissent plus sans limite. Il suffisait d'ouvrir `/sorties/<identifiant>` avec des identifiants inventés pour faire grossir le processus.
+
 ## [0.13.0] - 2026-11-01
 
 ### Ajouté
