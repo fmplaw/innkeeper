@@ -41,6 +41,9 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 ### Corrigé
 
 - Addon InnkeeperSync 1.2.1 : l'export repart de zéro à chaque connexion d'un perso. Si Forever relit les SavedVariables (ce que la bêta ne faisait pas), les recettes d'un autre perso du même compte étaient attribuées au perso connecté, et un perso hors guilde renvoyait le registre de la guilde d'un autre.
+### Corrigé
+
+- Import du jeu : un export plus ancien que les données d'une fiche ne les remplace plus (niveau qui redescend, métiers et dernière connexion d'avant). C'était le cas avec deux comptes WoW sur le même PC, dont InnkeeperSync renvoie les deux fichiers à chaque démarrage, ou quand l'export d'un officier arrivait après celui, plus récent, d'un membre. L'aperçu de l'import liste les fiches ignorées pour cette raison, et un registre plus ancien ne déplace plus la référence « vu en jeu ».
 
 ## [0.13.0] - 2026-11-01
 

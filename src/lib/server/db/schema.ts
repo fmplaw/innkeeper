@@ -75,6 +75,8 @@ export const characters = sqliteTable(
 		lastOnlineAt: integer('last_online_at', { mode: 'timestamp' }),
 		knownRecipes: text('known_recipes', { mode: 'json' }).$type<KnownRecipes[]>(),
 		gameSyncedAt: integer('game_synced_at', { mode: 'timestamp' }),
+		// Date de l'export (côté jeu) qui a fourni ces données : un export plus ancien ne les remplace pas.
+		gameExportedAt: integer('game_exported_at', { mode: 'timestamp' }),
 		createdAt: timestamp('created_at'),
 		updatedAt: timestamp('updated_at')
 	},
