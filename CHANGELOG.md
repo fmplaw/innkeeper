@@ -4,6 +4,10 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ## [Non publié]
 
+### Corrigé
+
+- Sorties : une sortie commencée ou passée n'accepte plus d'inscription ni de désinscription depuis le site. Le formulaire était déjà masqué, mais l'envoi direct du formulaire passait encore et modifiait la liste dans Raid-Helper après coup.
+
 ## [0.13.0] - 2026-11-01
 
 ### Ajouté
