@@ -4,6 +4,10 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ## [Non publié]
 
+### Corrigé
+
+- Import du jeu : un export plus ancien que les données d'une fiche ne les remplace plus (niveau qui redescend, métiers et dernière connexion d'avant). C'était le cas avec deux comptes WoW sur le même PC, dont InnkeeperSync renvoie les deux fichiers à chaque démarrage, ou quand l'export d'un officier arrivait après celui, plus récent, d'un membre. L'aperçu de l'import liste les fiches ignorées pour cette raison, et un registre plus ancien ne déplace plus la référence « vu en jeu ».
+
 ## [0.13.0] - 2026-11-01
 
 ### Ajouté
