@@ -26,10 +26,18 @@ async function call(path: string, init: RequestInit = {}) {
 
 export const botReady = () => Boolean(getDiscord()?.botToken);
 
+// Code d'erreur Discord « Unknown Guild » : le bot ne voit pas le serveur (mauvais identifiant…).
+const UNKNOWN_GUILD = 10004;
+
 /** Membre du serveur de la guilde, ou null s'il n'y est pas. */
 export async function guildMember(userId: string) {
 	const res = await call(`/guilds/${config().guildId}/members/${userId}`);
-	if (res.status === 404) return null;
+	if (res.status === 404) {
+		// Serveur introuvable : ce n'est pas le membre qui manque, on ne conclut rien.
+		const body = (await res.json().catch(() => null)) as { code?: number } | null;
+		if (body?.code === UNKNOWN_GUILD) throw new BotError('Le bot ne trouve pas le serveur de la guilde.');
+		return null;
+	}
 	if (!res.ok) throw new BotError(`Discord a répondu ${res.status}`);
 	return (await res.json()) as { roles: string[]; nick: string | null };
 }

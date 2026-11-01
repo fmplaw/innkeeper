@@ -6,7 +6,7 @@ import { handle as authHandle } from './auth';
 import { db, schema } from '$lib/server/db';
 import { purgeAuditLog } from '$lib/server/audit';
 import { hasLocalAdmin, sessionAdmin, setupCode } from '$lib/server/local-admin';
-import { permissionFor } from '$lib/server/permissions';
+import { permissionFor, refreshMembership } from '$lib/server/permissions';
 import { getDiscord, isSetupComplete } from '$lib/server/settings';
 
 export const init: ServerInit = () => {
@@ -38,7 +38,8 @@ const discordAuth: Handle = ({ event, resolve }) => {
 };
 
 // Charge l'utilisateur Discord et l'admin local de la session. La permission est
-// recalculée à chaque requête pour qu'un changement de rôles s'applique sans reconnexion.
+// recalculée à chaque requête, et les rôles relus par le bot toutes les 10 minutes, pour qu'un
+// changement de rôles ou une exclusion s'applique sans reconnexion.
 const sessionHandle: Handle = async ({ event, resolve }) => {
 	event.locals.user = null;
 	event.locals.candidate = null;
@@ -46,6 +47,7 @@ const sessionHandle: Handle = async ({ event, resolve }) => {
 
 	const discordId = (await event.locals.auth())?.user?.id;
 	if (discordId) {
+		await refreshMembership(discordId);
 		const user = db().select().from(schema.users).where(eq(schema.users.discordId, discordId)).get();
 		const permission = user && permissionFor(user);
 		if (user && permission) {
