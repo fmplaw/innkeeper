@@ -99,6 +99,13 @@
       "when": 1793452300221,
       "tag": "0013_sync_tokens",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "6",
+      "when": 1793536606714,
+      "tag": "0014_addons",
+      "breakpoints": true
     }
   ]
 }

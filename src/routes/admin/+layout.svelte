@@ -11,6 +11,7 @@
 		{ href: '/admin/recrutement', label: 'Recrutement' },
 		{ href: '/admin/guilde', label: 'Guilde' },
 		{ href: '/admin/charte', label: 'Charte' },
+		{ href: '/admin/addons', label: 'Addons' },
 		{ href: '/admin/rosters', label: 'Rosters' },
 		{ href: '/admin/sorties', label: 'Sorties' },
 		{ href: '/admin/import', label: 'Import du jeu' },

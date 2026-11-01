@@ -6,6 +6,7 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ### Ajouté
 
+- **Page Addons** : les addons conseillés par la guilde, gérés dans Admin → Addons (statut : indispensable, recommandé en raid, recommandé, utile, confort ; usage ; public visé par classe ou rôle ; « pourquoi » ; liens CurseForge, Wago ou autre ; ordre). Page en tableau, visible de tous, lien dans le menu dès qu'un addon est publié ; filtres par recherche, statut, usage et « Pour mon main ». Innkeeper Sync s'ajoute en un clic. Chaque changement est noté dans le journal.
 - **Publication de l'addon** sur CurseForge, Wago Addons et WoWInterface : versions et tags propres (`InnkeeperSync-v1.2.0`), workflow `addon.yml` avec le BigWigs Packager. Addon 1.2.0 : fichier TOC propre à Forever (`InnkeeperSync_Camelot.toc`), description anglaise avec traduction française.
 
 ## [0.12.2] - 2026-11-01

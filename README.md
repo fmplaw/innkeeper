@@ -22,6 +22,7 @@
 - **Roster** filtrable et triable, répartition par classe et par rôle, **rosters** composés par les officiers (équipe de raid, PvP…).
 - **Sorties** pilotées dans [Raid-Helper](https://raid-helper.dev) : création depuis le site (officielles et proposées par les membres), inscription depuis le site, composition, comparaison avec un roster, banc.
 - **Charte et règlement** rédigés dans l'admin, publiés pour tous et à accepter pour postuler.
+- **Addons conseillés** par la guilde : indispensables, requis en raid, recommandés, confort, avec le public visé (classes, rôles) et les liens CurseForge et Wago.
 - **Recrutement** : candidature en ligne, avis des officiers, entrée sur le serveur Discord et rôle d'arrivée posés par le bot, suivi des nouveaux membres.
 - **Import des données du jeu** par un addon, à la main ou automatiquement avec l'application InnkeeperSync pour PC (registre de guilde, métiers, recettes, dernière connexion).
 - **Statistiques pour les officiers** : composition par classe et par rôle face au recrutement, métiers et meilleurs artisans, niveaux, intérêts, activité, fiches à compléter.

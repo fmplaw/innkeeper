@@ -1,6 +1,7 @@
 import { sql } from 'drizzle-orm';
 import { index, integer, primaryKey, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
-import { ROLES } from '../../roles';
+import { ROLES, type Role } from '../../roles';
+import { ADDON_IMPORTANCES, ADDON_USAGES } from '../../addons';
 import { INTEREST_LEVELS } from '../../interests';
 
 /** Métier d'un perso : niveau de 1 à 300, ou null s'il n'est pas renseigné. */
@@ -237,6 +238,25 @@ export const auditLog = sqliteTable(
 	(t) => [index('audit_log_at_idx').on(t.at)]
 );
 
+// Addons conseillés par la guilde (page « Addons », gérée par les officiers).
+export const addons = sqliteTable('addons', {
+	id: integer('id').primaryKey({ autoIncrement: true }),
+	name: text('name').notNull(),
+	importance: text('importance', { enum: ADDON_IMPORTANCES }).notNull(),
+	usage: text('usage', { enum: ADDON_USAGES }).notNull(),
+	// Public visé : vide = tout le monde.
+	classes: text('classes', { mode: 'json' }).$type<string[]>().notNull().default([]),
+	roles: text('roles', { mode: 'json' }).$type<Role[]>().notNull().default([]),
+	description: text('description'),
+	curseforgeUrl: text('curseforge_url'),
+	wagoUrl: text('wago_url'),
+	otherUrl: text('other_url'),
+	// Ordre d'affichage dans son niveau d'importance.
+	position: integer('position').notNull().default(0),
+	createdAt: timestamp('created_at'),
+	updatedAt: timestamp('updated_at')
+});
+
 // Clés du programme InnkeeperSync (synchronisation automatique depuis le PC du joueur).
 // Seule l'empreinte SHA-256 de la clé est gardée : elle n'est montrée qu'une fois, à la création.
 export const syncTokens = sqliteTable(
@@ -259,6 +279,7 @@ export const syncTokens = sqliteTable(
 );
 
 export type User = typeof users.$inferSelect;
+export type Addon = typeof addons.$inferSelect;
 export type Roster = typeof rosters.$inferSelect;
 export type Application = typeof applications.$inferSelect;
 export type DiscordRole = typeof discordRoles.$inferSelect;

@@ -22,6 +22,7 @@
 				]
 			: []),
 		...(data.config.hasCharter ? [{ href: '/charte', label: 'Charte' }] : []),
+		...(data.config.hasAddons ? [{ href: '/addons', label: 'Addons' }] : []),
 		...(data.candidate ? [{ href: '/candidature', label: 'Ma candidature' }] : []),
 		...(data.user?.permission === 'officer' || data.admin
 			? [
