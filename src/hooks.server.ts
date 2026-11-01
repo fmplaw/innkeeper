@@ -47,7 +47,7 @@ const sessionHandle: Handle = async ({ event, resolve }) => {
 	const discordId = (await event.locals.auth())?.user?.id;
 	if (discordId) {
 		const user = db().select().from(schema.users).where(eq(schema.users.discordId, discordId)).get();
-		const permission = user && permissionFor(user.roles);
+		const permission = user && permissionFor(user);
 		if (user && permission) {
 			event.locals.user = { id: user.discordId, displayName: user.displayName, avatar: user.avatar, permission };
 		} else if (user) {

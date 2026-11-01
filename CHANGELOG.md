@@ -4,6 +4,10 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ## [Non publié]
 
+### Sécurité
+
+- **Accès des comptes extérieurs au serveur** : en mode « tout membre du serveur » (le mode par défaut), un compte Discord qui n'est pas sur le serveur de la guilde obtenait l'accès membre (roster, sorties, inscriptions, clés de synchronisation) au lieu de passer par la candidature. Le site enregistre désormais la présence sur le serveur à chaque connexion et à chaque relecture des nouveaux membres par le bot ; sans elle, aucun accès. Migration : les comptes qui avaient au moins un rôle sont considérés comme présents ; ceux qui n'en avaient aucun doivent se reconnecter une fois.
+
 ## [0.13.0] - 2026-11-01
 
 ### Ajouté

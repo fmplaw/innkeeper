@@ -1,5 +1,6 @@
 import { desc, eq, sql } from 'drizzle-orm';
 import { db, schema } from './db';
+import type { GuildMember } from './discord';
 import { getAccess, getDiscord } from './settings';
 
 export type Permission = 'officer' | 'member';
@@ -17,12 +18,41 @@ function permissionsByRole() {
 	return rolePermissions;
 }
 
-/** Permission sur le site d'après les rôles Discord du membre. `null` = pas d'accès. */
-export function permissionFor(roles: string[]): Permission | null {
+/**
+ * Permission sur le site d'après les rôles Discord du membre. `null` = pas d'accès.
+ * Un compte absent du serveur de guilde n'a jamais accès : ses rôles en cache ne comptent plus.
+ */
+export function permissionFor({ roles, inGuild }: { roles: string[]; inGuild: boolean }): Permission | null {
+	if (!inGuild) return null;
 	const map = permissionsByRole();
 	if (roles.some((r) => map.get(r) === 'officer')) return 'officer';
 	if (roles.some((r) => map.get(r) === 'member')) return 'member';
 	return getAccess().mode === 'all-members' ? 'member' : null;
+}
+
+/**
+ * Connexion Discord : met à jour le joueur avec son profil et sa situation sur le serveur
+ * (`member` : réponse de Discord, `null` s'il n'est pas sur le serveur de la guilde).
+ */
+export function recordDiscordLogin(
+	discordId: string,
+	profile: { username: string; name: string | null | undefined; image: string | null | undefined },
+	member: GuildMember | null
+) {
+	if (member) recordSeenRoles(member.roles);
+	const values = {
+		discordUsername: profile.username,
+		displayName: member?.nick ?? profile.name ?? profile.username,
+		avatar: profile.image ?? null,
+		roles: member?.roles ?? [],
+		inGuild: Boolean(member),
+		lastLogin: new Date()
+	};
+	db()
+		.insert(schema.users)
+		.values({ discordId, ...values })
+		.onConflictDoUpdate({ target: schema.users.discordId, set: values })
+		.run();
 }
 
 /** Découverte progressive : enregistre les rôles vus chez un membre qui se connecte. */

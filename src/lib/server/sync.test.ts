@@ -74,6 +74,11 @@ describe('clés de synchronisation', () => {
 		expect(() => identify('Bearer iks_inventee')).toThrow(/inconnue/);
 		const token = createSyncToken('parti', 'Vieux PC');
 		expect(() => identify(`Bearer ${token}`)).toThrow(expect.objectContaining({ status: 403 }));
+		// Même en mode « tout membre du serveur » : un compte qui n'est plus sur le serveur est refusé.
+		setAccess({ mode: 'all-members' });
+		createUser('exclu', [], { inGuild: false });
+		expect(() => identify(`Bearer ${createSyncToken('exclu', 'PC')}`)).toThrow(expect.objectContaining({ status: 403 }));
+		setAccess({ mode: 'mapped-roles' });
 	});
 
 	it(`sont limitées à ${MAX_TOKENS} par joueur`, () => {

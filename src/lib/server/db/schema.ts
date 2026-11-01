@@ -29,6 +29,9 @@ export const users = sqliteTable('users', {
 	avatar: text('avatar'),
 	// Rôles Discord du serveur de guilde, mis en cache à chaque connexion.
 	roles: text('roles', { mode: 'json' }).$type<string[]>().notNull().default([]),
+	// Présent sur le serveur de guilde à la dernière lecture : sans lui, aucun accès au site,
+	// même en mode « tout membre du serveur » (une liste de rôles vide ne le dit pas).
+	inGuild: integer('in_guild', { mode: 'boolean' }).notNull().default(false),
 	createdAt: timestamp('created_at'),
 	lastLogin: timestamp('last_login'),
 	// Arrivée dans la guilde (rôle d'arrivée donné par le bot) ; à défaut, première connexion.
