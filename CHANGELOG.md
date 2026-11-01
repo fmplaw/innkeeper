@@ -4,6 +4,10 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ## [Non publié]
 
+### Sécurité
+
+- Images envoyées (logo, bannière, images des sorties) : le contenu du fichier doit correspondre au format annoncé (signature PNG, JPEG ou WebP). Jusqu'ici, seul le type déclaré par le navigateur comptait : un fichier quelconque renommé en `.png` était accepté puis servi publiquement comme image.
+
 ## [0.13.0] - 2026-11-01
 
 ### Ajouté
