@@ -7,6 +7,7 @@ import { db, schema } from '$lib/server/db';
 import { purgeAuditLog } from '$lib/server/audit';
 import { hasLocalAdmin, sessionAdmin, setupCode } from '$lib/server/local-admin';
 import { permissionFor } from '$lib/server/permissions';
+import { withSecurityHeaders } from '$lib/server/security-headers';
 import { getDiscord, isSetupComplete } from '$lib/server/settings';
 
 export const init: ServerInit = () => {
@@ -18,6 +19,9 @@ export const init: ServerInit = () => {
 		console.log(`\n=== Installation d'Innkeeper ===\nOuvre ${url}\nCode d'installation : ${setupCode()}\n`);
 	}
 };
+
+// En premier, pour couvrir les réponses de toutes les étapes suivantes (pages, Auth.js, images).
+const securityHeaders: Handle = async ({ event, resolve }) => withSecurityHeaders(await resolve(event));
 
 const ALWAYS_OPEN = ['/installation', '/healthz', '/logo', '/banniere', '/admin/connexion'];
 
@@ -58,4 +62,4 @@ const sessionHandle: Handle = async ({ event, resolve }) => {
 	return resolve(event);
 };
 
-export const handle = sequence(setupGuard, discordAuth, sessionHandle);
+export const handle = sequence(securityHeaders, setupGuard, discordAuth, sessionHandle);

@@ -4,6 +4,10 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ## [Non publié]
 
+### Sécurité
+
+- En-têtes de sécurité sur toutes les réponses du site : interdiction d'intégrer le site dans la page d'un autre (`X-Frame-Options`, `frame-ancestors`), ce qui empêche de piéger un officier par des clics détournés sur les actions d'admin ; pas de reniflage des types de fichiers (`nosniff`) pour les images envoyées ; adresse complète des pages non transmise aux sites externes (`Referrer-Policy`).
+
 ## [0.13.0] - 2026-11-01
 
 ### Ajouté
