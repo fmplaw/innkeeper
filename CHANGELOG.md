@@ -8,6 +8,9 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 - **Accès des comptes extérieurs au serveur** : en mode « tout membre du serveur » (le mode par défaut), un compte Discord qui n'est pas sur le serveur de la guilde obtenait l'accès membre (roster, sorties, inscriptions, clés de synchronisation) au lieu de passer par la candidature. Le site enregistre désormais la présence sur le serveur à chaque connexion et à chaque relecture des nouveaux membres par le bot ; sans elle, aucun accès. Migration : les comptes qui avaient au moins un rôle sont considérés comme présents ; ceux qui n'en avaient aucun doivent se reconnecter une fois.
 - **Rôles à jour sans reconnexion** : avec le bot, les rôles d'un joueur et sa présence sur le serveur sont relus sur Discord au plus toutes les 10 minutes, pour les pages du site comme pour les clés InnkeeperSync. Un rôle retiré ou une exclusion du serveur s'applique donc en quelques minutes, au lieu de durer tant que la session restait ouverte (30 jours, prolongés à chaque visite). Si Discord ne répond pas, le site garde les rôles connus.
+### Corrigé
+
+- Une candidature validée deux fois (double clic, deux officiers en même temps) créait deux persos à la recrue et deux annonces. La décision ne s'enregistre plus que si la candidature est encore en attente ; un refus ou un retrait arrivé après coup est sans effet.
 
 ## [0.13.0] - 2026-11-01
 
