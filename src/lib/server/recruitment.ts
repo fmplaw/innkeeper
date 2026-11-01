@@ -189,7 +189,7 @@ async function fallbackInvite(app: Application) {
 function markArrived(app: Application, memberRoles: string[]) {
 	const user = db().select({ roles: users.roles }).from(users).where(eq(users.discordId, app.userId)).get();
 	const roles = [...new Set([...(user?.roles ?? []), ...memberRoles])];
-	db().update(users).set({ roles, inGuild: true, joinedAt: new Date() }).where(eq(users.discordId, app.userId)).run();
+	db().update(users).set({ roles, inGuild: true, rolesCheckedAt: new Date(), joinedAt: new Date() }).where(eq(users.discordId, app.userId)).run();
 	db().update(applications).set({ roleAssignedAt: new Date() }).where(eq(applications.id, app.id)).run();
 }
 

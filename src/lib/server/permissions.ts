@@ -1,4 +1,5 @@
 import { desc, eq, sql } from 'drizzle-orm';
+import { botReady, guildMember } from './bot';
 import { db, schema } from './db';
 import type { GuildMember } from './discord';
 import { getAccess, getDiscord } from './settings';
@@ -46,12 +47,41 @@ export function recordDiscordLogin(
 		avatar: profile.image ?? null,
 		roles: member?.roles ?? [],
 		inGuild: Boolean(member),
+		rolesCheckedAt: new Date(),
 		lastLogin: new Date()
 	};
 	db()
 		.insert(schema.users)
 		.values({ discordId, ...values })
 		.onConflictDoUpdate({ target: schema.users.discordId, set: values })
+		.run();
+}
+
+// Rôles relus au plus toutes les 10 minutes par joueur : assez pour qu'un retrait de rôle
+// ou une exclusion s'applique vite, sans solliciter Discord à chaque page.
+const ROLES_TTL_MS = 10 * 60_000;
+
+/**
+ * Relit sur Discord, avec le bot, les rôles d'un joueur et sa présence sur le serveur, si la
+ * dernière lecture date de plus de 10 minutes. Sans bot, ou si Discord ne répond pas, le cache
+ * de la dernière connexion reste valable : une panne de Discord ne doit fermer le site à personne.
+ */
+export async function refreshMembership(discordId: string) {
+	if (!botReady()) return;
+	const users = schema.users;
+	const user = db().select({ checkedAt: users.rolesCheckedAt }).from(users).where(eq(users.discordId, discordId)).get();
+	if (!user || (user.checkedAt && Date.now() - user.checkedAt.getTime() < ROLES_TTL_MS)) return;
+	let member: Awaited<ReturnType<typeof guildMember>>;
+	try {
+		member = await guildMember(discordId);
+	} catch {
+		return;
+	}
+	if (member) recordSeenRoles(member.roles);
+	db()
+		.update(users)
+		.set({ roles: member?.roles ?? [], inGuild: Boolean(member), rolesCheckedAt: new Date() })
+		.where(eq(users.discordId, discordId))
 		.run();
 }
 
