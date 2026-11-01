@@ -1,0 +1,10 @@
+{
+	"$schema": "../gen/schemas/desktop-schema.json",
+	"identifier": "windows",
+	"description": "Windows seulement : chemins à antislash. Ailleurs, « \\ » est un échappement dans les motifs, et un motif invalide fait échouer toute la permission de lecture.",
+	"platforms": ["windows"],
+	"windows": ["main"],
+	"permissions": [
+		{ "identifier": "fs:allow-read-file", "allow": [{ "path": "**\\SavedVariables\\InnkeeperSync.lua" }] }
+	]
+}

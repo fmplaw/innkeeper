@@ -4,6 +4,10 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ## [Non publié]
 
+### Corrigé
+
+- InnkeeperSync sous Linux (AppImage) : l'application ne pouvait lire aucun fichier de l'addon et n'envoyait donc jamais rien, en restant « En attente du jeu » sans message. Un des motifs de chemin autorisés, écrit avec des antislashs pour Windows, est invalide sur Linux et faisait échouer toute la permission de lecture. Ce motif est maintenant réservé à Windows.
+
 ## [0.13.0] - 2026-11-01
 
 ### Ajouté
