@@ -4,6 +4,11 @@ Exports your guild roster, professions and recipes from World of Warcraft: Forev
 
 Exporte le registre de guilde, les métiers et les recettes pour Innkeeper, le portail de la guilde. L'addon n'envoie rien : le jeu écrit l'export dans `SavedVariables/InnkeeperSync.lua`, que l'application InnkeeperSync (ou un officier) envoie au site de la guilde.
 
+## 1.2.1
+
+- Each character login starts a fresh export: if the game reloads saved variables, recipes or the guild roster of another character on the same account are no longer sent with the current one.
+- Chaque connexion d'un perso repart d'un export vierge : si le jeu relit les SavedVariables, les recettes ou le registre de guilde d'un autre perso du même compte ne sont plus envoyés avec celui du perso connecté.
+
 ## 1.2.0
 
 - Forever-specific TOC (`InnkeeperSync_Camelot.toc`), English description with a French translation, published on CurseForge and Wago.
