@@ -13,13 +13,31 @@ function config() {
 	return { token: discord.botToken, guildId: discord.guildId };
 }
 
-async function call(path: string, init: RequestInit = {}) {
+// Limite d'appels de Discord (429) : on patiente et on réessaie une fois si l'attente demandée
+// est courte ; au-delà, l'erreur remonte plutôt que de laisser une page en suspens.
+const MAX_RETRY_WAIT_S = 5;
+
+/** Attente demandée par Discord, en secondes (corps JSON `retry_after`, sinon en-tête Retry-After). */
+async function retryAfter(res: Response) {
+	const body = (await res.clone().json().catch(() => null)) as { retry_after?: number } | null;
+	const wait = Number(body?.retry_after ?? res.headers.get('Retry-After'));
+	return Number.isFinite(wait) && wait >= 0 ? wait : null;
+}
+
+async function call(path: string, init: RequestInit = {}, retried = false): Promise<Response> {
 	const { token } = config();
 	const res = await fetch(`${API}${path}`, {
 		...init,
 		headers: { Authorization: `Bot ${token}`, 'Content-Type': 'application/json', ...init.headers },
 		signal: AbortSignal.timeout(10_000)
 	});
+	if (res.status === 429 && !retried) {
+		const wait = await retryAfter(res);
+		if (wait !== null && wait <= MAX_RETRY_WAIT_S) {
+			await new Promise((r) => setTimeout(r, wait * 1000));
+			return call(path, init, true);
+		}
+	}
 	if (res.status === 403) throw new BotError('Le bot n’a pas la permission nécessaire sur Discord.');
 	return res;
 }

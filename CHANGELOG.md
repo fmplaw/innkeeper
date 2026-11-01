@@ -25,6 +25,9 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 ### Corrigé
 
 - Import du jeu : les caractères accentués écrits sous forme d'octets échappés (`\195\169`) dans le fichier de l'addon donnaient « Ã© » au lieu de « é » (noms de persos, de métiers, de recettes). Les octets échappés sont maintenant décodés ensemble en UTF-8.
+### Corrigé
+
+- Bot Discord : quand Discord demande de ralentir (429) pour quelques secondes, le bot patiente puis réessaie au lieu d'échouer. Le repérage des sorties sans clé Raid-Helper lit les salons cinq par cinq au lieu de tous à la fois : sur un serveur aux nombreux salons, des sorties manquaient à la liste sans aucun message.
 
 ## [0.13.0] - 2026-11-01
 
