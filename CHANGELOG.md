@@ -4,6 +4,10 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ## [Non publié]
 
+### Corrigé
+
+- InnkeeperSync : un message contenant un long chemin de fichier (erreur de lecture, par exemple) élargissait la fenêtre au-delà de son bord ; le contenu et le bouton « Mettre à jour » étaient coupés à droite. Le chemin revient maintenant à la ligne.
+
 ## [0.13.1] - 2026-11-01
 
 ### Sécurité
