@@ -58,7 +58,7 @@ Menu **Mes persos** → **Ajouter un perso**.
 
 Mes persos → **Synchronisation automatique** : la petite application **InnkeeperSync**, sur ton PC, envoie au site les données de l'addon chaque fois que le jeu les enregistre (à la déconnexion ou après un `/reload`). Plus de fichier à déposer à la main.
 
-1. Installe l'addon InnkeeperSync dans le jeu.
+1. Installe l'addon **Innkeeper Sync** dans le jeu : le plus simple est de le chercher dans l'application CurseForge ou Wago (version de jeu : World of Warcraft: Forever), qui le tiendra à jour. Sinon, le lien de la page donne un zip à décompresser dans `Interface/AddOns`.
 2. Télécharge et installe **InnkeeperSync pour Windows** (lien sur la page). Si Windows affiche un avertissement (application non signée) : « Informations complémentaires », puis « Exécuter quand même ».
 3. Sur la page, clique sur **Connecter InnkeeperSync** : l'application s'ouvre et te montre le site de ta guilde ; vérifie-le et confirme. Elle trouve toute seule le dossier du jeu (sinon : « Choisir le dossier »).
 4. En jeu, tape `/innkeeper` de temps en temps, et ouvre tes fenêtres de métier pour envoyer tes recettes.

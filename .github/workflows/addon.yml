@@ -1,0 +1,70 @@
+name: Addon InnkeeperSync
+
+# Publication de l'addon sur CurseForge, Wago Addons et WoWInterface avec le BigWigs Packager.
+# Tags propres à l'addon : InnkeeperSync-v1.2.0 (version), InnkeeperSync-v1.2.0-beta1 (bêta).
+# Pas de jeton GitHub : le Packager ne doit pas créer de release GitHub, sinon elle deviendrait
+# la « dernière » du dépôt et casserait le lien de l'application et ses mises à jour.
+#
+# Variables du dépôt (identifiants des projets, une plateforme sans identifiant est ignorée) :
+#   CURSEFORGE_PROJECT_ID, WAGO_PROJECT_ID, WOWI_PROJECT_ID
+# Secrets : CF_API_TOKEN, WAGO_API_TOKEN, WOWI_API_TOKEN
+
+on:
+  push:
+    tags: ["InnkeeperSync-v*"]
+  pull_request:
+    paths: ["addon/**"]
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Le tag correspond à la version du fichier TOC
+        if: github.event_name == 'push'
+        run: |
+          tag="${GITHUB_REF_NAME#InnkeeperSync-v}"
+          version=$(sed -n 's/^## Version: *//p' addon/InnkeeperSync/InnkeeperSync.toc | tr -d '\r')
+          [ "${tag%%-*}" = "$version" ] || { echo "Tag $GITHUB_REF_NAME, mais le TOC annonce $version"; exit 1; }
+
+      # Le Packager veut que l'addon soit à la racine d'un dépôt git : on le copie dans un dépôt
+      # temporaire qui porte le même tag (le journal de l'addon remplace l'historique git).
+      - name: Dépôt temporaire de l'addon
+        run: |
+          dir="$RUNNER_TEMP/addon"
+          cp -r addon/InnkeeperSync "$dir"
+          cd "$dir"
+          git init -q
+          git -c user.name=ci -c user.email=ci@innkeeper add -A
+          git -c user.name=ci -c user.email=ci@innkeeper commit -qm "$GITHUB_REF_NAME"
+          [ "${{ github.event_name }}" = "push" ] && git tag "$GITHUB_REF_NAME"
+          echo "ADDON_DIR=$dir" >> "$GITHUB_ENV"
+
+      - name: Plateformes configurées
+        id: targets
+        env:
+          CF: ${{ vars.CURSEFORGE_PROJECT_ID }}
+          WAGO: ${{ vars.WAGO_PROJECT_ID }}
+          WOWI: ${{ vars.WOWI_PROJECT_ID }}
+        run: |
+          args="-t $ADDON_DIR -n {project-version}"
+          [ -n "$CF" ] && args="$args -p $CF"
+          [ -n "$WAGO" ] && args="$args -a $WAGO"
+          [ -n "$WOWI" ] && args="$args -w $WOWI"
+          # Pull request : on vérifie seulement que le paquet se construit.
+          [ "${{ github.event_name }}" = "pull_request" ] && args="$args -d"
+          echo "args=$args" >> "$GITHUB_OUTPUT"
+
+      - uses: BigWigsMods/packager@v2
+        with:
+          args: ${{ steps.targets.outputs.args }}
+        env:
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          WAGO_API_TOKEN: ${{ secrets.WAGO_API_TOKEN }}
+          WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}

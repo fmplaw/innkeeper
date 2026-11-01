@@ -22,8 +22,9 @@
 	<h2>Comment faire</h2>
 	<ol>
 		<li>
-			<a href="/addon/InnkeeperSync.zip" download>Télécharger l'addon</a> et le décompresser dans le dossier
-			<code>Interface/AddOns</code> du jeu (à côté des autres addons).
+			Installer l'addon <strong>Innkeeper Sync</strong> : dans l'application CurseForge ou Wago (version de jeu
+			World of Warcraft: Forever), ou <a href="/addon/InnkeeperSync.zip" download>en zip</a> à décompresser dans le
+			dossier <code>Interface/AddOns</code> du jeu.
 		</li>
 		<li>En jeu, avec un perso de la guilde : tape <code>/innkeeper</code> (ou <code>/ik</code>), puis <code>/reload</code> pour que le jeu écrive le fichier.</li>
 		<li>Pour exporter aussi tes recettes : ouvre la fenêtre de chacun de tes métiers avant le <code>/reload</code>.</li>

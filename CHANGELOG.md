@@ -4,6 +4,10 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ## [Non publié]
 
+### Ajouté
+
+- **Publication de l'addon** sur CurseForge, Wago Addons et WoWInterface : versions et tags propres (`InnkeeperSync-v1.2.0`), workflow `addon.yml` avec le BigWigs Packager. Addon 1.2.0 : fichier TOC propre à Forever (`InnkeeperSync_Camelot.toc`), description anglaise avec traduction française.
+
 ## [0.12.2] - 2026-11-01
 
 ### Ajouté

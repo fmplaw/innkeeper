@@ -1,0 +1,6 @@
+# BigWigs Packager (publication sur CurseForge, Wago et WoWInterface) : voir .github/workflows/addon.yml.
+package-as: InnkeeperSync
+
+manual-changelog:
+  filename: CHANGELOG.md
+  markup-type: markdown

@@ -41,7 +41,10 @@
 <section class="card steps">
 	<h2>Mise en route</h2>
 	<ol>
-		<li>Installe l'addon <a href="/addon/InnkeeperSync.zip">InnkeeperSync</a> dans le jeu, si ce n'est pas déjà fait.</li>
+		<li>
+			Installe l'addon <strong>Innkeeper Sync</strong> dans le jeu, si ce n'est pas déjà fait : dans l'application
+			CurseForge ou Wago (version de jeu World of Warcraft: Forever), ou <a href="/addon/InnkeeperSync.zip">en zip</a>.
+		</li>
 		<li>
 			<a href={DOWNLOAD}>Télécharge InnkeeperSync pour Windows</a> et lance l'installation. Si Windows affiche un
 			avertissement : « Informations complémentaires », puis « Exécuter quand même ».

@@ -303,7 +303,8 @@ Pour que les sorties **officielles** apparaissent aussi dans la liste des évén
 
 Le client de WoW Forever est un client de type Retail (interface `16001`) avec un contenu Classic : l'addon utilise l'API moderne.
 
-- **Téléchargement** : `<ORIGIN>/addon/InnkeeperSync.zip`, à décompresser dans `Interface/AddOns`.
+- **Téléchargement** : sur CurseForge et Wago Addons (« Innkeeper Sync », installation et mises à jour par leurs applications), ou `<ORIGIN>/addon/InnkeeperSync.zip`, à décompresser dans `Interface/AddOns`.
+- **Fichiers TOC** : `InnkeeperSync.toc` et `InnkeeperSync_Camelot.toc` (type de jeu de Forever), identiques (test `src/lib/addon.test.ts`), interface `16001`.
 - **En jeu** : `/innkeeper` (ou `/ik`), puis `/reload` (ou déconnexion) pour que le jeu écrive le fichier. Ouvrir la fenêtre d'un métier exporte ses recettes.
 - **Fichier à déposer** : `WTF/Account/<COMPTE>/SavedVariables/InnkeeperSync.lua`, dans Admin → Import du jeu.
 
@@ -315,6 +316,14 @@ Le client de WoW Forever est un client de type Retail (interface `16001`) avec u
 | Recettes connues | `C_TradeSkillUI` |
 
 L'addon n'envoie rien sur Internet (c'est l'application ci-dessous qui s'en charge, si le joueur l'installe). Le site lit le fichier **sans l'exécuter** (analyseur dédié au format des SavedVariables), relie les persos par leur nom (Forever n'a pas de royaumes) et les métiers par leur identifiant de compétence, indépendant de la langue. Un aperçu liste les changements, les membres sans fiche et les fiches introuvables en jeu avant toute application.
+
+### Publication de l'addon (CurseForge, Wago, WoWInterface)
+
+L'addon a ses propres versions (`## Version` du TOC, journal `addon/InnkeeperSync/CHANGELOG.md`) et ses propres tags : `InnkeeperSync-v1.2.0`, ou `InnkeeperSync-v1.2.0-beta1` pour une bêta. Un tag déclenche `.github/workflows/addon.yml`, qui vérifie que le tag correspond au TOC, copie l'addon dans un dépôt git temporaire (le BigWigs Packager veut l'addon à la racine) et le publie avec le Packager, qui reconnaît Forever (« Camelot », version de jeu 1.60.x).
+
+- **Variables du dépôt** (identifiants des projets ; une plateforme sans identifiant est ignorée) : `CURSEFORGE_PROJECT_ID`, `WAGO_PROJECT_ID`, `WOWI_PROJECT_ID`.
+- **Secrets** : `CF_API_TOKEN`, `WAGO_API_TOKEN`, `WOWI_API_TOKEN`.
+- **Pas de jeton GitHub** donné au Packager : une release GitHub de l'addon deviendrait la plus récente du dépôt et casserait le lien de téléchargement de l'application et ses mises à jour (`releases/latest`).
 
 ### Application InnkeeperSync (synchronisation automatique)
 
