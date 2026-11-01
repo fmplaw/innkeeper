@@ -4,6 +4,10 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ## [Non publié]
 
+### Corrigé
+
+- Bot Discord : quand Discord demande de ralentir (429) pour quelques secondes, le bot patiente puis réessaie au lieu d'échouer. Le repérage des sorties sans clé Raid-Helper lit les salons cinq par cinq au lieu de tous à la fois : sur un serveur aux nombreux salons, des sorties manquaient à la liste sans aucun message.
+
 ## [0.13.0] - 2026-11-01
 
 ### Ajouté

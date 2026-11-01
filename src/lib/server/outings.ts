@@ -162,13 +162,18 @@ async function discoverWithBot(guildId: string): Promise<UpcomingEvent[]> {
 	if (discovered && Date.now() - discovered.at < DISCOVERY_TTL_MS) return discovered.events;
 	const channels = await textChannels();
 	const ids = new Set<string>();
+	// Cinq salons lus à la fois au plus : tous d'un coup, Discord répond 429 sur un serveur
+	// qui a beaucoup de salons, et les sorties de ces salons manquaient sans le dire.
+	const pending = [...channels];
 	await Promise.all(
-		channels.map(async (ch) => {
-			try {
-				for (const m of await recentMessages(ch.id)) if (m.author.bot && !notEvents.has(m.id)) ids.add(m.id);
-			} catch (e) {
-				// Salon que le bot ne peut pas lire : on l'ignore.
-				if (!(e instanceof BotError)) throw e;
+		Array.from({ length: 5 }, async () => {
+			for (let ch = pending.shift(); ch; ch = pending.shift()) {
+				try {
+					for (const m of await recentMessages(ch.id)) if (m.author.bot && !notEvents.has(m.id)) ids.add(m.id);
+				} catch (e) {
+					// Salon que le bot ne peut pas lire : on l'ignore.
+					if (!(e instanceof BotError)) throw e;
+				}
 			}
 		})
 	);
