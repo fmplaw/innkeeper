@@ -37,6 +37,14 @@ describe('lecture des SavedVariables', () => {
 		expect(typeof g.B).toBe('string');
 	});
 
+	it('reconstitue l’UTF-8 écrit octet par octet (\\ddd)', () => {
+		// É = \195\137 et é = \195\169, mêlés à des caractères écrits tels quels.
+		const g = parseSavedVariables('A = "\\195\\137lise"\nB = "Ça \\195\\169t\\195\\169"\nC = "\\065\\066"\n');
+		expect(g.A).toBe('Élise');
+		expect(g.B).toBe('Ça été');
+		expect(g.C).toBe('AB');
+	});
+
 	it('refuse ce qui n’est pas des données (aucune exécution)', () => {
 		expect(() => parseSavedVariables('A = os.execute("rm -rf /")')).toThrow();
 		expect(() => readExport('Autre = {}')).toThrow(ImportError);

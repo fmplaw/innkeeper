@@ -4,6 +4,10 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ## [Non publié]
 
+### Corrigé
+
+- Import du jeu : les caractères accentués écrits sous forme d'octets échappés (`\195\169`) dans le fichier de l'addon donnaient « Ã© » au lieu de « é » (noms de persos, de métiers, de recettes). Les octets échappés sont maintenant décodés ensemble en UTF-8.
+
 ## [0.13.0] - 2026-11-01
 
 ### Ajouté
