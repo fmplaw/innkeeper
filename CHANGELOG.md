@@ -18,6 +18,7 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 - Connexion Discord : la lecture du profil du joueur sur le serveur abandonne au bout de 10 secondes, comme les autres appels à Discord, au lieu d'attendre indéfiniment une réponse quand Discord est lent.
 - En-têtes de sécurité sur toutes les réponses du site : interdiction d'intégrer le site dans la page d'un autre (`X-Frame-Options`, `frame-ancestors`), ce qui empêche de piéger un officier par des clics détournés sur les actions d'admin ; pas de reniflage des types de fichiers (`nosniff`) pour les images envoyées ; adresse complète des pages non transmise aux sites externes (`Referrer-Policy`).
+- Images envoyées (logo, bannière, images des sorties) : le contenu du fichier doit correspondre au format annoncé (signature PNG, JPEG ou WebP). Jusqu'ici, seul le type déclaré par le navigateur comptait : un fichier quelconque renommé en `.png` était accepté puis servi publiquement comme image.
 
 ## [0.13.0] - 2026-11-01
 
