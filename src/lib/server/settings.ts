@@ -184,6 +184,13 @@ export interface GameImportInfo {
 export const getGameImport = () => read<GameImportInfo>('gameImport') ?? null;
 export const setGameImport = (info: GameImportInfo) => write('gameImport', info);
 
+// Base créée par le mode démo (INNKEEPER_DEMO=1) : sans cette marque, le mode démo refuse de démarrer.
+export const getDemoMarker = () => read<{ seededAt: number }>('demo') ?? null;
+export const setDemoMarker = () => write('demo', { seededAt: Date.now() });
+// Sorties Raid-Helper simulées du mode démo (créées, modifiées et supprimées depuis le site).
+export const getDemoEvents = <T>() => read<T[]>('demoEvents') ?? [];
+export const setDemoEvents = <T>(events: T[]) => write('demoEvents', events);
+
 export const getAccess = (): AccessSettings => read<AccessSettings>('access') ?? { mode: 'all-members' };
 export const setAccess = (access: AccessSettings) => write('access', access);
 

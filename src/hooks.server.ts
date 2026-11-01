@@ -5,12 +5,14 @@ import { env } from '$env/dynamic/private';
 import { handle as authHandle } from './auth';
 import { db, schema } from '$lib/server/db';
 import { purgeAuditLog } from '$lib/server/audit';
+import { demoEnabled, demoSessionUser, initDemo } from '$lib/server/demo';
 import { hasLocalAdmin, mustChangePasswordFirst, sessionAdmin, setupCode } from '$lib/server/local-admin';
 import { refreshMembership, sitePermission } from '$lib/server/permissions';
 import { withSecurityHeaders } from '$lib/server/security-headers';
 import { getDiscord, isSetupComplete } from '$lib/server/settings';
 
 export const init: ServerInit = () => {
+	if (demoEnabled()) initDemo();
 	// Journal d'audit : purge des entrées de plus de 12 mois, au démarrage puis chaque jour.
 	purgeAuditLog();
 	setInterval(purgeAuditLog, 86_400_000).unref();
@@ -34,8 +36,14 @@ const setupGuard: Handle = ({ event, resolve }) => {
 	return resolve(event);
 };
 
-// Auth.js n'est branché qu'une fois l'appli Discord configurée.
+// Auth.js n'est branché qu'une fois l'appli Discord configurée. En démo, la session vient du
+// profil choisi sur /connexion, sans Discord.
 const discordAuth: Handle = ({ event, resolve }) => {
+	if (demoEnabled()) {
+		const id = demoSessionUser(event.cookies);
+		event.locals.auth = async () => (id ? ({ user: { id }, expires: '' } as never) : null);
+		return resolve(event);
+	}
 	if (getDiscord()) return authHandle({ event, resolve });
 	event.locals.auth = async () => null;
 	return resolve(event);

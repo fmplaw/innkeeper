@@ -50,6 +50,12 @@
 
 <!-- La couleur d'accent de la guilde s'applique à tout le site via la variable CSS. -->
 <div class="app" data-faction={guild.faction} style:--accent={guild.accentColor}>
+	{#if data.config.demo}
+		<p class="demo-strip">
+			Site de démonstration : guilde fictive, Discord et Raid-Helper simulés.
+			<a href="/connexion">Changer de profil</a>
+		</p>
+	{/if}
 	{#if !inSetup}
 		<!-- Bannière : grande sur l'accueil, réduite ailleurs. Sans image, un dégradé de la couleur d'accent. -->
 		<a href="/" class="banner" class:home={isHome} class:plain={!guild.bannerUrl} class:titled={guild.bannerTitle}>
@@ -129,6 +135,19 @@
 </div>
 
 <style>
+	.demo-strip {
+		margin: 0;
+		padding: 0.35rem max(16px, env(safe-area-inset-left, 0px));
+		background: var(--gold);
+		color: #1b1408;
+		font-size: 0.85rem;
+		font-weight: 600;
+		text-align: center;
+	}
+	.demo-strip a {
+		color: inherit;
+		margin-left: 0.5rem;
+	}
 	.app {
 		min-height: 100vh;
 		display: flex;
