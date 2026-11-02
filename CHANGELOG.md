@@ -4,6 +4,11 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ## [Non publié]
 
+### Sécurité
+
+- **HSTS** : un site servi en HTTPS (`ORIGIN` en `https://`) demande au navigateur de n'utiliser que HTTPS pendant un an.
+- **`docker-compose.yml` ne publie plus le port 3000 que sur la machine elle-même** (`127.0.0.1:3000`) : Docker passant outre le pare-feu, le site était aussi joignable en HTTP clair depuis le réseau. Avec un reverse proxy sur une autre machine, remettre `"3000:3000"` (voir le README).
+
 ## [0.15.0] - 2026-11-02
 
 ### Publication

@@ -190,8 +190,9 @@ Tout reste modifiable ensuite dans **Admin**. La base est dans le volume `data` 
 
 ### Derrière un reverse proxy
 
-- `ORIGIN` doit être l'adresse publique en `https://`, exactement celle tapée dans le navigateur.
-- `ADDRESS_HEADER=X-Forwarded-For` et `XFF_DEPTH=1` permettent à la limite de tentatives de connexion admin de voir la vraie adresse des visiteurs.
+- `ORIGIN` doit être l'adresse publique en `https://`, exactement celle tapée dans le navigateur. Le site envoie alors l'en-tête HSTS : le navigateur n'acceptera plus que HTTPS pour ce domaine pendant un an.
+- `docker-compose.yml` ne publie le port 3000 que sur `127.0.0.1` : le proxy doit tourner sur la même machine. Proxy sur une autre machine : remplace par `"3000:3000"` et réserve ce port au proxy (Docker passe outre le pare-feu de l'hôte, sinon le site est joignable en HTTP clair).
+- `ADDRESS_HEADER=X-Forwarded-For` et `XFF_DEPTH=1` permettent à la limite de tentatives de connexion admin de voir la vraie adresse des visiteurs. Sans eux, tous les visiteurs ont l'adresse du proxy : dix mauvais mots de passe, d'où qu'ils viennent, bloquent la connexion admin pendant un quart d'heure. `XFF_DEPTH` compte les proxys qui ajoutent une adresse (1 pour un seul proxy) : trop grand, un visiteur peut falsifier la sienne.
 - Traefik sur le même hôte Docker : `docker-compose.traefik.yml` le configure par labels (voir `.env.example`).
 - L'envoi d'images (bannière, images de sorties) demande des requêtes jusqu'à 6 Mo : l'image fixe `BODY_SIZE_LIMIT=6M`, vérifie que ton proxy l'accepte.
 - **Box sans « hairpin NAT »** (fréquent en auto-hébergement) : depuis ton réseau local, le domaine public peut ne pas répondre. Ajoute une réécriture DNS locale (AdGuard, Pi-hole…) vers l'adresse du proxy, et un `extra_hosts` pour les conteneurs qui doivent joindre le site (supervision…).
