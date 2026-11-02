@@ -19,6 +19,10 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 - Journal : libellé pour l'attribution du rôle d'arrivée par le bot (« a donné le rôle d'arrivée à »).
 - Image Docker : le site est compilé et testé une seule fois, sans émulation, puis réutilisé pour l'image arm64 (better-sqlite3 y charge son binaire précompilé arm64). La construction de l'image arm64 ne passe plus des minutes sous QEMU ; chaque image est essayée au démarrage (`/healthz`) avant publication.
 
+### Corrigé
+
+- Roster : avec de vraies fiches, le tableau débordait de la page et la colonne Métiers sortait du cadre (cinq métiers dont les secondaires, badge « pas trouvé en jeu », pseudo comme « Artémis/christcosmik/néfélion », race « Skyborne (Windshaper) »). Le texte des cellules passe maintenant à la ligne, les pseudos se coupent après les barres obliques, et seuls les métiers principaux s'affichent en clair : les secondaires sont résumés (« + 3 secondaires », détail au survol).
+
 ## [0.14.0] - 2026-11-01
 
 ### Sécurité
