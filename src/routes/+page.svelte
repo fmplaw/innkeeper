@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Crest from '$lib/components/Crest.svelte';
 	import Glyph from '$lib/components/Glyph.svelte';
+	import OutingIcon from '$lib/components/OutingIcon.svelte';
 	import Horizon from '$lib/components/Horizon.svelte';
 	import RoleBar from '$lib/components/RoleBar.svelte';
 	import { GUILD_FACTION_LABELS } from '$lib/game/forever';
@@ -38,7 +39,10 @@
 			{#if next}
 				<a class="card next" href="/sorties/{next.id}">
 					<span class="eyebrow">Prochaine sortie · <span class="date">{nextDate.format(next.startTime * 1000)}</span></span>
-					<span class="serif next-title">{next.title}</span>
+					<span class="next-head">
+						<OutingIcon activity={next.type?.activity} size={44} />
+						<span class="serif next-title">{next.title}</span>
+					</span>
 					{#if next.signUpCount !== null}<span class="muted small">{next.signUpCount} inscrit{next.signUpCount > 1 ? 's' : ''}{#if next.leaderName}{' · '}organisé par {next.leaderName}{/if}</span>{/if}
 					<span class="next-go">Voir la composition <Glyph name="arrow-right" size={16} /></span>
 				</a>
@@ -270,6 +274,11 @@
 	}
 	.date {
 		font-weight: 500;
+	}
+	.next-head {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
 	}
 	.next-title {
 		font-size: 1.5rem;

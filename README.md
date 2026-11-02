@@ -20,7 +20,7 @@
 
 - **Fiches de persos** tenues par chaque joueur : main et rerolls, double spécialisation, métiers avec niveau, intérêts PvE/PvP.
 - **Roster** filtrable et triable, répartition par classe et par rôle, **rosters** composés par les officiers (équipe de raid, PvP…).
-- **Sorties** pilotées dans [Raid-Helper](https://raid-helper.dev) : création depuis le site (officielles et proposées par les membres), inscription depuis le site, composition, comparaison avec un roster, banc.
+- **Sorties** pilotées dans [Raid-Helper](https://raid-helper.dev) : création depuis le site (officielles et proposées par les membres), médaillon par type (quêtes, donjon, raid, PvP, farm), inscription depuis le site, composition, comparaison avec un roster, banc.
 - **Charte et règlement** rédigés dans l'admin, publiés pour tous et à accepter pour postuler.
 - **Addons conseillés** par la guilde : indispensables, requis en raid, recommandés, confort, avec le public visé (classes, rôles) et les liens CurseForge et Wago.
 - **Recrutement** : candidature en ligne, avis des officiers, entrée sur le serveur Discord et rôle d'arrivée posés par le bot, suivi des nouveaux membres.

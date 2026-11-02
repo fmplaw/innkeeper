@@ -313,3 +313,16 @@ describe('refus de Raid-Helper', () => {
 		await expect(deleteEvent('881', 'cle')).rejects.toThrow(/Clé API/);
 	});
 });
+
+describe('type des sorties pour l’affichage', () => {
+	it('donne activité et libellé des sorties créées sur le site, rien pour les autres', async () => {
+		const { recordOuting, withOutingTypes } = await import('./outings');
+		const soon = new Date(Date.now() + 86_400_000);
+		recordOuting({ eventId: 'ev-t1', kind: 'official', createdBy: null, title: 'Raid', activity: 'raid', instanceId: 'barrow-deeps', startTime: soon });
+		recordOuting({ eventId: 'ev-t2', kind: 'member', createdBy: 'm9', title: 'Sans type', activity: null, instanceId: null, startTime: soon });
+		const [raid, untyped, discord] = withOutingTypes([{ id: 'ev-t1' }, { id: 'ev-t2' }, { id: 'ev-discord' }]);
+		expect(raid.type).toEqual({ activity: 'raid', label: 'Raid · Barrow Deeps' });
+		expect(untyped.type).toEqual({ activity: 'other', label: 'Autre' });
+		expect(discord.type).toBeNull();
+	});
+});

@@ -1,6 +1,6 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import { audit } from '$lib/server/audit';
-import { canManageOuting, deleteOutingRecord, forgetDiscovered, officers, outingEditSchema, unixToZoned, updateOutingRecord, zonedToUnix } from '$lib/server/outings';
+import { canManageOuting, deleteOutingRecord, outingTypes, forgetDiscovered, officers, outingEditSchema, unixToZoned, updateOutingRecord, zonedToUnix } from '$lib/server/outings';
 import { listCharacters } from '$lib/server/characters';
 import { getDiscord, getGuild, getRaidHelper } from '$lib/server/settings';
 import { requireViewer } from '$lib/server/guards';
@@ -86,6 +86,8 @@ export const load: PageServerLoad = async ({ locals, params, url }) => {
 			description: event.description ?? '',
 			leader: event.leaderName ?? '',
 			image: eventImage(event),
+			// Type (médaillon et libellé), connu pour les sorties créées depuis le site.
+			type: outingTypes([event.id])[event.id] ?? null,
 			// Places : réglage Raid-Helper `limit` (9999 = illimité).
 			limit: (() => {
 				const limit = Number(event.advancedSettings?.limit);

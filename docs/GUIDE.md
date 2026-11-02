@@ -78,7 +78,7 @@ Une clé de **membre** met à jour tes persos seulement ; une clé d'**officier*
 
 ### Les sorties
 
-Menu **Sorties** : deux listes, **sorties officielles** et **sorties des membres**, avec la date, l'organisateur et le nombre d'inscrits.
+Menu **Sorties** : deux listes, **sorties officielles** et **sorties des membres**, avec la date, l'organisateur et le nombre d'inscrits. Le médaillon devant chaque sortie en donne le type, comme sur la carte du jeu : « ! » jaune pour les quêtes, vortex bleu pour un donjon, vortex vert pour un raid, épées croisées pour le PvP, pelle pour le farm, « … » pour le reste ou pour une sortie créée directement sur Discord (« Événement Discord »).
 
 Sur la page d'une sortie :
 

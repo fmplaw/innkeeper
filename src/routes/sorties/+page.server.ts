@@ -1,6 +1,6 @@
 import { redirect } from '@sveltejs/kit';
 import { requireViewer } from '$lib/server/guards';
-import { upcomingOutings } from '$lib/server/outings';
+import { upcomingOutings, withOutingTypes } from '$lib/server/outings';
 import { parseEventId } from '$lib/server/raidhelper';
 import { isOfficer } from '$lib/server/rosters';
 import { getGuild, getRaidHelper } from '$lib/server/settings';
@@ -15,7 +15,10 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 	}
 
 	// Sorties à venir : API Raid-Helper si la clé est configurée, sinon le bot parcourt les salons.
-	const { events, error: eventsError, source } = await upcomingOutings();
+	const upcoming = await upcomingOutings();
+	const { error: eventsError, source } = upcoming;
+	// Type de chaque sortie (médaillon et libellé), connu pour celles créées depuis le site.
+	const events = upcoming.events && withOutingTypes(upcoming.events);
 	const { apiKey, memberChannelId } = getRaidHelper();
 	// Sorties membres : celles du salon dédié ; tout le reste est officiel.
 	const isMember = (e: { channelId: string | null }) => Boolean(memberChannelId && e.channelId === memberChannelId);

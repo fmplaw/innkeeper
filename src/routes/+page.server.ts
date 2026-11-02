@@ -1,4 +1,4 @@
-import { upcomingOutings } from '$lib/server/outings';
+import { upcomingOutings, withOutingTypes } from '$lib/server/outings';
 import { getGuild } from '$lib/server/settings';
 import { publicStats } from '$lib/server/stats';
 import type { PageServerLoad } from './$types';
@@ -7,7 +7,8 @@ import type { PageServerLoad } from './$types';
 export const load: PageServerLoad = async ({ locals }) => {
 	const guild = getGuild();
 	// Membre connecté : la prochaine sortie, en tête de l'accueil. Une panne de Raid-Helper ne bloque pas la page.
-	const nextOuting = locals.user ? ((await upcomingOutings()).events?.[0] ?? null) : null;
+	const next = locals.user ? ((await upcomingOutings()).events?.[0] ?? null) : null;
+	const nextOuting = next && withOutingTypes([next])[0];
 	return {
 		nextOuting,
 		timezone: guild?.timezone ?? 'Europe/Paris',
