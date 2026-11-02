@@ -39,7 +39,7 @@ Captures prises sur une guilde de démonstration fictive.
 |---|---|
 | ![Roster de la guilde avec filtres et répartition par rôle et par classe](docs/images/roster.png) | ![Liste des sorties officielles et des sorties proposées par les membres](docs/images/sorties.png) |
 | **Roster** : filtres, répartition, badge « en jeu » venu de l'addon. | **Sorties** : officielles et proposées par les membres, tirées de Raid-Helper. |
-| ![Composition d'un raid de 10 : inscrits par rôle, banc, retards et absences](docs/images/sortie.png) | ![Candidature avec les réponses du candidat, les avis des officiers et la décision](docs/images/candidature.png) |
+| ![Composition d'un raid de 10 : inscrits par rôle, classes présentes, banc, retards et absences](docs/images/sortie.png) | ![Candidature avec les réponses du candidat, les avis des officiers et la décision](docs/images/candidature.png) |
 | **Une sortie** : composition par rôle et par classe, banc, inscription depuis le site. | **Une candidature** : réponses, avis des officiers, décision. |
 
 <p align="center">
