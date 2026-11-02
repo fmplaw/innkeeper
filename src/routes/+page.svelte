@@ -167,10 +167,10 @@
 		margin-inline: auto;
 		padding-inline: 2rem;
 	}
+	/* Hauteur liée à la largeur : la bannière garde à peu près sa taille réelle au lieu d'être agrandie. */
 	.hero {
 		position: relative;
-		height: min(92vh, 780px);
-		min-height: 560px;
+		height: clamp(560px, 44vw, 780px);
 		overflow: hidden;
 	}
 	.hero.compact {
@@ -208,10 +208,11 @@
 		margin-inline: auto;
 		padding-inline: 2rem;
 		display: flex;
-		align-items: flex-end;
+		align-items: center;
 		gap: 2rem;
 	}
 	.compact .hero-in {
+		align-items: flex-end;
 		justify-content: space-between;
 	}
 	.blazon {

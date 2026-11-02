@@ -196,7 +196,9 @@
 						<td class="num">{c.level}</td>
 						<td>{raceName(cfg, c.race)}</td>
 						<td><InterestBadges pve={c.pve} pvp={c.pvp} compact /></td>
-						<td class="muted small" title={c.recipes ?? undefined}>{professionNames(cfg, c.professions)}</td>
+						<td class="muted small profs" title={c.recipes ?? undefined}>
+							{#each professionNames(cfg, c.professions).split(', ').filter(Boolean) as name (name)}<span>{name}</span>{/each}
+						</td>
 						{#if data.roster && data.officer}
 							<td>
 								<form method="POST" action="?/remove" use:enhance>
@@ -367,6 +369,9 @@
 	}
 	.player {
 		color: var(--text);
+	}
+	.profs span {
+		display: block;
 	}
 	button.sort {
 		all: unset;

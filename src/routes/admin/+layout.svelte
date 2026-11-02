@@ -103,6 +103,7 @@
 		gap: 1.25rem;
 		max-height: calc(100dvh - 112px);
 		overflow-y: auto;
+		scrollbar-width: none;
 	}
 	.group {
 		display: grid;
