@@ -18,6 +18,7 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 - **Prénoms en double** : dans Forever, plusieurs persos peuvent porter le même prénom (seul le nom complet est unique). L'avertissement ne conseille plus de corriger l'orthographe : il explique que l'import du jeu ne sait pas encore distinguer ces fiches, et rassure quand ce sont toutes les persos du même joueur. Dans Admin → Joueurs, le badge devient « prénom en double » et n'apparaît plus quand les fiches sont toutes au même joueur.
 - Journal : libellé pour l'attribution du rôle d'arrivée par le bot (« a donné le rôle d'arrivée à »).
 - Image Docker : le site est compilé et testé une seule fois, sans émulation, puis réutilisé pour l'image arm64 (better-sqlite3 y charge son binaire précompilé arm64). La construction de l'image arm64 ne passe plus des minutes sous QEMU ; chaque image est essayée au démarrage (`/healthz`) avant publication.
+- Migrations : un test refuse deux migrations du même numéro (deux branches fusionnées l'une après l'autre) et un journal qui ne reprend pas exactement les fichiers ; la CI vérifie que `npm run db:generate` ne produit plus rien, donc que le schéma et les migrations concordent.
 
 ## [0.14.0] - 2026-11-01
 
