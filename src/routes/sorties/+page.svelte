@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Glyph from '$lib/components/Glyph.svelte';
+	import OutingIcon from '$lib/components/OutingIcon.svelte';
 
 	let { data } = $props();
 	const fmt = (options: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat('fr-FR', { ...options, timeZone: data.timezone });
@@ -51,13 +52,15 @@
 						<a class="event" href="/sorties/{e.id}">
 							<span class="when">
 								<span class="serif num day">{dayNum.format(e.startTime * 1000)}</span>
-								<span class="muted small">{weekday.format(e.startTime * 1000)}<br />{hour.format(e.startTime * 1000)}</span>
+								<span class="muted small">{weekday.format(e.startTime * 1000)}<br />{' '}{hour.format(e.startTime * 1000)}</span>
 							</span>
-							{#if e.image}<img class="thumb" src={e.image} alt="" loading="lazy" />{/if}
+							<OutingIcon activity={e.type?.activity} size={48} />
 							<span class="what">
 								<span class="serif title">{e.title}</span>
 								<span class="muted small">
-									{[e.leaderName && `Organisé par ${e.leaderName}`, e.channelName && `#${e.channelName}`].filter(Boolean).join(' · ')}
+									<!-- Type connu pour les sorties créées depuis le site ; les autres viennent de Discord. -->
+									<strong class="type {e.type?.activity ?? 'other'}">{e.type?.label ?? 'Événement Discord'}</strong>
+									{[e.leaderName && `organisé par ${e.leaderName}`, e.channelName && `#${e.channelName}`].filter(Boolean).map((t) => ` · ${t}`).join('')}
 								</span>
 							</span>
 							{#if e.signUpCount !== null}<span class="count num">{e.signUpCount} inscrit{e.signUpCount > 1 ? 's' : ''}</span>{/if}
@@ -162,12 +165,28 @@
 		font-size: 2.75rem;
 		line-height: 1;
 	}
-	.thumb {
-		flex: none;
-		width: 6.5rem;
-		aspect-ratio: 16 / 9;
-		object-fit: cover;
-		border-radius: 8px;
+	/* Type de sortie dans la couleur de son médaillon. */
+	.type {
+		font-weight: 600;
+		color: var(--gold);
+	}
+	.type.quests {
+		color: #ffd34a;
+	}
+	.type.dungeon {
+		color: #6cc6ff;
+	}
+	.type.raid {
+		color: #8fe04a;
+	}
+	.type.pvp {
+		color: #ef7a6c;
+	}
+	.type.farm {
+		color: #d9a46a;
+	}
+	.type.other {
+		color: var(--muted);
 	}
 	.what {
 		flex: 1;
@@ -219,7 +238,6 @@
 		.when br {
 			display: none;
 		}
-		.thumb,
 		.go {
 			display: none;
 		}

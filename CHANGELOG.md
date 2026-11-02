@@ -6,6 +6,7 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ### Ajouté
 
+- **Médaillon du type de sortie**, dans l'esprit de la légende de la carte du jeu : « ! » jaune pour les quêtes, vortex bleu pour un donjon, vortex vert pour un raid, épées croisées pour le PvP, pelle pour le farm, « … » pour le reste. Il s'affiche dans la liste des sorties, sur la page d'une sortie et dans la carte « prochaine sortie » de l'accueil, avec le type en toutes lettres (« Raid · Barrow Deeps »). Une sortie créée directement sur Discord ou dans Raid-Helper, sans type connu du site, est marquée « Événement Discord ». Dessins propres au projet, aucune image de Blizzard.
 - **Icônes de classe** : Admin → Guilde accepte une image par classe, affichée en médaillon à côté de chaque perso (Mes persos, roster, fiches des joueurs, candidatures, filtres par classe), avec le rôle en pastille dans le coin. Sans icône, la classe garde un blason à sa couleur. Aucune image de Blizzard n'est fournie : chaque guilde envoie les siennes.
 
 ### Modifié

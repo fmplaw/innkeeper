@@ -1,4 +1,4 @@
-import { and, asc, count, eq, gt } from 'drizzle-orm';
+import { and, asc, count, eq, gt, inArray } from 'drizzle-orm';
 import { z } from 'zod';
 import { getActivity, getInstance } from '$lib/activities';
 import { RAID_HELPER } from '$lib/game/forever';
@@ -241,6 +241,38 @@ export function recordOuting(values: typeof outings.$inferInsert) {
 }
 
 export const getOuting = (eventId: string) => db().select().from(outings).where(eq(outings.eventId, eventId)).get();
+
+/** Type d'une sortie pour l'affichage : activité (son médaillon) et libellé, « Raid · Barrow Deeps ». */
+export interface OutingType {
+	activity: string;
+	label: string;
+}
+
+/**
+ * Type des sorties créées depuis le site, par identifiant d'événement. Une sortie créée
+ * directement dans Raid-Helper ou sur Discord n'en a pas : elle n'apparaît pas dans le résultat.
+ */
+export function outingTypes(eventIds: string[]): Record<string, OutingType> {
+	if (!eventIds.length) return {};
+	const rows = db()
+		.select({ eventId: outings.eventId, activity: outings.activity, instanceId: outings.instanceId })
+		.from(outings)
+		.where(inArray(outings.eventId, eventIds))
+		.all();
+	return Object.fromEntries(
+		rows.map((r) => {
+			const activity = getActivity(r.activity);
+			const label = [activity?.name ?? 'Autre', getInstance(r.instanceId)?.name].filter(Boolean).join(' · ');
+			return [r.eventId, { activity: activity?.id ?? 'other', label }];
+		})
+	);
+}
+
+/** Ajoute à chaque sortie son type (null pour une sortie créée hors du site). */
+export function withOutingTypes<T extends { id: string }>(events: T[]): (T & { type: OutingType | null })[] {
+	const types = outingTypes(events.map((e) => e.id));
+	return events.map((e) => ({ ...e, type: types[e.id] ?? null }));
+}
 
 export const updateOutingRecord = (eventId: string, values: { title: string; startTime: Date }) =>
 	db().update(outings).set(values).where(eq(outings.eventId, eventId)).run();

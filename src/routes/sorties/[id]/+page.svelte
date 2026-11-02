@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Glyph from '$lib/components/Glyph.svelte';
+	import OutingIcon from '$lib/components/OutingIcon.svelte';
 	import { ROLES, ROLE_ICONS, ROLE_LABELS } from '$lib/roles';
 	import { className, classColor, fullName, specName } from '$lib/labels';
 	import { RAID_HELPER } from '$lib/game/forever';
@@ -44,12 +45,15 @@
 <header class="head">
 	{#if data.event.image}<img class="cover" src={data.event.image} alt="" />{/if}
 	<div class="head-row">
-		<div>
-			<p class="eyebrow">{data.event.limit ? `${data.event.limit} places` : 'Sortie'}</p>
-			<h1>{data.event.title}</h1>
-			<p class="meta muted">
-				{data.event.when}{#if data.event.leader}{' '}· organisé par {data.event.leader}{/if}
-			</p>
+		<div class="title-row">
+			<OutingIcon activity={data.event.type?.activity} size={64} />
+			<div>
+				<p class="eyebrow">{[data.event.type?.label, data.event.limit && `${data.event.limit} places`].filter(Boolean).join(' · ') || 'Sortie'}</p>
+				<h1>{data.event.title}</h1>
+				<p class="meta muted">
+					{data.event.when}{#if data.event.leader}{' '}· organisé par {data.event.leader}{/if}
+				</p>
+			</div>
 		</div>
 		<div class="actions">
 			<a class="button secondary small" href="https://raid-helper.dev/event/{data.event.id}" target="_blank" rel="noopener"><Glyph name="external" size={16} /> Raid-Helper</a>
@@ -338,6 +342,12 @@
 </div>
 
 <style>
+	.title-row {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		min-width: 0;
+	}
 	.back {
 		display: inline-flex;
 		align-items: center;
