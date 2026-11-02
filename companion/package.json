@@ -1,6 +1,6 @@
 {
   "name": "innkeeper-sync",
-  "version": "0.0.0",
+  "version": "0.14.0",
   "description": "Synchronise l'addon InnkeeperSync de World of Warcraft: Forever avec le site Innkeeper de ta guilde.",
   "license": "AGPL-3.0-only",
   "private": true,

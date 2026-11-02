@@ -190,8 +190,9 @@ Tout reste modifiable ensuite dans **Admin**. La base est dans le volume `data` 
 
 ### Derrière un reverse proxy
 
-- `ORIGIN` doit être l'adresse publique en `https://`, exactement celle tapée dans le navigateur.
-- `ADDRESS_HEADER=X-Forwarded-For` et `XFF_DEPTH=1` permettent à la limite de tentatives de connexion admin de voir la vraie adresse des visiteurs.
+- `ORIGIN` doit être l'adresse publique en `https://`, exactement celle tapée dans le navigateur. Le site envoie alors l'en-tête HSTS : le navigateur n'acceptera plus que HTTPS pour ce domaine pendant un an.
+- `docker-compose.yml` ne publie le port 3000 que sur `127.0.0.1` : le proxy doit tourner sur la même machine. Proxy sur une autre machine : remplace par `"3000:3000"` et réserve ce port au proxy (Docker passe outre le pare-feu de l'hôte, sinon le site est joignable en HTTP clair).
+- `ADDRESS_HEADER=X-Forwarded-For` et `XFF_DEPTH=1` permettent à la limite de tentatives de connexion admin de voir la vraie adresse des visiteurs. Sans eux, tous les visiteurs ont l'adresse du proxy : dix mauvais mots de passe, d'où qu'ils viennent, bloquent la connexion admin pendant un quart d'heure. `XFF_DEPTH` compte les proxys qui ajoutent une adresse (1 pour un seul proxy) : trop grand, un visiteur peut falsifier la sienne.
 - Traefik sur le même hôte Docker : `docker-compose.traefik.yml` le configure par labels (voir `.env.example`).
 - L'envoi d'images (bannière, images de sorties) demande des requêtes jusqu'à 6 Mo : l'image fixe `BODY_SIZE_LIMIT=6M`, vérifie que ton proxy l'accepte.
 - **Box sans « hairpin NAT »** (fréquent en auto-hébergement) : depuis ton réseau local, le domaine public peut ne pas répondre. Ajoute une réécriture DNS locale (AdGuard, Pi-hole…) vers l'adresse du proxy, et un `extra_hosts` pour les conteneurs qui doivent joindre le site (supervision…).
@@ -338,7 +339,7 @@ Un addon WoW n'a aucun accès au réseau, et le jeu n'écrit son fichier qu'à l
 - **Adresse** : `GET /api/sync` (vérifie la clé), `POST /api/sync` (fichier brut, 5 Mo au plus), en-tête `Authorization: Bearer iks_…`.
 - **Droits** : clé d'officier = tout l'export, registre de guilde compris (référence « vu en jeu ») ; clé de membre = seulement ses persos. Les droits suivent les rôles Discord actuels du joueur.
 - **Garde-fous** : un fichier identique au précédent n'est pas réimporté, deux envois d'un même compte à moins de 10 s sont refusés (l'application réessaie), un import qui modifie des persos est noté dans le journal (`game.sync`).
-- **Publication** : à chaque tag `vX.Y.Z`, `.github/workflows/companion.yml` construit l'installateur Windows et l'AppImage Linux avec `tauri-action`, les attache à la release, publie `latest.json` (mises à jour) et une copie `InnkeeperSync-Setup.exe` (lien fixe du site). Les mises à jour sont signées : le secret `TAURI_SIGNING_PRIVATE_KEY` du dépôt contient la clé privée, la clé publique est dans `companion/src-tauri/tauri.conf.json`. Un fork doit générer sa propre paire (`npx tauri signer generate`) et changer `endpoints`. Pas encore de version Mac (signature Apple nécessaire).
+- **Publication** : l'application a son propre numéro, dans `companion/package.json` (et `companion/package-lock.json`). À chaque tag `vX.Y.Z`, `.github/workflows/companion.yml` la reconstruit seulement si ce numéro a changé : installateur Windows et AppImage Linux construits avec `tauri-action`, attachés à la release, avec `latest.json` (mises à jour) et une copie `InnkeeperSync-Setup.exe` (lien fixe du site). Sinon, la release reprend tels quels les fichiers de la précédente : pas de mise à jour inutile chez les membres, et le même exécutable, déjà connu de Windows Defender. Une modification de `companion/` sans nouveau numéro fait échouer la publication. Les mises à jour sont signées : le secret `TAURI_SIGNING_PRIVATE_KEY` du dépôt contient la clé privée, la clé publique est dans `companion/src-tauri/tauri.conf.json`. Un fork doit générer sa propre paire (`npx tauri signer generate`) et changer `endpoints`. Pas encore de version Mac (signature Apple nécessaire).
 - **Développement** : `cd companion && npm install && npx tauri dev`.
 
 `addon/test/simulate.lua` exécute l'addon hors du jeu avec une fausse API WoW ; il produit le fichier utilisé par les tests de l'import.
@@ -409,7 +410,7 @@ npm run dev
 
 Les tests tournent aussi à chaque `docker build` et dans la CI GitHub (`.github/workflows/docker.yml`), qui publie l'image multi-architecture (amd64, arm64) sur `ghcr.io/fmplaw/innkeeper` : `latest` suit `main`, chaque version a sa propre étiquette (`0.9.1`…).
 
-**Publier une version** : `node scripts/version.mjs X.Y.Z` change le numéro dans `package.json`, `package-lock.json`, les fichiers compose (image proposée aux guildes) et renomme la section « Non publié » de [CHANGELOG.md](CHANGELOG.md). Un test vérifie que tout concorde. Committe, puis pose le tag et pousse-le **séparément** de la branche (poussés ensemble, GitHub ne lance que le build de la branche) :
+**Publier une version** : `node scripts/version.mjs X.Y.Z` change le numéro dans `package.json`, `package-lock.json`, les fichiers compose (image proposée aux guildes) et renomme la section « Non publié » de [CHANGELOG.md](CHANGELOG.md). Un test vérifie que tout concorde. Il ne touche pas au numéro d'InnkeeperSync (`companion/package.json`) : change-le à la main quand l'application elle-même a changé. Committe, puis pose le tag et pousse-le **séparément** de la branche (poussés ensemble, GitHub ne lance que le build de la branche) :
 
 ```sh
 node scripts/version.mjs 0.9.2

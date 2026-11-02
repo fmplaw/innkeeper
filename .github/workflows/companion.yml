@@ -1,8 +1,13 @@
 name: Application InnkeeperSync
 
-# À chaque version (tag vX.Y.Z) : construit l'application pour PC (Tauri), signe ses mises à jour et
-# l'attache à la release GitHub. La page « Synchronisation automatique » du site renvoie vers
-# releases/latest/download/InnkeeperSync-Setup.exe ; l'application vérifie latest.json pour se mettre à jour.
+# À chaque version du site (tag vX.Y.Z), la release GitHub reçoit l'application pour PC (Tauri). La page
+# « Synchronisation automatique » du site renvoie vers releases/latest/download/InnkeeperSync-Setup.exe ;
+# l'application vérifie latest.json pour se mettre à jour.
+#
+# L'application a son propre numéro (companion/package.json). Elle n'est reconstruite que s'il change :
+# sinon la release reprend tels quels les fichiers de la précédente. Les membres ne reçoivent pas de mise
+# à jour inutile, et Windows Defender revoit le même exécutable, déjà connu (un exécutable neuf peut être
+# signalé à tort, comme la 0.13.1). Modifier companion/ sans changer ce numéro fait échouer la version.
 # Secret nécessaire : TAURI_SIGNING_PRIVATE_KEY (clé privée de signature des mises à jour, sans mot de passe).
 
 on:
@@ -15,7 +20,60 @@ permissions:
   contents: write
 
 jobs:
+  # Reconstruire, ou reprendre les fichiers de la version précédente ?
+  decide:
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    outputs:
+      build: ${{ steps.decide.outputs.build }}
+      previous: ${{ steps.decide.outputs.previous }}
+      version: ${{ steps.decide.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: decide
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          version=$(node -p "require('./companion/package.json').version")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          previous=$(git describe --tags --abbrev=0 --match 'v*' "${GITHUB_REF_NAME}^" 2>/dev/null || true)
+          released=$([ -n "$previous" ] && gh release download "$previous" --pattern latest.json --output - 2>/dev/null | jq -r .version || true)
+          echo "previous=$previous" >> "$GITHUB_OUTPUT"
+          if [ "$version" != "$released" ]; then
+            echo "InnkeeperSync $version (précédente : ${released:-aucune}) : construction."
+            echo "build=true" >> "$GITHUB_OUTPUT"
+          elif ! git diff --quiet "$previous" HEAD -- companion/ ':!companion/package.json' ':!companion/package-lock.json' \
+            || ! node .github/scripts/same-except-version.mjs "$previous" companion/package.json companion/package-lock.json; then
+            echo "::error::companion/ a changé depuis $previous, mais pas le numéro de companion/package.json ($version) : change-le pour publier l'application."
+            exit 1
+          else
+            echo "InnkeeperSync $version inchangée : reprise des fichiers de $previous."
+            echo "build=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  # Application inchangée : la release reprend l'installateur, l'AppImage et latest.json de la précédente.
+  reuse:
+    needs: decide
+    if: needs.decide.outputs.build == 'false'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Release avec les fichiers de la version précédente
+        run: |
+          gh release download "${{ needs.decide.outputs.previous }}" --dir app
+          ls app
+          notes="Voir le [journal des modifications](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md). L'application InnkeeperSync pour Windows : InnkeeperSync-Setup.exe (version ${{ needs.decide.outputs.version }}, inchangée)."
+          gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 || gh release create "$GITHUB_REF_NAME" --title "Innkeeper $GITHUB_REF_NAME" --notes "$notes" --verify-tag
+          gh release upload "$GITHUB_REF_NAME" app/* --clobber
+
   build:
+    needs: decide
+    # Pull request : construction d'essai (decide ne tourne pas). Version : seulement si le numéro a changé.
+    if: always() && (github.event_name == 'pull_request' || needs.decide.outputs.build == 'true')
     strategy:
       fail-fast: false
       matrix:
@@ -42,9 +100,6 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev libxdo-dev libssl-dev
       - run: npm ci
       - run: npm run check
-      - name: Numéro de version (celui du site)
-        shell: bash
-        run: npm pkg set version="$(node -p "require('../package.json').version")"
 
       - name: Construction (sans publication, pour une pull request)
         if: github.event_name == 'pull_request'
@@ -61,7 +116,7 @@ jobs:
           projectPath: companion
           tagName: ${{ github.ref_name }}
           releaseName: Innkeeper ${{ github.ref_name }}
-          releaseBody: "Voir le [journal des modifications](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md). L'application InnkeeperSync pour Windows : InnkeeperSync-Setup.exe."
+          releaseBody: "Voir le [journal des modifications](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md). L'application InnkeeperSync pour Windows : InnkeeperSync-Setup.exe (version ${{ needs.decide.outputs.version }})."
           releaseDraft: false
           includeUpdaterJson: true
           args: --bundles ${{ matrix.bundles }}

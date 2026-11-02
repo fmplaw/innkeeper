@@ -4,6 +4,21 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ## [Non publié]
 
+### Sécurité
+
+- **HSTS** : un site servi en HTTPS (`ORIGIN` en `https://`) demande au navigateur de n'utiliser que HTTPS pendant un an.
+- **`docker-compose.yml` ne publie plus le port 3000 que sur la machine elle-même** (`127.0.0.1:3000`) : Docker passant outre le pare-feu, le site était aussi joignable en HTTP clair depuis le réseau. Avec un reverse proxy sur une autre machine, remettre `"3000:3000"` (voir le README).
+
+### Corrigé
+
+- Roster : avec de vraies fiches, le tableau débordait de la page et la colonne Métiers sortait du cadre (cinq métiers dont les secondaires, badge « pas trouvé en jeu », pseudo comme « Artémis/christcosmik/néfélion », race « Skyborne (Windshaper) »). Le texte des cellules passe maintenant à la ligne, les pseudos se coupent après les barres obliques, et seuls les métiers principaux s'affichent en clair : les secondaires sont résumés (« + 3 secondaires », détail au survol).
+
+## [0.15.0] - 2026-11-02
+
+### Publication
+
+- **InnkeeperSync n'est plus reconstruite à chaque version du site**, seulement quand son propre numéro change (`companion/package.json`). Sinon, la release reprend l'installateur de la version précédente : pas de mise à jour inutile chez les membres, et pas de nouvel exécutable à faire accepter par Windows Defender. Cette version garde InnkeeperSync **0.14.0**.
+
 ### Ajouté
 
 - **Médaillon du type de sortie**, dans l'esprit de la légende de la carte du jeu : « ! » jaune pour les quêtes, vortex bleu pour un donjon, vortex vert pour un raid, épées croisées pour le PvP, pelle pour le farm, « … » pour le reste. Il s'affiche dans la liste des sorties, sur la page d'une sortie et dans la carte « prochaine sortie » de l'accueil, avec le type en toutes lettres (« Raid · Barrow Deeps »). Une sortie créée directement sur Discord ou dans Raid-Helper, sans type connu du site, est marquée « Événement Discord ». Dessins propres au projet, aucune image de Blizzard.
@@ -18,10 +33,6 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 - **Prénoms en double** : dans Forever, plusieurs persos peuvent porter le même prénom (seul le nom complet est unique). L'avertissement ne conseille plus de corriger l'orthographe : il explique que l'import du jeu ne sait pas encore distinguer ces fiches, et rassure quand ce sont toutes les persos du même joueur. Dans Admin → Joueurs, le badge devient « prénom en double » et n'apparaît plus quand les fiches sont toutes au même joueur.
 - Journal : libellé pour l'attribution du rôle d'arrivée par le bot (« a donné le rôle d'arrivée à »).
 - Image Docker : le site est compilé et testé une seule fois, sans émulation, puis réutilisé pour l'image arm64 (better-sqlite3 y charge son binaire précompilé arm64). La construction de l'image arm64 ne passe plus des minutes sous QEMU ; chaque image est essayée au démarrage (`/healthz`) avant publication.
-
-### Corrigé
-
-- Roster : avec de vraies fiches, le tableau débordait de la page et la colonne Métiers sortait du cadre (cinq métiers dont les secondaires, badge « pas trouvé en jeu », pseudo comme « Artémis/christcosmik/néfélion », race « Skyborne (Windshaper) »). Le texte des cellules passe maintenant à la ligne, les pseudos se coupent après les barres obliques, et seuls les métiers principaux s'affichent en clair : les secondaires sont résumés (« + 3 secondaires », détail au survol).
 
 ## [0.14.0] - 2026-11-01
 
@@ -170,7 +181,8 @@ Première version publique.
 - **Apparence** : palettes Horde, Alliance et multi-faction, logo, bannière et couleur d'accent de la guilde, affichage adapté aux téléphones.
 - **Exploitation** : image Docker multi-architecture publiée par la CI, sauvegardes de la base, point de contrôle `/healthz`.
 
-[Non publié]: https://github.com/fmplaw/innkeeper/compare/v0.14.0...HEAD
+[Non publié]: https://github.com/fmplaw/innkeeper/compare/v0.15.0...HEAD
+[0.15.0]: https://github.com/fmplaw/innkeeper/compare/v0.14.0...v0.15.0
 [0.14.0]: https://github.com/fmplaw/innkeeper/compare/v0.13.1...v0.14.0
 [0.13.1]: https://github.com/fmplaw/innkeeper/compare/v0.13.0...v0.13.1
 [0.13.0]: https://github.com/fmplaw/innkeeper/compare/v0.12.2...v0.13.0
