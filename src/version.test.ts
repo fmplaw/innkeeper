@@ -12,4 +12,13 @@ describe('version', () => {
 	it('le CHANGELOG a une section pour la version courante', () => {
 		expect(readFileSync('CHANGELOG.md', 'utf8')).toContain(`## [${version}] - `);
 	});
+
+	// InnkeeperSync a son propre numéro, changé à la main quand l'application change (companion.yml).
+	it('InnkeeperSync a le même numéro dans package.json et package-lock.json', () => {
+		const app = JSON.parse(readFileSync('companion/package.json', 'utf8')) as { version: string };
+		const lock = JSON.parse(readFileSync('companion/package-lock.json', 'utf8')) as { version: string; packages: Record<string, { version?: string }> };
+		expect(app.version).toMatch(/^\d+\.\d+\.\d+$/);
+		expect(lock.version).toBe(app.version);
+		expect(lock.packages[''].version).toBe(app.version);
+	});
 });

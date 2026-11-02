@@ -1,10 +1,13 @@
 services:
   site:
     # Version publiée ; pour construire depuis les sources, remplace par `build: .`
-    image: ghcr.io/fmplaw/innkeeper:0.14.0
+    image: ghcr.io/fmplaw/innkeeper:0.15.0
     env_file: .env
     ports:
-      - "3000:3000"
+      # Joignable seulement depuis cette machine, par le reverse proxy HTTPS : Docker passe
+      # outre le pare-feu de l'hôte, et "3000:3000" ouvrirait le site en HTTP clair à tout le réseau.
+      # Proxy sur une autre machine : remplace par "3000:3000" et filtre le port 3000.
+      - "127.0.0.1:3000:3000"
     volumes:
       - data:/data
     restart: unless-stopped
