@@ -1,0 +1,38 @@
+name: Migrations
+
+# schema.ts et drizzle/ doivent raconter la même chose : si `drizzle-kit generate` produit une
+# migration, c'est qu'un changement de schéma n'a pas la sienne, ou qu'une fusion de deux
+# migrations du même numéro a gardé un instantané incomplet (drizzle/meta/*_snapshot.json).
+# Le nommage et le journal sont vérifiés par src/lib/server/db/migrations.test.ts.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  schema:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Le schéma correspond aux migrations
+        run: |
+          npx drizzle-kit generate --name verification < /dev/null
+          if [ -n "$(git status --porcelain drizzle)" ]; then
+            git status --short drizzle
+            echo "::error::schema.ts diffère des migrations : lance npm run db:generate et versionne le résultat (fusion de deux migrations du même numéro : voir le README, § Développement)."
+            exit 1
+          fi

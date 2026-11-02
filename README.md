@@ -408,6 +408,8 @@ npm run dev
 | `npm run build` | construction de production |
 | `npm run db:generate` | migration après une modification de `src/lib/server/db/schema.ts` |
 
+**Deux branches avec une migration chacune** prennent le même numéro (`0020_a`, `0020_b`). À la fusion de la seconde, ne garde pas les deux : supprime sa migration (fichier `.sql`, instantané `meta/0020_snapshot.json`, entrée du journal), reprends l'instantané et le journal de `main`, puis relance `npm run db:generate`. Un test (`migrations.test.ts`) refuse deux numéros identiques, et la CI (`.github/workflows/migrations.yml`) vérifie que `db:generate` ne produit plus rien.
+
 Les tests tournent aussi à chaque `docker build` et dans la CI GitHub (`.github/workflows/docker.yml`), qui publie l'image multi-architecture (amd64, arm64) sur `ghcr.io/fmplaw/innkeeper` : `latest` suit `main`, chaque version a sa propre étiquette (`0.9.1`…).
 
 **Publier une version** : `node scripts/version.mjs X.Y.Z` change le numéro dans `package.json`, `package-lock.json`, les fichiers compose (image proposée aux guildes) et renomme la section « Non publié » de [CHANGELOG.md](CHANGELOG.md). Un test vérifie que tout concorde. Il ne touche pas au numéro d'InnkeeperSync (`companion/package.json`) : change-le à la main quand l'application elle-même a changé. Committe, puis pose le tag et pousse-le **séparément** de la branche (poussés ensemble, GitHub ne lance que le build de la branche) :
