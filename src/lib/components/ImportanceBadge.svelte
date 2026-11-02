@@ -17,17 +17,16 @@
 		font-weight: 600;
 		white-space: nowrap;
 		color: var(--tone);
-		border: 1px solid color-mix(in srgb, var(--tone) 55%, transparent);
-		background: color-mix(in srgb, var(--tone) 12%, transparent);
+		background: color-mix(in oklab, var(--tone) 12%, var(--bg));
 	}
 	.essential {
-		--tone: #e5534b;
+		--tone: var(--danger);
 	}
 	.raid {
-		--tone: #e3a03a;
+		--tone: var(--warn);
 	}
 	.recommended {
-		--tone: #56d364;
+		--tone: var(--good);
 	}
 	.useful {
 		--tone: #58a6ff;

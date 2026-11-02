@@ -145,7 +145,7 @@
 		border-radius: 4px;
 	}
 	.new-token {
-		border-color: color-mix(in srgb, #3fb950 50%, var(--border));
+		border-color: color-mix(in srgb, var(--good) 50%, var(--border));
 	}
 	.new-token p {
 		margin: 0 0 0.6rem;

@@ -16,8 +16,8 @@
 	d'œil.
 </p>
 
-{#if form?.saved}<p class="card ok">{form.saved}</p>{/if}
-{#if form?.error}<p class="card error">{form.error}</p>{/if}
+{#if form?.saved}<p class="notice ok">{form.saved}</p>{/if}
+{#if form?.error}<p class="notice bad">{form.error}</p>{/if}
 
 {#if !data.hasInnkeeperSync}
 	<form method="POST" action="?/innkeeperSync" use:enhance class="card suggest row">
@@ -80,7 +80,6 @@
 		margin: 0 0 1.25rem;
 	}
 	.ok,
-	p.card.error,
 	.suggest {
 		margin: 0 0 1rem;
 	}

@@ -1,58 +1,96 @@
 <script lang="ts">
+	import Glyph from '$lib/components/Glyph.svelte';
+
 	let { data } = $props();
-	const day = $derived(new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', timeZone: data.timezone }));
-	const hour = $derived(new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit', timeZone: data.timezone }));
+	const fmt = (options: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat('fr-FR', { ...options, timeZone: data.timezone });
+	const dayNum = $derived(fmt({ day: 'numeric' }));
+	const weekday = $derived(fmt({ weekday: 'long' }));
+	const hour = $derived(fmt({ hour: '2-digit', minute: '2-digit' }));
+	const month = $derived(fmt({ month: 'long', year: 'numeric' }));
+	const all = $derived([...(data.official ?? []), ...(data.member ?? [])]);
+	const next = $derived(all.toSorted((a, b) => a.startTime - b.startTime)[0]);
+	const relative = new Intl.RelativeTimeFormat('fr-FR', { numeric: 'auto' });
+	const fromNow = (t: number) => {
+		const days = Math.round((t * 1000 - Date.now()) / 86_400_000);
+		return days < 1 ? "aujourd'hui" : relative.format(days, 'day');
+	};
+	// Regroupe par mois, dans l'ordre d'arrivée (déjà chronologique).
+	const byMonth = <T extends { startTime: number }>(events: T[]) => {
+		const groups: { label: string; events: T[] }[] = [];
+		for (const e of events) {
+			const label = month.format(e.startTime * 1000);
+			if (groups.at(-1)?.label !== label) groups.push({ label, events: [] });
+			groups.at(-1)!.events.push(e);
+		}
+		return groups;
+	};
 </script>
 
-<div class="head">
-	<h1>Sorties</h1>
-	{#if data.canCreate}<a class="button" href="/sorties/nouvelle">Nouvelle sortie</a>{:else if data.canPropose}<a class="button" href="/sorties/nouvelle">Proposer une sortie</a>{/if}
+<div class="page-head">
+	<div>
+		<h1>Sorties</h1>
+		{#if next}<p class="sub">Prochaine sortie {fromNow(next.startTime)}, à {hour.format(next.startTime * 1000)} : {next.title}.</p>{/if}
+	</div>
+	{#if data.canCreate}
+		<a class="button" href="/sorties/nouvelle"><Glyph name="plus" size={18} /> Nouvelle sortie</a>
+	{:else if data.canPropose}
+		<a class="button" href="/sorties/nouvelle"><Glyph name="plus" size={18} /> Proposer une sortie</a>
+	{/if}
 </div>
 
-{#if data.deleted}<p class="card ok">Sortie supprimée, sur le site comme sur Discord.</p>{/if}
-{#if data.eventsError}<p class="card warn">{data.eventsError}</p>{/if}
+{#if data.deleted}<p class="notice ok"><Glyph name="check" /> Sortie supprimée, sur le site comme sur Discord.</p>{/if}
+{#if data.eventsError}<p class="notice warn"><Glyph name="warning" /> {data.eventsError}</p>{/if}
+
 {#snippet list(events: NonNullable<typeof data.official>, empty: string)}
 	{#if events.length}
-		<ul class="events">
-			{#each events as e (e.id)}
-				<li>
-					<a class="card event" href="/sorties/{e.id}">
-						{#if e.image}<img class="thumb" src={e.image} alt="" loading="lazy" />{/if}
-						<span class="date">
-							<span class="day">{day.format(e.startTime * 1000)}</span>
-							<span class="hour">{hour.format(e.startTime * 1000)}</span>
-						</span>
-						<span class="body">
-							<strong>{e.title}</strong>
-							<span class="muted small">
-								{[e.leaderName && `Organisé par ${e.leaderName}`, e.channelName && `#${e.channelName}`].filter(Boolean).join(' · ')}
+		{#each byMonth(events) as group (group.label)}
+			<h3 class="month">{group.label}</h3>
+			<ol class="events">
+				{#each group.events as e (e.id)}
+					<li>
+						<a class="event" href="/sorties/{e.id}">
+							<span class="when">
+								<span class="serif num day">{dayNum.format(e.startTime * 1000)}</span>
+								<span class="muted small">{weekday.format(e.startTime * 1000)}<br />{hour.format(e.startTime * 1000)}</span>
 							</span>
-						</span>
-						{#if e.signUpCount !== null}<span class="count">{e.signUpCount} inscrit{e.signUpCount > 1 ? 's' : ''}</span>{/if}
-					</a>
-				</li>
-			{/each}
-		</ul>
+							{#if e.image}<img class="thumb" src={e.image} alt="" loading="lazy" />{/if}
+							<span class="what">
+								<span class="serif title">{e.title}</span>
+								<span class="muted small">
+									{[e.leaderName && `Organisé par ${e.leaderName}`, e.channelName && `#${e.channelName}`].filter(Boolean).join(' · ')}
+								</span>
+							</span>
+							{#if e.signUpCount !== null}<span class="count num">{e.signUpCount} inscrit{e.signUpCount > 1 ? 's' : ''}</span>{/if}
+							<span class="go" aria-hidden="true"><Glyph name="chevron-right" /></span>
+						</a>
+					</li>
+				{/each}
+			</ol>
+		{/each}
 	{:else}
-		<p class="card empty muted">{empty}</p>
+		<p class="empty">{empty}</p>
 	{/if}
 {/snippet}
 
 {#if data.official}
-	{#if data.member}<h2>Sorties officielles</h2>{/if}
-	{@render list(data.official, data.source === 'bot' ? "Aucune sortie à venir pour l'instant. Les sorties Raid-Helper postées dans les salons du serveur apparaissent ici." : "Aucune sortie à venir pour l'instant.")}
+	<section class="group">
+		{#if data.member}<h2>Sorties officielles</h2>{/if}
+		{@render list(data.official, data.source === 'bot' ? "Aucune sortie à venir pour l'instant. Les sorties Raid-Helper postées dans les salons du serveur apparaissent ici." : "Aucune sortie à venir pour l'instant.")}
+	</section>
 {/if}
 
 {#if data.member}
-	<div class="section-head">
-		<h2>Sorties des membres</h2>
-		{#if data.canPropose}<a class="button secondary" href="/sorties/nouvelle">Proposer une sortie</a>{/if}
-	</div>
-	{@render list(data.member, 'Aucune sortie proposée pour l’instant : lance la première ! Donjon, quêtes, farm… tout le monde peut proposer.')}
+	<section class="group">
+		<div class="section-head">
+			<h2>Sorties des membres</h2>
+			{#if data.canPropose && data.canCreate}<a class="button secondary small" href="/sorties/nouvelle">Proposer une sortie</a>{/if}
+		</div>
+		{@render list(data.member, 'Aucune sortie proposée pour l’instant : lance la première ! Donjon, quêtes, farm… tout le monde peut proposer.')}
+	</section>
 {/if}
 
-<details class="card lookup" open={!data.official || data.invalid}>
-	<summary>Retrouver un événement par son ID ou son lien</summary>
+<details class="lookup" open={!data.official || data.invalid}>
+	<summary class="muted">Retrouver un événement par son ID ou son lien</summary>
 	<form method="GET" class="lookup-form">
 		<div class="row">
 			<input id="evenement" name="evenement" required placeholder="123456789012345678" aria-label="ID ou lien de l'événement" />
@@ -67,87 +105,92 @@
 </details>
 
 <style>
-	.head {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		justify-content: space-between;
-		gap: 0.75rem;
+	.group + .group {
+		margin-top: 3.5rem;
 	}
-	h2 {
-		font-size: 1.15rem;
-		margin: 1.25rem 0 0.75rem;
+	.group h2 {
+		margin: 0;
 	}
 	.section-head {
 		display: flex;
 		flex-wrap: wrap;
 		align-items: center;
 		justify-content: space-between;
-		gap: 0.5rem;
+		gap: 0.75rem;
 	}
-	.section-head h2 {
-		margin: 1.25rem 0 0.75rem;
+	.month {
+		margin: 2rem 0 0;
+		padding-bottom: 0.75rem;
+		border-bottom: 1px solid var(--border);
+		color: var(--muted);
+		font-size: 1rem;
+	}
+	.month::first-letter {
+		text-transform: uppercase;
 	}
 	.events {
 		list-style: none;
-		margin: 0 0 1.5rem;
+		margin: 0;
 		padding: 0;
-		display: grid;
-		gap: 0.6rem;
 	}
 	.event {
 		display: flex;
 		align-items: center;
-		gap: 1rem;
+		gap: 1.5rem;
+		padding: 1.25rem 0.5rem;
+		border-bottom: 1px solid var(--border);
 		color: var(--text);
 		text-decoration: none;
+		transition: background 0.15s;
 	}
 	.event:hover {
-		border-color: var(--accent);
+		background: color-mix(in srgb, var(--accent) 7%, transparent);
 	}
-	.thumb {
-		width: 7rem;
-		aspect-ratio: 16 / 9;
-		object-fit: cover;
-		border-radius: 4px;
-		flex-shrink: 0;
+	.event:hover .title {
+		color: var(--accent-ink);
 	}
-	.date {
-		display: grid;
-		min-width: 9.5rem;
+	.when {
+		flex: none;
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		width: 8rem;
+		line-height: 1.25;
 	}
 	.day {
-		color: var(--gold);
-		font-weight: 700;
-		text-transform: capitalize;
+		min-width: 3rem;
+		font-size: 2.75rem;
+		line-height: 1;
 	}
-	.hour {
-		font-variant-numeric: tabular-nums;
+	.thumb {
+		flex: none;
+		width: 6.5rem;
+		aspect-ratio: 16 / 9;
+		object-fit: cover;
+		border-radius: 8px;
 	}
-	.body {
+	.what {
 		flex: 1;
 		display: grid;
-		gap: 0.15rem;
+		gap: 0.1875rem;
 		min-width: 0;
 	}
+	.title {
+		font-size: 1.375rem;
+		line-height: 1.25;
+		transition: color 0.15s;
+	}
 	.count {
-		font-variant-numeric: tabular-nums;
 		white-space: nowrap;
+		color: var(--muted);
 	}
-	@media (max-width: 30rem) {
-		.event {
-			flex-wrap: wrap;
-		}
-	}
-	.empty {
-		margin: 0 0 1.5rem;
+	.go {
+		display: inline-flex;
+		color: var(--muted);
 	}
 	.lookup {
 		max-width: 44rem;
-	}
-	.lookup summary {
-		cursor: pointer;
-		color: var(--muted);
+		margin-top: 3rem;
 	}
 	.lookup-form {
 		display: grid;
@@ -157,17 +200,31 @@
 	.lookup-form .row {
 		flex-wrap: nowrap;
 	}
-	.small {
-		font-size: 0.85rem;
+	.lookup-form p {
 		margin: 0;
 	}
-	.ok {
-		border-color: var(--gold);
-		margin-bottom: 1rem;
-	}
-	.warn {
-		border-color: var(--gold);
-		color: var(--gold);
-		margin-bottom: 1rem;
+	@media (max-width: 640px) {
+		.event {
+			flex-wrap: wrap;
+			gap: 0.5rem 1rem;
+			padding-inline: 0;
+		}
+		.when {
+			width: 100%;
+		}
+		.day {
+			min-width: 0;
+			font-size: 2rem;
+		}
+		.when br {
+			display: none;
+		}
+		.thumb,
+		.go {
+			display: none;
+		}
+		.lookup-form .row {
+			flex-wrap: wrap;
+		}
 	}
 </style>

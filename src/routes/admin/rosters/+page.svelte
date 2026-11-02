@@ -14,10 +14,10 @@
 	plusieurs rosters, et « Toute la guilde » reste toujours disponible.
 </p>
 
-{#if form?.error}<p class="card error">{form.error}</p>{/if}
-{#if form?.created}<p class="card ok">Roster créé.</p>{/if}
-{#if form?.saved}<p class="card ok">Roster enregistré.</p>{/if}
-{#if form?.deleted}<p class="card ok">Roster supprimé.</p>{/if}
+{#if form?.error}<p class="notice bad">{form.error}</p>{/if}
+{#if form?.created}<p class="notice ok">Roster créé.</p>{/if}
+{#if form?.saved}<p class="notice ok">Roster enregistré.</p>{/if}
+{#if form?.deleted}<p class="notice ok">Roster supprimé.</p>{/if}
 
 <div class="list">
 	{#each data.rosters as r (r.id)}
@@ -111,9 +111,6 @@
 	}
 	.ok {
 		border-color: var(--gold);
-		margin-bottom: 1rem;
-	}
-	p.card.error {
 		margin-bottom: 1rem;
 	}
 </style>

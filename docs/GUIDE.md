@@ -24,7 +24,7 @@ Ce guide explique comment utiliser au quotidien le site de ta guilde, propulsé 
 2. Tu arrives sur **discord.com**, la page officielle de Discord. Vérifie le compte affiché : ce doit être **celui que tu utilises sur le serveur de la guilde**.
 3. Clique sur **Autoriser**. Tu reviens sur le site, connecté.
 
-Sur téléphone, les pages du site sont dans le menu **☰** en haut, avec ton nom et le bouton de déconnexion.
+Sur téléphone, les pages du site sont dans la barre d'onglets en bas de l'écran ; **Plus** donne le reste des pages, ton nom et le bouton de déconnexion.
 
 Le site ne voit jamais ton mot de passe. Discord lui transmet seulement ton identifiant, ton pseudo, ton avatar et tes rôles sur le serveur de la guilde. Ce sont ces rôles qui déterminent ce que tu vois : membre ou officier.
 
@@ -71,7 +71,7 @@ Une clé de **membre** met à jour tes persos seulement ; une clé d'**officier*
 
 ### Le roster et les pages joueurs
 
-- **Roster** : la liste des persos de la guilde, avec des filtres par classe, rôle, faction, intérêts, métier et niveau de métier. Par défaut, **seuls les mains** sont affichés, pour une vue juste de l'effectif ; choisis « Mains et rerolls » pour tout voir. Un clic sur l'en-tête d'une colonne trie le tableau, un second clic inverse l'ordre ; le tri reste en place quand tu changes de filtre. Les onglets en haut montrent les **rosters** composés par les officiers (équipe de raid…).
+- **Roster** : la liste des persos de la guilde, avec des filtres par classe, rôle, faction, intérêts, métier et niveau de métier. Par défaut, **seuls les mains** sont affichés, pour une vue juste de l'effectif ; choisis « Mains et rerolls » pour tout voir. Un clic sur une carte de rôle (Tank, Soigneur…) ou sur une pastille de classe filtre la liste, un second clic retire le filtre ; chaque compteur montre ce que donnerait ce choix, sans tenir compte de son propre filtre. Un clic sur l'en-tête d'une colonne trie le tableau, un second clic inverse l'ordre ; le tri reste en place quand tu changes de filtre. Les onglets en haut montrent les **rosters** composés par les officiers (équipe de raid…).
 - **Charte** : la charte et le règlement de la guilde, dans le menu dès que les officiers l'ont publiée. Elle est lisible par tous, même sans connexion.
 - **Addons** : le tableau des addons que conseille la guilde, du plus important (indispensables, recommandés en raid) au confort, avec pour chacun pourquoi la guilde le conseille et son lien de téléchargement. Filtres : recherche, statut, usage, et « Pour mon main », qui ne garde que ce qui concerne la classe et le rôle de ton main.
 - **Page joueur** : un clic sur un nom affiche ses persos, ses métiers, ses recettes connues et ses rosters.
@@ -201,7 +201,7 @@ L'addon n'envoie rien sur Internet ; il écrit seulement ce fichier. Il n'export
 - Admin → **Rôles Discord** (admins de l'instance seulement) : permission de chaque rôle (Officier, Membre, Aucune) et mode d'accès au site. Un officier ne peut donc ni nommer d'autres officiers ni ouvrir le site : pour un nouveau rang, demande à un admin de l'instance.
 - Admin → **Charte** : la charte et le règlement de la guilde, avec un aperçu en direct. Mise en forme : `# Titre`, `## Sous-titre`, `- élément de liste`, `**gras**`, `*italique*`, ligne vide entre les paragraphes. Sur la page, chaque `## Sous-titre` devient un encadré : regroupe par exemple les valeurs de la guilde sous un `# Titre`, une valeur par `##`. Une dernière ligne entièrement en gras, comme une devise, s'affiche en bandeau tout en bas. Une fois publiée, elle apparaît dans le menu de tous et les candidats doivent l'accepter pour postuler ; la candidature l'indique par une pastille verte « ✔ Charte acceptée le … » (orange si la charte a été modifiée depuis). La laisser vide la retire. Chaque modification est notée dans le journal.
 - Admin → **Addons** : la liste des addons conseillés, publiée sur la page Addons (visible de tous, même sans connexion ; le lien apparaît dans le menu dès qu'il y a un addon). Pour chacun : importance (Indispensable, Recommandé en raid, Recommandé, Utile, Confort), usage, public visé (classes, rôles ; rien de coché = tout le monde), une phrase sur ce qu'il fait et pourquoi la guilde le conseille, liens CurseForge, Wago ou autre. ▲▼ pour l'ordre dans chaque niveau. Un bouton ajoute **Innkeeper Sync** en un clic. Gardez peu d'indispensables : un nouveau doit voir l'essentiel d'un coup d'œil.
-- Admin → **Guilde** : **type de serveur** (JcJ, JcE, JdR ou Hardcore), affiché sur l'accueil et en bas de chaque page ; présentation, logo, bannière, ambitions, horaires, recrutement affiché sur l'accueil. La **faction** choisie donne aussi l'ambiance du site (fond chaud pour la Horde, bleu nuit pour l'Alliance, neutre pour une guilde mixte) ; la couleur d'accent reste au choix.
+- Admin → **Guilde** : **type de serveur** (JcJ, JcE, JdR ou Hardcore), affiché sur l'accueil et en bas de chaque page ; présentation, logo (au moins 600 × 600 px), bannière (grande image de fond de l'accueil : au moins 2400 × 1000 px, sujet au centre, les bords étant recadrés selon l'écran), ambitions, horaires, recrutement affiché sur l'accueil. La **faction** choisie donne aussi l'ambiance du site (fond chaud pour la Horde, bleu nuit pour l'Alliance, neutre pour une guilde mixte) ; la couleur d'accent reste au choix.
 
 ---
 

@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { untrack, type Snippet } from 'svelte';
 	import { enhance } from '$app/forms';
-	import { ROLES, ROLE_LABELS, type Role } from '$lib/roles';
+	import Glyph from '$lib/components/Glyph.svelte';
+	import { ROLES, ROLE_ICONS, ROLE_LABELS, type Role } from '$lib/roles';
 	import { FACTIONS, FACTION_LABELS, MAX_PRIMARY_PROFESSIONS, MAX_PROFESSION_LEVEL } from '$lib/game/forever';
 	import { AXIS_LABELS, INTEREST_AXES, INTEREST_LEVELS, LEVEL_LABELS } from '$lib/interests';
 	import type { PublicConfig } from '$lib/server/config';
@@ -104,6 +105,8 @@
 <form method="POST" {action} use:enhance class="card form">
 	{#if errors.form}<p class="error">{errors.form}</p>{/if}
 
+	<fieldset>
+	<legend>Le perso</legend>
 	<div class="grid">
 		<div>
 			<label for="name">Nom du perso *</label>
@@ -156,11 +159,12 @@
 			{:else}
 				<label>
 					<input type="checkbox" name="isMain" checked={initial.isMain ?? false} />
-					Reroll de <strong>{mainName}</strong> — en faire le main
+					<span>Reroll de <strong>{mainName}</strong> — en faire le main</span>
 				</label>
 			{/if}
 		</div>
 	</div>
+	</fieldset>
 
 	<div class="specs">
 		<fieldset>
@@ -174,11 +178,15 @@
 				{#if errors.spec}<p class="error">{errors.spec}</p>{/if}
 			</div>
 			<div>
-				<label for="role">Rôle *</label>
-				<select id="role" name="role" required bind:value={role}>
-					<option value="" disabled>Choisir…</option>
-					{#each rolesFor(spec) as r (r)}<option value={r}>{ROLE_LABELS[r]}</option>{/each}
-				</select>
+				<span class="label" id="role-label">Rôle *</span>
+				<div class="roles" role="radiogroup" aria-labelledby="role-label">
+					{#each rolesFor(spec) as r (r)}
+						<label class="pill role-pill">
+							<input type="radio" name="role" value={r} required bind:group={role} />
+							<span><span class="mark" style:color="var(--r-{r})"><Glyph name={ROLE_ICONS[r]} size={15} /></span>{ROLE_LABELS[r]}</span>
+						</label>
+					{/each}
+				</div>
 				{#if errors.role}<p class="error">{errors.role}</p>{/if}
 			</div>
 		</fieldset>
@@ -197,11 +205,19 @@
 				{#if errors.spec2}<p class="error">{errors.spec2}</p>{/if}
 			</div>
 			<div>
-				<label for="role2">Rôle</label>
-				<select id="role2" name="role2" bind:value={role2}>
-					<option value="">Aucun</option>
-					{#each rolesFor(spec2) as r (r)}<option value={r}>{ROLE_LABELS[r]}</option>{/each}
-				</select>
+				<span class="label" id="role2-label">Rôle</span>
+				<div class="roles" role="radiogroup" aria-labelledby="role2-label">
+					<label class="pill">
+						<input type="radio" name="role2" value="" bind:group={role2} />
+						<span>Aucun</span>
+					</label>
+					{#each rolesFor(spec2) as r (r)}
+						<label class="pill role-pill">
+							<input type="radio" name="role2" value={r} bind:group={role2} />
+							<span><span class="mark" style:color="var(--r-{r})"><Glyph name={ROLE_ICONS[r]} size={15} /></span>{ROLE_LABELS[r]}</span>
+						</label>
+					{/each}
+				</div>
 				{#if errors.role2}<p class="error">{errors.role2}</p>{/if}
 			</div>
 		</fieldset>
@@ -272,10 +288,10 @@
 		</div>
 	</fieldset>
 
-	<div>
-		<label for="notes">Notes</label>
-		<textarea id="notes" name="notes" rows="3" maxlength="500">{initial.notes ?? ''}</textarea>
-	</div>
+	<fieldset>
+		<legend>Notes</legend>
+		<textarea id="notes" name="notes" rows="3" maxlength="500" aria-label="Notes">{initial.notes ?? ''}</textarea>
+	</fieldset>
 
 	{@render extra?.()}
 
@@ -288,112 +304,183 @@
 <style>
 	.form {
 		display: grid;
-		gap: 1rem;
+		gap: 0;
+		padding: 0.5rem clamp(1.25rem, 3vw, 2rem) 1.75rem;
+	}
+	/* Sections séparées par un filet, sans cadre. */
+	fieldset,
+	.specs {
+		display: grid;
+		gap: 0.875rem;
+		align-content: start;
+		padding-block: 1.5rem;
+		border-top: 1px solid var(--border);
+	}
+	.form > fieldset:first-of-type {
+		border-top: 0;
+	}
+	.specs fieldset {
+		padding: 0;
+		border: 0;
+	}
+	legend {
+		float: left;
+		width: 100%;
+		margin-bottom: 0.25rem;
+	}
+	legend + * {
+		clear: both;
 	}
 	.grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
-		gap: 1rem;
+		grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+		gap: 1rem 1.25rem;
 	}
 	.check {
 		display: flex;
 		align-items: end;
 	}
+	.check p {
+		margin: 0 0 0.625rem;
+	}
 	.check label {
+		display: flex;
+		align-items: baseline;
+		gap: 0.375rem;
+		margin: 0 0 0.625rem;
 		color: var(--text);
 	}
-	fieldset {
-		border: 1px solid var(--border);
-		border-radius: 6px;
-		display: grid;
-		gap: 0.75rem;
-		align-content: start;
+	.check label input {
+		flex: none;
+		align-self: center;
 	}
 	.specs {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
-		gap: 1rem;
+		grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+		column-gap: 2.5rem;
 	}
 	fieldset:disabled {
-		opacity: 0.55;
+		opacity: 0.5;
 	}
 	.small {
 		margin: 0;
-		font-size: 0.85rem;
 	}
-	legend {
+	.label {
+		display: block;
+		margin-bottom: 0.375rem;
 		color: var(--muted);
-		font-size: 0.9rem;
+		font-size: 0.875rem;
+		font-weight: 500;
+	}
+	.roles {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.375rem;
+	}
+	.mark {
+		display: inline-flex;
 	}
 	.professions {
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
-		gap: 0.4rem 1rem;
+		gap: 0.375rem 0.75rem;
+	}
+	.professions + .professions {
+		padding-top: 0.5rem;
+		border-top: 1px dashed var(--border);
 	}
 	.profession {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
 		gap: 0.5rem;
-		min-height: 2.2rem;
+		min-height: 2.75rem;
+		padding: 0 0.375rem 0 0.75rem;
+		border-radius: 10px;
+		transition: background 0.15s;
+	}
+	.profession.checked {
+		background: var(--tint);
 	}
 	.profession label {
 		display: flex;
 		align-items: center;
-		gap: 0.4rem;
+		gap: 0.5rem;
+		margin: 0;
 		color: var(--text);
+		font-size: 0.9375rem;
+		font-weight: 400;
 	}
 	.profession:not(.checked) label:has(input:disabled) {
 		opacity: 0.45;
 	}
 	.level {
 		width: 4.5rem;
-		padding: 0.25rem 0.4rem;
+		min-height: 34px;
+		padding: 0.25rem 0.5rem;
 	}
 	.interests {
 		display: grid;
-		gap: 0.6rem;
+		gap: 0.625rem;
 	}
 	.axis {
 		display: flex;
 		flex-wrap: wrap;
 		align-items: center;
-		gap: 0.4rem;
+		gap: 0.375rem;
 	}
 	.axis-name {
 		width: 3rem;
-		font-weight: 700;
+		font-weight: 600;
 	}
 	/* Choix en pastilles : le bouton radio est masqué, la pastille sélectionnée s'allume. */
+	.pill {
+		margin: 0;
+	}
 	.pill input {
 		position: absolute;
 		opacity: 0;
 		pointer-events: none;
 	}
-	.pill span {
-		display: inline-block;
-		padding: 0.3rem 0.8rem;
+	.pill > span {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.375rem;
+		min-height: 36px;
+		padding: 0.25rem 0.875rem;
 		border: 1px solid var(--border);
 		border-radius: 999px;
 		color: var(--muted);
+		font-size: 0.9375rem;
 		cursor: pointer;
+		transition: background 0.15s, border-color 0.15s, color 0.15s;
+	}
+	.pill > span:hover {
+		border-color: var(--border-strong);
+		color: var(--text);
 	}
 	.pill input:checked + span {
+		border-color: transparent;
+		background: rgb(255 238 220 / 0.13);
 		color: var(--text);
-		border-color: var(--text);
-		background: var(--surface-2);
+	}
+	.role-pill input:checked + span {
+		background: var(--tint);
+		box-shadow: inset 0 0 0 1px var(--accent);
 	}
 	.pill.casual input:checked + span {
-		border-color: #3fb950;
-		color: #56d364;
+		background: color-mix(in oklab, var(--good) 13%, var(--bg));
+		color: var(--good);
 	}
 	.pill.competitive input:checked + span {
-		border-color: var(--accent);
-		color: color-mix(in srgb, var(--accent) 40%, white);
-		background: color-mix(in srgb, var(--accent) 18%, transparent);
+		background: var(--tint);
+		color: var(--accent-ink);
 	}
 	.pill input:focus-visible + span {
 		outline: 2px solid var(--gold);
 		outline-offset: 2px;
+	}
+	.row {
+		padding-top: 1.5rem;
+		border-top: 1px solid var(--border);
 	}
 </style>

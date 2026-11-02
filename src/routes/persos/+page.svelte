@@ -1,9 +1,11 @@
 <script lang="ts">
+	import CharacterTitle from '$lib/components/CharacterTitle.svelte';
 	import GameBadge from '$lib/components/GameBadge.svelte';
+	import Glyph from '$lib/components/Glyph.svelte';
 	import HomonymWarning from '$lib/components/HomonymWarning.svelte';
 	import { enhance } from '$app/forms';
 	import InterestBadges from '$lib/components/InterestBadges.svelte';
-	import { className, classColor, fullName, professionNames, raceName, specRole } from '$lib/labels';
+	import { professionNames, specRole } from '$lib/labels';
 
 	const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium' });
 
@@ -13,48 +15,51 @@
 	const rerolls = $derived(data.characters.filter((c) => !c.isMain));
 </script>
 
-<div class="row head">
-	<h1>Mes persos</h1>
+<div class="page-head">
+	<div>
+		<h1>Mes persos</h1>
+		<p class="sub">Une fiche à jour aide les officiers à composer les sorties.</p>
+	</div>
 	<div class="row">
-		<a class="button secondary" href="/persos/synchro">Synchronisation automatique</a>
-		<a class="button" href="/persos/nouveau">Ajouter un perso</a>
+		<a class="button secondary" href="/persos/synchro"><Glyph name="refresh" size={17} /> Synchronisation automatique</a>
+		<a class="button" href="/persos/nouveau"><Glyph name="plus" size={18} /> Ajouter un perso</a>
 	</div>
 </div>
 
-{#if form?.message}<p class="card error">{form.message}</p>{/if}
+{#if form?.message}<p class="notice bad"><Glyph name="warning" /> {form.message}</p>{/if}
 
 {#snippet card(c: (typeof data.characters)[number])}
 	<article class="card" class:main={c.isMain}>
-		<div class="row">
-			<h2 style:color={classColor(cfg, c.class)}>{fullName(c)}</h2>
-			{#if c.isMain}<span class="badge main">Main</span>{:else}<span class="badge">Reroll</span>{/if}
+		<CharacterTitle {cfg} character={c} big={c.isMain}>
+			{#if c.isMain}<span class="badge main">Main</span>{:else}<span class="badge plain">Reroll</span>{/if}
 			<GameBadge character={c} importAt={data.gameImportAt} showPending />
-		</div>
+		</CharacterTitle>
 		<HomonymWarning homonyms={data.homonyms[c.id]} viewerId={data.user?.id} />
-		<p>
-			Niv. {c.level}
-			{raceName(cfg, c.race)}
-			{className(cfg, c.class)}
-			· {specRole(cfg, c.class, c.spec, c.role)}
-		</p>
-		{#if c.spec2 || c.role2}
-			<p class="muted">Spé secondaire : {specRole(cfg, c.class, c.spec2, c.role2)}</p>
-		{/if}
-		{#if c.pve || c.pvp}
-			<p class="interests">
-				<InterestBadges pve={c.pve} pvp={c.pvp} />
-				{#if c.interestsUpdatedAt}<span class="muted small">à jour du {dateFormat.format(c.interestsUpdatedAt)}</span>{/if}
-			</p>
-		{/if}
-		{#if c.professions.length}<p class="muted">{professionNames(cfg, c.professions)}</p>{/if}
-		{#if c.recipes}<p class="muted small">Recettes : {c.recipes}</p>{/if}
-		{#if c.notes}<p class="muted notes">{c.notes}</p>{/if}
-		<div class="row">
-			<a class="button secondary" href="/persos/{c.id}">Modifier</a>
+		<dl class="facts">
+			{#if c.spec2 || c.role2}
+				<div><dt>Spé secondaire</dt><dd>{specRole(cfg, c.class, c.spec2, c.role2)}</dd></div>
+			{/if}
+			{#if c.professions.length}
+				<div><dt>Métiers</dt><dd>{professionNames(cfg, c.professions)}</dd></div>
+			{/if}
+			{#if c.pve || c.pvp}
+				<div>
+					<dt>Envies</dt>
+					<dd>
+						<InterestBadges pve={c.pve} pvp={c.pvp} />
+						{#if c.interestsUpdatedAt}<span class="muted small">à jour du {dateFormat.format(c.interestsUpdatedAt)}</span>{/if}
+					</dd>
+				</div>
+			{/if}
+			{#if c.recipes}<div><dt>Recettes</dt><dd>{c.recipes}</dd></div>{/if}
+			{#if c.notes}<div><dt>Notes</dt><dd class="notes">{c.notes}</dd></div>{/if}
+		</dl>
+		<div class="actions">
+			<a class="button secondary small" href="/persos/{c.id}"><Glyph name="pencil" size={15} /> Modifier</a>
 			{#if !c.isMain}
 				<form method="POST" action="?/setMain" use:enhance>
 					<input type="hidden" name="id" value={c.id} />
-					<button class="secondary">Définir comme main</button>
+					<button class="secondary small">Définir comme main</button>
 				</form>
 			{/if}
 			<form
@@ -65,18 +70,22 @@
 				}}
 			>
 				<input type="hidden" name="id" value={c.id} />
-				<button class="danger">Supprimer</button>
+				<button class="link danger-link">Supprimer</button>
 			</form>
 		</div>
 	</article>
 {/snippet}
 
 {#if !main}
-	<p class="card muted">Tu n'as encore aucun perso. Commence par ton main !</p>
+	<div class="empty-state">
+		<p class="serif">Tu n'as encore aucun perso.</p>
+		<p class="muted">Commence par ton main : c'est lui qui compte pour la composition des sorties.</p>
+		<a class="button" href="/persos/nouveau"><Glyph name="plus" size={18} /> Ajouter mon main</a>
+	</div>
 {:else}
 	{@render card(main)}
 
-	<h2 class="section">Rerolls de {main.name} <span class="muted">({rerolls.length})</span></h2>
+	<h2 class="section">Rerolls de {main.name} <span class="muted num">{rerolls.length}</span></h2>
 	{#if rerolls.length}
 		<div class="list">
 			{#each rerolls as c (c.id)}{@render card(c)}{/each}
@@ -87,35 +96,75 @@
 {/if}
 
 <style>
-	.head {
-		justify-content: space-between;
-	}
-	.list {
+	article {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
 		gap: 1rem;
+		align-content: start;
 	}
 	.card.main {
-		border-color: var(--gold);
+		box-shadow: var(--shadow), inset 0 0 0 1px color-mix(in oklab, var(--gold) 35%, transparent);
 	}
-	h2 {
+	.facts {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+		gap: 0.75rem 2rem;
 		margin: 0;
-		font-size: 1.2rem;
 	}
-	h2.section {
-		margin: 2rem 0 1rem;
-		font-size: 1.05rem;
+	.list .facts {
+		grid-template-columns: 1fr;
 	}
-	.interests {
+	.facts dt {
+		color: var(--muted);
+		font-size: 0.8125rem;
+		font-weight: 500;
+	}
+	.facts dd {
 		display: flex;
 		flex-wrap: wrap;
 		align-items: center;
-		gap: 0.3rem 0.6rem;
-	}
-	.small {
-		font-size: 0.85rem;
+		gap: 0.25rem 0.5rem;
+		margin: 0.125rem 0 0;
 	}
 	.notes {
 		white-space: pre-line;
+	}
+	.actions {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.5rem 1rem;
+		padding-top: 1rem;
+		border-top: 1px solid var(--border);
+	}
+	.actions form:last-child {
+		margin-left: auto;
+	}
+	.danger-link {
+		color: var(--danger);
+		font-size: 0.875rem;
+	}
+	.section {
+		display: flex;
+		align-items: baseline;
+		gap: 0.5rem;
+		margin: 3rem 0 1rem;
+	}
+	.list {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+		gap: 1rem;
+	}
+	.empty-state {
+		display: grid;
+		justify-items: center;
+		gap: 0.75rem;
+		padding: 4rem 1rem;
+		text-align: center;
+	}
+	.empty-state p {
+		margin: 0;
+	}
+	.empty-state .serif {
+		font-size: 1.75rem;
 	}
 </style>

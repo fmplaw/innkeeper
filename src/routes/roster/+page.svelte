@@ -1,29 +1,27 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import GameBadge from '$lib/components/GameBadge.svelte';
-	import { ROLES, ROLE_LABELS } from '$lib/roles';
+	import Glyph from '$lib/components/Glyph.svelte';
+	import { ROLES, ROLE_ICONS, ROLE_LABELS } from '$lib/roles';
 	import { FACTIONS, FACTION_LABELS } from '$lib/game/forever';
 	import { enhance } from '$app/forms';
 	import InterestBadges from '$lib/components/InterestBadges.svelte';
 	import { AXIS_LABELS, INTEREST_AXES, INTEREST_LEVELS, LEVEL_LABELS } from '$lib/interests';
-	import { className, classColor, fullName, professionNames, raceName, specRole } from '$lib/labels';
+	import { className, classColor, professionNames, raceName, specRole } from '$lib/labels';
 	import { sortRows, type SortDir, type SortValue } from '$lib/sort';
 
 	let { data } = $props();
 	const cfg = $derived(data.config);
 	const total = $derived(data.rows.length);
-	const pct = (n: number) => (total ? Math.round((n / total) * 100) : 0);
 
 	type Row = (typeof data.rows)[number];
 	// Colonnes triables : valeur comparée et sens du premier clic (les nombres commencent par le plus grand).
 	const interestScore = (v: string | null) => (v === 'competitive' ? 2 : v === 'casual' ? 1 : 0);
 	const COLUMNS: { key: string; label: string; value: (c: Row) => SortValue; first?: SortDir }[] = [
-		{ key: 'perso', label: 'Perso', value: (c) => fullName(c) },
-		// Les mains (sans « reroll de ») restent en fin de liste, groupés.
-		{ key: 'reroll', label: 'Reroll de', value: (c) => (c.isMain ? null : c.mainName) },
+		{ key: 'perso', label: 'Perso', value: (c) => c.name },
 		{ key: 'joueur', label: 'Joueur', value: (c) => c.player },
 		{ key: 'classe', label: 'Classe', value: (c) => className(cfg, c.class) },
-		{ key: 'spe', label: 'Spé principale', value: (c) => specRole(cfg, c.class, c.spec, c.role) },
-		{ key: 'spe2', label: 'Spé secondaire', value: (c) => specRole(cfg, c.class, c.spec2, c.role2) },
+		{ key: 'spe', label: 'Spé', value: (c) => specRole(cfg, c.class, c.spec, c.role) },
 		{ key: 'niveau', label: 'Niv.', value: (c) => c.level, first: 'desc' },
 		{ key: 'race', label: 'Race', value: (c) => raceName(cfg, c.race) },
 		{ key: 'interets', label: 'Intérêts', value: (c) => interestScore(c.pve) + interestScore(c.pvp) || null, first: 'desc' },
@@ -39,29 +37,47 @@
 	function sortBy(col: (typeof COLUMNS)[number]) {
 		sort = sort?.key === col.key ? { key: col.key, dir: sort.dir === 'asc' ? 'desc' : 'asc' } : { key: col.key, dir: col.first ?? 'asc' };
 	}
+	function sortByKey(key: string) {
+		const col = COLUMNS.find((k) => k.key === key);
+		sort = col ? { key: col.key, dir: col.first ?? 'asc' } : null;
+	}
 	const ariaSort = (key: string) => (sort?.key === key ? (sort.dir === 'asc' ? 'ascending' : 'descending') : undefined);
+
+	// Rôles et classes se choisissent d'un clic ; un second clic retire le filtre.
+	function toggle(key: 'role' | 'classe', value: string) {
+		const params = new URLSearchParams(page.url.search);
+		if (params.get(key) === value) params.delete(key);
+		else params.set(key, value);
+		const query = params.toString();
+		return query ? `/roster?${query}` : '/roster';
+	}
+	const active = $derived(
+		Boolean(data.filters.classe || data.filters.role || data.filters.secondaire || data.filters.faction || data.filters.pve || data.filters.pvp || data.filters.metier) ||
+			data.filters.type !== (data.roster ? 'tous' : 'main')
+	);
 
 	function submit(e: Event) {
 		(e.currentTarget as HTMLInputElement | HTMLSelectElement).form?.requestSubmit();
 	}
 </script>
 
-<div class="row head">
-	<h1>Roster</h1>
-	{#if data.officer}<a href="/admin/rosters" class="muted">Gérer les rosters</a>{/if}
+<div class="page-head">
+	<div>
+		<h1>Roster</h1>
+		<nav class="seg tabs" aria-label="Rosters">
+			<a href="/roster" aria-current={!data.roster ? 'page' : undefined}>Toute la guilde</a>
+			{#each data.rosters as r (r.id)}
+				<a href="/roster?equipe={r.id}" aria-current={data.roster?.id === r.id ? 'page' : undefined}>
+					{r.name}{#if r.visibility === 'officers'}<span class="private" title="Réservé aux officiers"><Glyph name="lock" size={13} /></span>{/if}
+				</a>
+			{/each}
+		</nav>
+	</div>
+	{#if data.officer}<a href="/admin/rosters">Gérer les rosters</a>{/if}
 </div>
 
-<nav class="tabs" aria-label="Rosters">
-	<a href="/roster" aria-current={!data.roster ? 'page' : undefined}>Toute la guilde</a>
-	{#each data.rosters as r (r.id)}
-		<a href="/roster?equipe={r.id}" aria-current={data.roster?.id === r.id ? 'page' : undefined}>
-			{r.name}{#if r.visibility === 'officers'}<span class="private" title="Réservé aux officiers"> · officiers</span>{/if}
-		</a>
-	{/each}
-</nav>
-
 {#if data.roster}
-	<section class="card roster-head">
+	<section class="roster-head">
 		<div>
 			<h2>{data.roster.name}</h2>
 			{#if data.roster.description}<p class="muted">{data.roster.description}</p>{/if}
@@ -81,101 +97,72 @@
 	</section>
 {/if}
 
-<form method="GET" class="card row filters" data-sveltekit-keepfocus>
-	{#if data.roster}<input type="hidden" name="equipe" value={data.roster.id} />{/if}
-	<label>
-		Classe
-		<select name="classe" value={data.filters.classe} onchange={submit}>
-			<option value="">Toutes</option>
-			{#each cfg.classes as c (c.id)}<option value={c.id}>{c.name}</option>{/each}
-		</select>
-	</label>
-	<label>
-		Rôle
-		<select name="role" value={data.filters.role} onchange={submit}>
-			<option value="">Tous</option>
-			{#each ROLES as r (r)}<option value={r}>{ROLE_LABELS[r]}</option>{/each}
-		</select>
-	</label>
-	<label class="inline">
-		<input type="checkbox" name="secondaire" value="1" checked={data.filters.secondaire} onchange={submit} />
-		Inclure les spés secondaires
-	</label>
-	{#if cfg.guild.faction === 'both'}
-		<label>
-			Faction
-			<select name="faction" value={data.filters.faction} onchange={submit}>
-				<option value="">Les deux</option>
-				{#each FACTIONS as f (f)}<option value={f}>{FACTION_LABELS[f]}</option>{/each}
-			</select>
-		</label>
-	{/if}
-	<label>
-		Type
-		<select name="type" value={data.filters.type} onchange={submit}>
-			<option value="tous">Mains et rerolls</option>
-			<option value="main">Mains</option>
-			<option value="reroll">Rerolls</option>
-		</select>
-	</label>
-	{#each INTEREST_AXES as axis (axis)}
-		<label>
-			{AXIS_LABELS[axis]}
-			<select name={axis} value={data.filters[axis]} onchange={submit}>
-				<option value="">Indifférent</option>
-				{#each INTEREST_LEVELS as level (level)}<option value={level}>{LEVEL_LABELS[level]}</option>{/each}
-			</select>
-		</label>
+<section class="picker" aria-label="Filtrer par rôle">
+	{#each ROLES as r (r)}
+		<a class="role" class:on={data.filters.role === r} href={toggle('role', r)} aria-current={data.filters.role === r ? 'true' : undefined} data-sveltekit-noscroll data-sveltekit-keepfocus>
+			<span class="mark" style:color="var(--r-{r})"><Glyph name={ROLE_ICONS[r]} size={20} /></span>
+			<span class="r-name">{ROLE_LABELS[r]}</span>
+			<span class="r-n">
+				<span class="serif num">{data.byRole[r]}</span>
+				{#if data.byRole2[r]}<span class="muted small num" title="Persos qui peuvent aussi tenir ce rôle en spé secondaire">+{data.byRole2[r]}</span>{/if}
+			</span>
+		</a>
 	{/each}
-	<label>
-		Métier
-		<select name="metier" value={data.filters.metier} onchange={submit}>
-			<option value="">Tous</option>
-			{#each cfg.professions as p (p.id)}<option value={p.id}>{p.name}</option>{/each}
-		</select>
-	</label>
-	{#if data.filters.metier}
-		<label class="narrow">
-			Niveau min.
-			<input type="number" name="niveau" min="1" max="300" value={data.filters.niveau} onchange={submit} />
-		</label>
-	{/if}
-	<noscript><button>Filtrer</button></noscript>
-	<a href={data.roster ? `/roster?equipe=${data.roster.id}` : '/roster'} class="muted">Réinitialiser</a>
-</form>
-
-<section class="stats">
-	<div class="card">
-		<h2>Par rôle <span class="muted">({total})</span></h2>
-		{#each ROLES as r (r)}
-			<div class="bar">
-				<span>{ROLE_LABELS[r]}</span>
-				<span class="track"><span class="fill" style:width="{pct(data.byRole[r])}%"></span></span>
-				<span class="count">{data.byRole[r]}</span>
-				<span class="extra muted">{data.byRole2[r] ? `+${data.byRole2[r]}` : ''}</span>
-			</div>
-		{/each}
-		<p class="muted legend">+N : persos qui peuvent aussi tenir ce rôle en spé secondaire.</p>
-	</div>
-	<div class="card">
-		<h2>Par classe</h2>
-		{#each cfg.classes as c (c.id)}
-			{@const n = data.byClass[c.id] ?? 0}
-			<div class="bar">
-				<span style:color={c.color}>{c.name}</span>
-				<span class="track"><span class="fill" style:width="{pct(n)}%" style:background={c.color}></span></span>
-				<span class="count">{n}</span>
-			</div>
-		{/each}
-	</div>
 </section>
 
-<div class="card table-wrap">
-	{#if total === 0}
-		<p class="muted">
-			{data.roster && !data.rows.length && data.officer ? 'Ce roster est vide : ajoute des persos avec le menu ci-dessus.' : 'Aucun perso ne correspond.'}
-		</p>
-	{:else}
+<section class="classes" aria-label="Filtrer par classe">
+	{#each cfg.classes as c (c.id)}
+		{@const n = data.byClass[c.id] ?? 0}
+		<a class:on={data.filters.classe === c.id} class:none={!n} href={toggle('classe', c.id)} aria-current={data.filters.classe === c.id ? 'true' : undefined} data-sveltekit-noscroll data-sveltekit-keepfocus>
+			<span class="dot" style:--c={c.color}></span>{c.name} <span class="num muted">{n}</span>
+		</a>
+	{/each}
+</section>
+
+<form method="GET" class="refine" data-sveltekit-keepfocus data-sveltekit-noscroll>
+	{#if data.roster}<input type="hidden" name="equipe" value={data.roster.id} />{/if}
+	{#if data.filters.classe}<input type="hidden" name="classe" value={data.filters.classe} />{/if}
+	{#if data.filters.role}<input type="hidden" name="role" value={data.filters.role} />{/if}
+	<select name="type" value={data.filters.type} onchange={submit} aria-label="Type de perso">
+		<option value="tous">Mains et rerolls</option>
+		<option value="main">Mains</option>
+		<option value="reroll">Rerolls</option>
+	</select>
+	{#each INTEREST_AXES as axis (axis)}
+		<select name={axis} value={data.filters[axis]} onchange={submit} aria-label={AXIS_LABELS[axis]}>
+			<option value="">{AXIS_LABELS[axis]} : indifférent</option>
+			{#each INTEREST_LEVELS as level (level)}<option value={level}>{AXIS_LABELS[axis]} : {LEVEL_LABELS[level].toLowerCase()}</option>{/each}
+		</select>
+	{/each}
+	<select name="metier" value={data.filters.metier} onchange={submit} aria-label="Métier">
+		<option value="">Tous les métiers</option>
+		{#each cfg.professions as p (p.id)}<option value={p.id}>{p.name}</option>{/each}
+	</select>
+	{#if data.filters.metier}
+		<input class="level" type="number" name="niveau" min="1" max="300" value={data.filters.niveau} onchange={submit} aria-label="Niveau de métier minimum" placeholder="Niv. min." />
+	{/if}
+	{#if cfg.guild.faction === 'both'}
+		<select name="faction" value={data.filters.faction} onchange={submit} aria-label="Faction">
+			<option value="">Les deux factions</option>
+			{#each FACTIONS as f (f)}<option value={f}>{FACTION_LABELS[f]}</option>{/each}
+		</select>
+	{/if}
+	<label class="check">
+		<input type="checkbox" name="secondaire" value="1" checked={data.filters.secondaire} onchange={submit} />
+		Rôle en spé secondaire aussi
+	</label>
+	<noscript><button>Filtrer</button></noscript>
+	{#if active}<a href={data.roster ? `/roster?equipe=${data.roster.id}` : '/roster'}>Réinitialiser</a>{/if}
+</form>
+
+<p class="list-head muted" aria-live="polite"><strong class="num">{total}</strong> perso{total > 1 ? 's' : ''}</p>
+
+{#if total === 0}
+	<p class="empty">
+		{data.roster && data.officer && !active ? 'Ce roster est vide : ajoute des persos avec le menu ci-dessus.' : 'Aucun perso ne correspond à ces filtres.'}
+	</p>
+{:else}
+	<div class="card table-wrap">
 		<table>
 			<thead>
 				<tr>
@@ -186,32 +173,42 @@
 							</button>
 						</th>
 					{/each}
-					{#if data.roster && data.officer}<th></th>{/if}
+					{#if data.roster && data.officer}<th><span class="visually-hidden">Actions</span></th>{/if}
 				</tr>
 			</thead>
 			<tbody>
 				{#each rows as c (c.id)}
 					<tr>
 						<td>
-							{fullName(c)}
-							{#if c.isMain}<span class="badge main">Main</span>{/if}
-							<GameBadge character={c} importAt={data.gameImportAt} />
+							<div class="perso">
+								<span class="name"><strong>{c.name}</strong>{#if c.surname}{' '}<span class="muted">{c.surname}</span>{/if}</span>
+								<span class="tags">
+									{#if c.isMain}<span class="badge main">Main</span>{:else}<span class="muted small">reroll de {c.mainName ?? '?'}</span>{/if}
+									<GameBadge character={c} importAt={data.gameImportAt} />
+								</span>
+							</div>
 						</td>
-						<td class="muted">{c.isMain ? '' : `↳ ${c.mainName ?? '?'}`}</td>
 						<td><a class="player" href="/joueurs/{c.playerId}">{c.player}</a></td>
-						<td style:color={classColor(cfg, c.class)}>{className(cfg, c.class)}</td>
-						<td>{specRole(cfg, c.class, c.spec, c.role)}</td>
-						<td class="muted">{specRole(cfg, c.class, c.spec2, c.role2)}</td>
-						<td>{c.level}</td>
+						<td><span class="dot" style:--c={classColor(cfg, c.class)}></span> {className(cfg, c.class)}</td>
+						<td>
+							<span class="spec">
+								<span class="mark" style:color="var(--r-{c.role})" title={ROLE_LABELS[c.role]}><Glyph name={ROLE_ICONS[c.role]} size={15} /></span>
+								{specRole(cfg, c.class, c.spec, c.role)}
+							</span>
+							{#if c.spec2 || c.role2}<span class="muted small second">aussi {specRole(cfg, c.class, c.spec2, c.role2)}</span>{/if}
+						</td>
+						<td class="num">{c.level}</td>
 						<td>{raceName(cfg, c.race)}</td>
 						<td><InterestBadges pve={c.pve} pvp={c.pvp} compact /></td>
-						<td class="muted" title={c.recipes ?? undefined}>{professionNames(cfg, c.professions)}</td>
+						<td class="muted small profs" title={c.recipes ?? undefined}>
+							{#each professionNames(cfg, c.professions).split(', ').filter(Boolean) as name (name)}<span>{name}</span>{/each}
+						</td>
 						{#if data.roster && data.officer}
 							<td>
 								<form method="POST" action="?/remove" use:enhance>
 									<input type="hidden" name="rosterId" value={data.roster.id} />
 									<input type="hidden" name="characterId" value={c.id} />
-									<button class="secondary small-btn" title="Retirer de {data.roster.name}">Retirer</button>
+									<button class="secondary small" title="Retirer de {data.roster.name}">Retirer</button>
 								</form>
 							</td>
 						{/if}
@@ -219,35 +216,57 @@
 				{/each}
 			</tbody>
 		</table>
-	{/if}
-</div>
+	</div>
+
+	<!-- Téléphone : une carte par perso, plus lisible qu'un tableau à faire défiler. -->
+	<div class="mobile">
+		<label class="mobile-sort">
+			Trier par
+			<select value={sort?.key ?? ''} onchange={(e) => sortByKey(e.currentTarget.value)}>
+				<option value="">Classe</option>
+				{#each COLUMNS.filter((k) => k.key !== 'classe') as col (col.key)}<option value={col.key}>{col.label}</option>{/each}
+			</select>
+		</label>
+		<ul class="cards">
+			{#each rows as c (c.id)}
+				<li>
+					<div class="c-top">
+						<span class="crest" style:--c={classColor(cfg, c.class)} title={ROLE_LABELS[c.role]}><Glyph name={ROLE_ICONS[c.role]} size={18} /></span>
+						<div class="c-id">
+							<span class="name"><strong>{c.name}</strong>{#if c.surname}{' '}<span class="muted">{c.surname}</span>{/if}</span>
+							<span class="muted small">{className(cfg, c.class)} · {specRole(cfg, c.class, c.spec, c.role)}</span>
+						</div>
+						<span class="muted small num">niv. {c.level}</span>
+					</div>
+					<div class="tags">
+						{#if c.isMain}<span class="badge main">Main</span>{:else}<span class="muted small">reroll de {c.mainName ?? '?'}</span>{/if}
+						<GameBadge character={c} importAt={data.gameImportAt} />
+						<InterestBadges pve={c.pve} pvp={c.pvp} compact />
+					</div>
+					<p class="muted small">
+						<a class="player" href="/joueurs/{c.playerId}">{c.player}</a>{#if c.race}{' · '}{raceName(cfg, c.race)}{/if}{#if c.spec2 || c.role2}{' · '}aussi {specRole(cfg, c.class, c.spec2, c.role2)}{/if}
+					</p>
+					{#if c.professions.length}<p class="small">{professionNames(cfg, c.professions)}</p>{/if}
+					{#if data.roster && data.officer}
+						<form method="POST" action="?/remove" use:enhance>
+							<input type="hidden" name="rosterId" value={data.roster.id} />
+							<input type="hidden" name="characterId" value={c.id} />
+							<button class="secondary small">Retirer de {data.roster.name}</button>
+						</form>
+					{/if}
+				</li>
+			{/each}
+		</ul>
+	</div>
+{/if}
 
 <style>
-	.head {
-		justify-content: space-between;
-		align-items: baseline;
-	}
 	.tabs {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.4rem;
-		margin-bottom: 1rem;
-	}
-	.tabs a {
-		padding: 0.35rem 0.85rem;
-		border: 1px solid var(--border);
-		border-radius: 999px;
-		color: var(--text);
-		text-decoration: none;
-	}
-	.tabs a[aria-current='page'] {
-		border-color: var(--accent);
-		background: var(--surface-2);
-		color: var(--gold);
+		margin-top: 1.25rem;
 	}
 	.private {
+		display: inline-flex;
 		color: var(--muted);
-		font-size: 0.85rem;
 	}
 	.roster-head {
 		display: flex;
@@ -255,12 +274,12 @@
 		justify-content: space-between;
 		align-items: center;
 		gap: 1rem;
-		margin-bottom: 1rem;
+		margin-bottom: 2rem;
+		padding-bottom: 1.5rem;
+		border-bottom: 1px solid var(--border);
 	}
 	.roster-head h2 {
 		margin: 0;
-		font-size: 1.2rem;
-		color: var(--gold);
 	}
 	.roster-head p {
 		margin: 0.25rem 0 0;
@@ -269,69 +288,139 @@
 		width: auto;
 		max-width: 22rem;
 	}
-	.small-btn {
-		padding: 0.2rem 0.6rem;
-		font-size: 0.82rem;
-	}
-	.filters {
-		align-items: end;
-		margin-bottom: 1rem;
-	}
-	.filters .narrow {
-		min-width: 0;
-		width: 7rem;
-	}
-	.filters label {
-		min-width: 10rem;
-	}
-	.stats {
+	.picker {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
-		gap: 1rem;
-		margin-bottom: 1rem;
+		grid-template-columns: repeat(4, 1fr);
+		gap: 0.75rem;
 	}
-	.stats h2 {
-		margin-top: 0;
-		font-size: 1rem;
-	}
-	.bar {
-		display: grid;
-		grid-template-columns: 7rem 1fr 2rem 2rem;
-		align-items: center;
-		gap: 0.6rem;
-		font-size: 0.9rem;
-	}
-	.track {
-		height: 0.55rem;
-		border-radius: 999px;
-		background: var(--surface-2);
-		overflow: hidden;
-	}
-	.fill {
-		display: block;
-		height: 100%;
-		background: var(--accent);
-	}
-	.legend {
-		margin: 0.5rem 0 0;
-		font-size: 0.8rem;
-	}
-	.filters .inline {
+	.role {
 		display: flex;
 		align-items: center;
+		gap: 0.625rem;
+		padding: 0.875rem 1rem;
+		border: 1px solid var(--border);
+		border-radius: var(--radius);
+		background: var(--surface);
+		color: var(--text);
+		text-decoration: none;
+		transition: border-color 0.15s, box-shadow 0.15s;
+	}
+	.role:hover {
+		border-color: color-mix(in oklab, var(--accent) 45%, var(--border));
+	}
+	.role.on {
+		border-color: var(--accent);
+		box-shadow: 0 0 0 1px var(--accent);
+	}
+	.mark {
+		display: inline-flex;
+	}
+	.r-name {
+		font-weight: 500;
+	}
+	.r-n {
+		display: flex;
+		align-items: baseline;
+		gap: 0.25rem;
+		margin-left: auto;
+	}
+	.r-n .serif {
+		font-size: 1.625rem;
+		line-height: 1;
+	}
+	.classes {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.25rem;
+		margin-top: 1rem;
+	}
+	.classes a {
+		display: inline-flex;
+		align-items: center;
 		gap: 0.4rem;
-		min-width: 0;
-		align-self: center;
+		padding: 0.375rem 0.625rem;
+		border-radius: 999px;
+		color: var(--text);
+		font-size: 0.9375rem;
+		text-decoration: none;
+		transition: background 0.15s;
 	}
-	.count {
-		text-align: right;
-		font-variant-numeric: tabular-nums;
+	.classes a:hover {
+		background: var(--tint);
 	}
-	.badge {
-		margin-left: 0.35rem;
+	.classes a.on {
+		background: var(--tint);
+		box-shadow: inset 0 0 0 1px var(--accent);
+	}
+	.classes a.none {
+		color: var(--muted);
+	}
+	.refine {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.75rem;
+		margin-top: 1rem;
+		padding-block: 1rem;
+		border-block: 1px solid var(--border);
+	}
+	.refine select {
+		width: auto;
+		min-height: 38px;
+		padding-block: 0.25rem;
+		font-size: 0.9375rem;
+	}
+	.refine .level {
+		width: 7rem;
+		min-height: 38px;
+	}
+	.check {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		margin: 0;
+		color: var(--text);
+		font-size: 0.9375rem;
+		font-weight: 400;
+	}
+	.list-head {
+		margin: 1.75rem 0 0.75rem;
+	}
+	.list-head strong {
+		color: var(--text);
+	}
+	.table-wrap {
+		padding: 0.5rem;
+	}
+	/* Neuf colonnes : des marges plus serrées pour que les métiers tiennent sans défilement. */
+	.table-wrap :is(th, td) {
+		padding-inline: 0.5rem;
+	}
+	.perso {
+		display: grid;
+		gap: 0.125rem;
+	}
+	.name strong {
+		font-weight: 600;
+	}
+	.tags {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+	}
+	.spec {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.375rem;
+	}
+	.second {
+		display: block;
 	}
 	.player {
 		color: var(--text);
+	}
+	.profs span {
+		display: block;
 	}
 	button.sort {
 		all: unset;
@@ -347,7 +436,7 @@
 		color: var(--text);
 	}
 	button.sort:focus-visible {
-		outline: 2px solid var(--accent);
+		outline: 2px solid var(--gold);
 		outline-offset: 2px;
 		border-radius: 3px;
 	}
@@ -358,5 +447,82 @@
 	th[aria-sort] .arrow {
 		opacity: 1;
 		color: var(--gold);
+	}
+	.visually-hidden {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip-path: inset(50%);
+	}
+	.mobile {
+		display: none;
+	}
+	.mobile-sort {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		margin-bottom: 0.75rem;
+		white-space: nowrap;
+	}
+	.mobile-sort select {
+		min-height: 38px;
+		padding-block: 0.25rem;
+	}
+	.cards {
+		list-style: none;
+		display: grid;
+		gap: 0.75rem;
+		margin: 0;
+		padding: 0;
+	}
+	.cards li {
+		display: grid;
+		gap: 0.5rem;
+		padding: 1rem 1.125rem;
+		border-radius: var(--radius);
+		background: var(--surface);
+		box-shadow: var(--shadow);
+	}
+	.cards p {
+		margin: 0;
+	}
+	.c-top {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+	}
+	.crest {
+		flex: none;
+		display: grid;
+		place-items: center;
+		width: 40px;
+		height: 40px;
+		border-radius: 12px;
+		background: color-mix(in srgb, var(--c) 16%, var(--surface));
+		box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--c) 45%, rgb(0 0 0 / 0.3));
+	}
+	.c-id {
+		flex: 1;
+		display: grid;
+		min-width: 0;
+		line-height: 1.3;
+	}
+	.cards .tags {
+		flex-wrap: wrap;
+	}
+	@media (max-width: 760px) {
+		.table-wrap {
+			display: none;
+		}
+		.mobile {
+			display: block;
+		}
+		.picker {
+			grid-template-columns: 1fr 1fr;
+		}
+		.refine select {
+			flex: 1 1 42%;
+		}
 	}
 </style>

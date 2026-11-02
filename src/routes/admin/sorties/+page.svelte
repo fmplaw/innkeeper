@@ -19,11 +19,11 @@
 	inscrivent comme d'habitude. Les modèles préremplissent le formulaire de <a href="/sorties/nouvelle">nouvelle sortie</a>.
 </p>
 
-{#if form?.saved}<p class="card ok">Réglages enregistrés.</p>{/if}
-{#if form?.created}<p class="card ok">Modèle créé.</p>{/if}
-{#if form?.deleted}<p class="card ok">Modèle supprimé.</p>{/if}
-{#if form?.error}<p class="card error">{form.error}</p>{/if}
-{#if data.channelsError}<p class="card warn">{data.channelsError}</p>{/if}
+{#if form?.saved}<p class="notice ok">Réglages enregistrés.</p>{/if}
+{#if form?.created}<p class="notice ok">Modèle créé.</p>{/if}
+{#if form?.deleted}<p class="notice ok">Modèle supprimé.</p>{/if}
+{#if form?.error}<p class="notice bad">{form.error}</p>{/if}
+{#if data.channelsError}<p class="notice warn">{data.channelsError}</p>{/if}
 
 {#snippet channelSelect(id: string, name: string, value: string | null, empty: string)}
 	<select {id} {name} value={value ?? ''}>
@@ -287,8 +287,5 @@
 	}
 	.warn {
 		color: var(--gold);
-	}
-	p.card.error {
-		margin-bottom: 1rem;
 	}
 </style>

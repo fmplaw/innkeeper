@@ -18,17 +18,17 @@
 <style>
 	.interest {
 		display: inline-block;
-		padding: 0.05rem 0.55rem;
+		padding: 0.0625rem 0.5625rem;
 		border-radius: 999px;
-		font-size: 0.8rem;
-		border: 1px solid #3fb950;
-		color: #56d364;
+		font-size: 0.8125rem;
+		font-weight: 500;
+		background: color-mix(in oklab, var(--good) 11%, var(--bg));
+		color: var(--good);
 		white-space: nowrap;
 	}
 	.interest.competitive {
-		border-color: var(--accent);
-		color: color-mix(in srgb, var(--accent) 40%, white);
-		background: color-mix(in srgb, var(--accent) 18%, transparent);
+		background: var(--tint);
+		color: var(--accent-ink);
 	}
 	.interest + .interest {
 		margin-left: 0.3rem;

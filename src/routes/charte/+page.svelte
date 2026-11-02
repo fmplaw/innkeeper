@@ -7,8 +7,9 @@
 
 <svelte:head><title>Charte et règlement · {data.config.guild.name}</title></svelte:head>
 
+<div class="page-head"><h1>Charte et règlement</h1></div>
+
 <article class="card charter">
-	<h1>Charte et règlement</h1>
 	{#if data.charter}
 		<RichText text={data.charter.text} document />
 		{#if data.charter.updatedAt}
@@ -21,12 +22,7 @@
 
 <style>
 	.charter {
-		max-width: 60rem;
-		padding: 1.75rem clamp(1.25rem, 3vw, 2.25rem);
-		margin: 0 auto;
-	}
-	h1 {
-		margin: 0 0 1.5rem;
+		padding: 2rem clamp(1.25rem, 3vw, 2.5rem);
 	}
 	.updated {
 		margin: 1.5rem 0 0;

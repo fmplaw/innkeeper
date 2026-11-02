@@ -6,7 +6,12 @@
 	const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long' });
 </script>
 
-<h1>Rejoindre {data.config.guild.name}</h1>
+<div class="page-head">
+	<div>
+		<p class="eyebrow">Candidature</p>
+		<h1>Rejoindre {data.config.guild.name}</h1>
+	</div>
+</div>
 
 {#if data.state === 'member'}
 	<p class="card">Tu fais déjà partie de la guilde. <a href="/persos">Gère tes persos</a>.</p>
@@ -99,9 +104,8 @@
 	.charter-text {
 		max-height: 22rem;
 		overflow-y: auto;
-		padding: 1rem;
-		border: 1px solid var(--border);
-		border-radius: 6px;
+		padding: 1rem 1.25rem;
+		border-radius: 12px;
 		background: var(--bg);
 	}
 	.charter-text:focus-visible {
@@ -118,13 +122,10 @@
 		width: auto;
 	}
 	.questions {
-		border: 1px solid var(--border);
-		border-radius: 6px;
 		display: grid;
 		gap: 0.9rem;
 	}
 	.questions legend {
-		color: var(--muted);
-		font-size: 0.9rem;
+		margin-bottom: 0.5rem;
 	}
 </style>

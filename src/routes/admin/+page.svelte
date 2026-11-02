@@ -1,5 +1,6 @@
 <script lang="ts">
 	import GameBadge from '$lib/components/GameBadge.svelte';
+	import Glyph from '$lib/components/Glyph.svelte';
 	import HomonymWarning from '$lib/components/HomonymWarning.svelte';
 	import { className, classColor, fullName, specRole } from '$lib/labels';
 
@@ -37,12 +38,14 @@
 	</section>
 {/if}
 
-<h1>Joueurs</h1>
-<p class="muted">
-	{data.players.length} joueurs connectés au moins une fois · {withoutCharacter} sans perso renseigné
-</p>
+<div class="page-head">
+	<div>
+		<h1>Joueurs</h1>
+		<p class="sub">{data.players.length} joueurs connectés au moins une fois · {withoutCharacter} sans perso renseigné</p>
+	</div>
+</div>
 
-{#if data.missingError}<p class="card warn">{data.missingError}</p>{/if}
+{#if data.missingError}<p class="notice warn">{data.missingError}</p>{/if}
 {#if data.missing?.length}
 	<details class="card missing" open>
 		<summary>
@@ -72,28 +75,27 @@
 	<p class="muted small">Tous les membres du Discord qui ont accès au site s'y sont déjà connectés.</p>
 {/if}
 
-<div class="players">
+<ul class="players">
 	{#each data.players as p (p.id)}
-		<article class="card">
-			<div class="row head">
-				{#if p.avatar}<img src={p.avatar} alt="" />{/if}
+		<li>
+			<div class="head">
+				{#if p.avatar}<img src={p.avatar} alt="" />{:else}<span class="initial" aria-hidden="true">{p.displayName[0]?.toUpperCase()}</span>{/if}
 				<div class="who">
 					<a href="/joueurs/{p.id}"><strong>{p.displayName}</strong></a>
-					<span class="muted">@{p.username}</span>
+					<span class="muted small">@{p.username} · vu le {dateFormat.format(p.lastLogin)}</span>
 				</div>
-				<span class="badge">{p.permission ? PERMISSION_LABELS[p.permission] : 'Sans accès'}</span>
-				<span class="muted small">Dernière connexion : {dateFormat.format(p.lastLogin)}</span>
-				<a class="button secondary" href="/persos/nouveau?pour={p.id}">Ajouter un perso</a>
+				<span class="badge" class:main={p.permission === 'officer'} class:plain={!p.permission}>{p.permission ? PERMISSION_LABELS[p.permission] : 'Sans accès'}</span>
+				<a class="button secondary small" href="/persos/nouveau?pour={p.id}"><Glyph name="plus" size={15} /> Perso</a>
 			</div>
 			{#if p.characters.length}
-				<ul>
+				<ul class="chars">
 					{#each p.characters as c (c.id)}
 						<li>
-							<a href="/persos/{c.id}" style:color={classColor(cfg, c.class)}>{fullName(c)}</a>
+							<a href="/persos/{c.id}" class="cls"><span class="dot" style:--c={classColor(cfg, c.class)}></span>{fullName(c)}</a>
+							{#if c.isMain}<span class="badge main">Main</span>{/if}
 							<GameBadge character={c} importAt={data.gameImportAt} />
 							<HomonymWarning homonyms={data.homonyms[c.id]} viewerId={p.id} compact />
-							{#if c.isMain}<span class="badge main">Main</span>{/if}
-							<span class="muted">
+							<span class="muted small">
 								{className(cfg, c.class)}
 								· {specRole(cfg, c.class, c.spec, c.role)}
 								{#if c.spec2 || c.role2}/ {specRole(cfg, c.class, c.spec2, c.role2)}{/if}
@@ -103,11 +105,11 @@
 					{/each}
 				</ul>
 			{:else}
-				<p class="muted">Aucun perso.</p>
+				<p class="muted small none">Aucun perso.</p>
 			{/if}
-		</article>
+		</li>
 	{/each}
-</div>
+</ul>
 
 <style>
 	.missing {
@@ -146,14 +148,8 @@
 		flex-shrink: 0;
 		background: var(--surface-2);
 	}
-	.warn {
-		border-color: var(--gold);
-		color: var(--gold);
-		margin-bottom: 1rem;
-	}
 	.welcome {
-		border-color: var(--gold);
-		margin-bottom: 1.5rem;
+		margin-bottom: 2rem;
 	}
 	.welcome h2 {
 		margin-top: 0;
@@ -165,28 +161,64 @@
 		gap: 0.35rem;
 	}
 	.players {
-		display: grid;
-		gap: 0.75rem;
+		list-style: none;
+		margin: 0;
+		padding: 0;
 	}
-	.head img {
-		width: 36px;
-		height: 36px;
+	.players > li {
+		padding-block: 1.125rem;
+		border-bottom: 1px solid var(--border);
+	}
+	.head {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.5rem 1rem;
+	}
+	.head img,
+	.initial {
+		width: 38px;
+		height: 38px;
 		border-radius: 50%;
 	}
+	.initial {
+		display: grid;
+		place-items: center;
+		background: var(--tint);
+		color: var(--accent-ink);
+		font-weight: 700;
+	}
 	.who {
-		display: flex;
-		flex-direction: column;
+		display: grid;
 		flex: 1;
 		min-width: 10rem;
+		line-height: 1.35;
 	}
-	.small {
-		font-size: 0.85rem;
+	.who a {
+		color: var(--text);
+		text-decoration: none;
 	}
-	ul {
-		margin: 0.75rem 0 0;
-		padding-left: 1.25rem;
+	.who a:hover {
+		color: var(--accent-ink);
 	}
-	li {
-		margin: 0.2rem 0;
+	.chars {
+		list-style: none;
+		display: grid;
+		gap: 0.375rem;
+		margin: 0.75rem 0 0 calc(38px + 1rem);
+		padding: 0;
+	}
+	.chars li {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.25rem 0.625rem;
+	}
+	.chars a {
+		color: var(--text);
+		font-weight: 500;
+	}
+	.none {
+		margin: 0.5rem 0 0 calc(38px + 1rem);
 	}
 </style>

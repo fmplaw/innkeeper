@@ -1,6 +1,8 @@
 <script lang="ts">
+	import CharacterTitle from '$lib/components/CharacterTitle.svelte';
+	import Glyph from '$lib/components/Glyph.svelte';
 	import InterestBadges from '$lib/components/InterestBadges.svelte';
-	import { className, classColor, fullName, professionNames, raceName, specRole } from '$lib/labels';
+	import { professionNames, specRole } from '$lib/labels';
 	import { richText } from '$lib/format';
 
 	let { data } = $props();
@@ -15,14 +17,37 @@
 		refused: { label: 'Non retenue', text: 'Ta candidature n’a pas été retenue cette fois-ci.' },
 		withdrawn: { label: 'Retirée', text: 'Tu as retiré ta candidature.' }
 	} as const;
+
+	// Étapes de la candidature : où on en est, d'un coup d'œil.
+	const steps = $derived.by(() => {
+		const decided = app.status === 'accepted' || app.status === 'refused';
+		const list = [
+			{ label: 'Déposée', detail: dateFormat.format(app.createdAt), done: true, current: false },
+			{ label: 'Examen par les officiers', detail: '', done: decided, current: app.status === 'pending' },
+			{ label: app.status === 'refused' ? 'Non retenue' : 'Décision', detail: '', done: decided, current: false }
+		];
+		if (app.status !== 'refused') list.push({ label: 'Arrivée sur le Discord', detail: '', done: Boolean(app.roleAssigned), current: app.status === 'accepted' && !app.roleAssigned });
+		return list;
+	});
 </script>
 
-<h1>Ma candidature</h1>
+<div class="page-head"><h1>Ma candidature</h1></div>
+
+{#if app.status !== 'withdrawn'}
+	<ol class="steps">
+		{#each steps as step, i (i)}
+			<li class:done={step.done} class:current={step.current}>
+				<span class="bullet" aria-hidden="true">{#if step.done}<Glyph name="check" size={14} />{:else}{i + 1}{/if}</span>
+				<span class="step-label">{step.label}{#if step.detail}<span class="muted small">{step.detail}</span>{/if}</span>
+			</li>
+		{/each}
+	</ol>
+{/if}
 
 <section class="card status {app.status}">
 	<div class="row head">
 		<span class="pill">{STATUS[app.status].label}</span>
-		<span class="muted">Déposée le {dateFormat.format(app.createdAt)}</span>
+		<span class="muted small">Déposée le {dateFormat.format(app.createdAt)}</span>
 	</div>
 	<p>{STATUS[app.status].text}</p>
 	{#if app.decisionMessage}
@@ -69,16 +94,13 @@
 </section>
 
 <section class="card">
-	<h2 style:color={classColor(cfg, c.class)}>{fullName({ name: c.name, surname: c.surname ?? null })}</h2>
-	<p>
-		Niv. {c.level}
-		{raceName(cfg, c.race ?? null)}
-		{className(cfg, c.class)} · {specRole(cfg, c.class, c.spec ?? null, c.role)}
-	</p>
+	<p class="eyebrow">Le perso présenté</p>
+	<CharacterTitle {cfg} character={{ name: c.name, surname: c.surname ?? null, class: c.class, spec: c.spec ?? null, role: c.role, race: c.race ?? null, level: Number(c.level ?? 1) }} big />
 	{#if c.spec2 || c.role2}<p class="muted">Spé secondaire : {specRole(cfg, c.class, c.spec2 ?? null, c.role2 ?? null)}</p>{/if}
 	{#if c.pve || c.pvp}<p><InterestBadges pve={c.pve ?? null} pvp={c.pvp ?? null} /></p>{/if}
 	{#if c.professions?.length}<p class="muted">{professionNames(cfg, c.professions)}</p>{/if}
 
+	<p class="eyebrow answers-title">Tes réponses</p>
 	<dl class="answers">
 		{#each app.answers as a, i (i)}
 			<div>
@@ -101,46 +123,115 @@
 	.head {
 		justify-content: space-between;
 	}
-	.pill {
-		padding: 0.25rem 0.8rem;
-		border-radius: 999px;
-		font-weight: 700;
-		background: var(--surface-2);
+	.steps {
+		list-style: none;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.75rem 0;
+		margin: 0 0 2rem;
+		padding: 0;
 	}
-	.status.accepted {
-		border-color: #3fb950;
+	.steps li {
+		display: flex;
+		align-items: center;
+		gap: 0.625rem;
+		color: var(--muted);
+	}
+	/* Trait entre deux étapes. */
+	.steps li:not(:last-child)::after {
+		content: '';
+		width: clamp(1.5rem, 5vw, 4rem);
+		height: 1px;
+		margin-inline: 0.75rem;
+		background: var(--border-strong);
+	}
+	.bullet {
+		flex: none;
+		display: grid;
+		place-items: center;
+		width: 28px;
+		height: 28px;
+		border-radius: 50%;
+		box-shadow: inset 0 0 0 1px var(--border-strong);
+		font-size: 0.8125rem;
+		font-weight: 600;
+	}
+	.done {
+		color: var(--text);
+	}
+	.done .bullet {
+		background: color-mix(in oklab, var(--good) 16%, var(--bg));
+		box-shadow: none;
+		color: var(--good);
+	}
+	.current {
+		color: var(--text);
+		font-weight: 600;
+	}
+	.current .bullet {
+		background: var(--tint);
+		box-shadow: inset 0 0 0 1px var(--accent);
+		color: var(--accent-ink);
+	}
+	.step-label {
+		display: grid;
+		line-height: 1.25;
+	}
+	/* Téléphone : les étapes s'empilent, sans trait de liaison. */
+	@media (max-width: 640px) {
+		.steps {
+			flex-direction: column;
+		}
+		.steps li:not(:last-child)::after {
+			display: none;
+		}
+	}
+	.pill {
+		padding: 0.25rem 0.875rem;
+		border-radius: 999px;
+		font-weight: 600;
+		background: color-mix(in oklab, var(--gold) 14%, var(--bg));
+		color: var(--gold);
 	}
 	.status.accepted .pill {
-		background: color-mix(in srgb, #3fb950 20%, transparent);
-		color: #56d364;
+		background: color-mix(in oklab, var(--good) 14%, var(--bg));
+		color: var(--good);
 	}
 	.status.refused .pill {
+		background: color-mix(in oklab, var(--danger) 12%, var(--bg));
 		color: var(--danger);
 	}
-	.status.pending .pill {
-		color: var(--gold);
+	.status.withdrawn .pill {
+		background: var(--surface-2);
+		color: var(--muted);
 	}
 	blockquote {
 		margin: 0;
-		padding: 0.5rem 1rem;
-		border-left: 3px solid var(--accent);
-		background: var(--surface-2);
+		padding: 0.625rem 1rem;
+		border-radius: 10px;
+		background: var(--tint);
+		font-family: var(--font-read);
 	}
-	h2 {
-		margin: 0;
-		font-size: 1.2rem;
+	.answers-title {
+		margin-top: 0.75rem !important;
+		padding-top: 1.25rem;
+		border-top: 1px solid var(--border);
 	}
 	.answers {
-		margin: 0.5rem 0 0;
+		margin: 0;
 		display: grid;
-		gap: 0.75rem;
+		gap: 1.25rem;
 	}
 	.answers dt {
 		color: var(--muted);
-		font-size: 0.9rem;
+		font-size: 0.875rem;
 	}
+	/* Les réponses se lisent comme un texte, en caractères de lecture. */
 	.answers dd {
-		margin: 0.2rem 0 0;
+		margin: 0.25rem 0 0;
+		font-family: var(--font-read);
+		font-size: 1.0625rem;
+		line-height: 1.5;
 	}
 	.answers :global(p) {
 		margin: 0 0 0.4rem;

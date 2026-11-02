@@ -11,12 +11,12 @@
 <p class="muted">Identifiant : <strong>{data.username}</strong></p>
 
 {#if data.mustChangePassword}
-	<p class="card warn">
+	<p class="notice warn">
 		Bienvenue ! Ton compte a été créé avec un <strong>mot de passe provisoire</strong> : choisis le tien pour accéder au reste
 		de l'admin.
 	</p>
 {/if}
-{#if form?.saved}<p class="card ok">Mot de passe changé. Les autres sessions admin ont été déconnectées.</p>{/if}
+{#if form?.saved}<p class="notice ok">Mot de passe changé. Les autres sessions admin ont été déconnectées.</p>{/if}
 
 <form method="POST" action="?/password" class="card form">
 	<h2>{data.mustChangePassword ? 'Choisis ton mot de passe' : 'Changer de mot de passe'}</h2>

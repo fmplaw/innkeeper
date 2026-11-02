@@ -9,12 +9,12 @@
 
 <h1>Rôles Discord</h1>
 
-{#if form?.saved}<p class="card ok">Réglages enregistrés.</p>{/if}
-{#if form?.synced !== undefined}<p class="card ok">{form.synced} rôles synchronisés depuis le bot.</p>{/if}
-{#if form?.error}<p class="card error">{form.error}</p>{/if}
+{#if form?.saved}<p class="notice ok">Réglages enregistrés.</p>{/if}
+{#if form?.synced !== undefined}<p class="notice ok">{form.synced} rôles synchronisés depuis le bot.</p>{/if}
+{#if form?.error}<p class="notice bad">{form.error}</p>{/if}
 
 {#if !data.discordReady}
-	<p class="card warn">Discord n'est pas encore configuré : aucun rôle ne peut être découvert pour l'instant.</p>
+	<p class="notice warn">Discord n'est pas encore configuré : aucun rôle ne peut être découvert pour l'instant.</p>
 {/if}
 
 <form method="POST" action="?/save" use:enhance={keepValues} class="card form">
@@ -79,15 +79,16 @@
 		display: grid;
 		gap: 1rem;
 	}
+	fieldset:first-of-type {
+		padding-top: 0.5rem;
+		border-top: 0;
+	}
+	/* Sections séparées par un filet, sans cadre. */
 	fieldset {
-		border: 1px solid var(--border);
-		border-radius: 6px;
+		padding-block: 1.5rem;
+		border-top: 1px solid var(--border);
 		display: grid;
 		gap: 0.5rem;
-	}
-	legend {
-		color: var(--muted);
-		font-size: 0.9rem;
 	}
 	.choice {
 		display: flex;
@@ -122,8 +123,5 @@
 	}
 	.warn {
 		color: var(--gold);
-	}
-	p.card.error {
-		margin-bottom: 1rem;
 	}
 </style>
