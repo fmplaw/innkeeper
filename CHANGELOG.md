@@ -4,6 +4,10 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ## [Non publié]
 
+### Publication
+
+- **InnkeeperSync n'est plus reconstruite à chaque version du site**, seulement quand son propre numéro change (`companion/package.json`). Sinon, la release reprend l'installateur de la version précédente : pas de mise à jour inutile chez les membres, et pas de nouvel exécutable à faire accepter par Windows Defender. Cette version garde InnkeeperSync **0.14.0**.
+
 ### Ajouté
 
 - **Médaillon du type de sortie**, dans l'esprit de la légende de la carte du jeu : « ! » jaune pour les quêtes, vortex bleu pour un donjon, vortex vert pour un raid, épées croisées pour le PvP, pelle pour le farm, « … » pour le reste. Il s'affiche dans la liste des sorties, sur la page d'une sortie et dans la carte « prochaine sortie » de l'accueil, avec le type en toutes lettres (« Raid · Barrow Deeps »). Une sortie créée directement sur Discord ou dans Raid-Helper, sans type connu du site, est marquée « Événement Discord ». Dessins propres au projet, aucune image de Blizzard.
