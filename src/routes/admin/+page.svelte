@@ -91,7 +91,7 @@
 						<li>
 							<a href="/persos/{c.id}" style:color={classColor(cfg, c.class)}>{fullName(c)}</a>
 							<GameBadge character={c} importAt={data.gameImportAt} />
-							<HomonymWarning homonyms={data.homonyms[c.id]} compact />
+							<HomonymWarning homonyms={data.homonyms[c.id]} viewerId={p.id} compact />
 							{#if c.isMain}<span class="badge main">Main</span>{/if}
 							<span class="muted">
 								{className(cfg, c.class)}

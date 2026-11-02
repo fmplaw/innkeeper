@@ -1,6 +1,7 @@
 <script lang="ts">
-	// Autres fiches du même nom : l'import du jeu relie les persos par leur nom et n'en met
-	// alors à jour aucun. `viewerId` : le joueur qui regarde, pour dire « un autre de tes persos ».
+	// Autres fiches du même prénom. Forever l'autorise (seul prénom + nom de famille est unique),
+	// mais l'import du jeu relie encore les persos par leur prénom et n'en met alors à jour aucun.
+	// `viewerId` : le propriétaire de la fiche, pour dire « un autre de tes persos ».
 	let {
 		homonyms,
 		viewerId = null,
@@ -12,16 +13,27 @@
 	} = $props();
 
 	const owners = $derived([...new Set((homonyms ?? []).map((h) => (h.userId === viewerId ? 'un autre de tes persos' : `la fiche de ${h.player}`)))]);
+	// Tous au même joueur (plusieurs persos de même prénom) : rien d'anormal, seul l'import est concerné.
+	const ownOnly = $derived(Boolean(homonyms?.length) && homonyms!.every((h) => h.userId === viewerId));
 </script>
 
 {#if homonyms?.length}
 	{#if compact}
-		<span class="homonym" title="Même nom que {owners.join(', ')} : l'import du jeu ne met à jour aucune de ces fiches">⚠ nom en double</span>
+		{#if !ownOnly}
+			<span class="homonym" title="Même prénom que {owners.join(', ')} : l'import du jeu ne met à jour aucune de ces fiches pour l'instant">⚠ prénom en double</span>
+		{/if}
+	{:else if ownOnly}
+		<p class="homonym-note">
+			ⓘ Plusieurs de tes persos portent le prénom <strong>{homonyms[0].name}</strong>. Forever l'autorise (seul le nom
+			complet, avec le nom de famille, est unique), mais l'import du jeu ne sait pas encore les distinguer : il ne les met
+			pas à jour pour l'instant. Rien à corriger de ton côté.
+		</p>
 	{:else}
 		<p class="homonym-note">
-			⚠ <strong>{homonyms[0].name}</strong> porte le même nom que {owners.join(', ')} : l'import du jeu ne peut pas savoir
-			laquelle mettre à jour, et n'en met à jour aucune. Vérifie l'orthographe exacte du nom en jeu, ou préviens un officier
-			si quelqu'un a créé une fiche à ton nom.
+			⚠ <strong>{homonyms[0].name}</strong> a le même prénom que {owners.join(', ')}. Forever l'autorise avec des noms de
+			famille différents, mais l'import du jeu ne sait pas encore les distinguer : il ne met à jour aucune de ces fiches
+			pour l'instant. Vérifie que le nom de famille de ta fiche est bien celui du jeu ; si quelqu'un a créé une fiche à ton
+			nom, préviens un officier.
 		</p>
 	{/if}
 {/if}
