@@ -112,7 +112,7 @@
 		font-variant-numeric: tabular-nums;
 	}
 	.up {
-		color: #56d364;
+		color: var(--good);
 	}
 	.down {
 		color: var(--danger);

@@ -75,9 +75,14 @@
 	.wide {
 		grid-column: 1 / -1;
 	}
+	fieldset:first-of-type {
+		padding-top: 0.5rem;
+		border-top: 0;
+	}
+	/* Sections séparées par un filet, sans cadre. */
 	fieldset {
-		border: 1px solid var(--border);
-		border-radius: 6px;
+		padding-block: 1.5rem;
+		border-top: 1px solid var(--border);
 		padding: 0.6rem 0.8rem;
 		display: grid;
 		gap: 0.4rem;

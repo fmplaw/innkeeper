@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { keepValues } from '$lib/forms';
+	import CharacterTitle from '$lib/components/CharacterTitle.svelte';
+	import Glyph from '$lib/components/Glyph.svelte';
 	import InterestBadges from '$lib/components/InterestBadges.svelte';
 	import { richText } from '$lib/format';
-	import { className, classColor, fullName, professionNames, raceName, specRole } from '$lib/labels';
+	import { professionNames, specRole } from '$lib/labels';
 
 	let { data, form } = $props();
 	const cfg = $derived(data.config);
@@ -17,10 +19,10 @@
 	const STATUS = { pending: 'En attente', accepted: 'Acceptée', refused: 'Refusée', withdrawn: 'Retirée par le candidat' };
 </script>
 
-<p><a href="/admin/candidatures" class="muted">← Candidatures</a></p>
+<a class="back" href="/admin/candidatures"><Glyph name="arrow-left" size={16} /> Candidatures</a>
 
-<header class="card head">
-	{#if data.candidate.avatar}<img src={data.candidate.avatar} alt="" />{/if}
+<header class="head">
+	{#if data.candidate.avatar}<img src={data.candidate.avatar} alt="" />{:else}<span class="initial" aria-hidden="true">{data.candidate.name[0]?.toUpperCase()}</span>{/if}
 	<div>
 		<h1>{data.candidate.name}</h1>
 		<p class="muted">
@@ -28,7 +30,7 @@
 		</p>
 		{#if app.charterAcceptedAt}
 			<p class="charter" class:changed={data.charterChangedAt}>
-				✔ Charte acceptée le {dateFormat.format(app.charterAcceptedAt)}
+				<Glyph name="check" size={14} /> Charte acceptée le {dateFormat.format(app.charterAcceptedAt)}
 				{#if data.charterChangedAt}{' '}· avant sa modification du {dateFormat.format(data.charterChangedAt)}{/if}
 			</p>
 		{/if}
@@ -49,18 +51,15 @@
 
 <div class="layout">
 	<section class="card">
-		<h2 class="cls"><span class="dot" style:--c={classColor(cfg, c.class)}></span>{fullName({ name: c.name, surname: c.surname ?? null })}</h2>
-		<p>
-			Niv. {c.level}
-			{raceName(cfg, c.race ?? null)}
-			{className(cfg, c.class)} · {specRole(cfg, c.class, c.spec ?? null, c.role)}
-		</p>
+		<p class="eyebrow">Le perso présenté</p>
+		<CharacterTitle {cfg} character={{ name: c.name, surname: c.surname ?? null, class: c.class, spec: c.spec ?? null, role: c.role, race: c.race ?? null, level: Number(c.level ?? 1) }} big />
 		{#if c.spec2 || c.role2}<p class="muted">Spé secondaire : {specRole(cfg, c.class, c.spec2 ?? null, c.role2 ?? null)}</p>{/if}
 		{#if c.pve || c.pvp}<p><InterestBadges pve={c.pve ?? null} pvp={c.pvp ?? null} /></p>{/if}
 		{#if c.professions?.length}<p class="muted">{professionNames(cfg, c.professions)}</p>{/if}
 		{#if c.recipes}<p class="muted small">Recettes : {c.recipes}</p>{/if}
 		{#if c.notes}<p class="muted small">{c.notes}</p>{/if}
 
+		<p class="eyebrow answers-title">Ses réponses</p>
 		<dl class="answers">
 			{#each app.answers as a, i (i)}
 				<div>
@@ -78,7 +77,7 @@
 			<ul class="votes">
 				{#each data.votes as v (v.voterId)}
 					<li class:negative={v.value < 0}>
-						<strong>{v.value > 0 ? '+1' : '−1'}</strong>
+						<span class="vote-ic"><Glyph name={v.value > 0 ? 'thumbs-up' : 'thumbs-down'} size={15} /></span>
 						{v.voterName}
 						{#if v.comment}<p>{v.comment}</p>{/if}
 					</li>
@@ -87,9 +86,9 @@
 
 			{#if app.status === 'pending'}
 				<form method="POST" action="?/vote" use:enhance={keepValues} class="vote">
-					<div class="row">
-						<label class="choice"><input type="radio" name="value" value="1" bind:group={voteValue} /> +1</label>
-						<label class="choice"><input type="radio" name="value" value="-1" bind:group={voteValue} /> −1</label>
+					<div class="row" role="radiogroup" aria-label="Mon avis">
+						<label class="pill up-pill"><input type="radio" name="value" value="1" bind:group={voteValue} /><span><Glyph name="thumbs-up" size={15} /> Pour</span></label>
+						<label class="pill down-pill"><input type="radio" name="value" value="-1" bind:group={voteValue} /><span><Glyph name="thumbs-down" size={15} /> Contre</span></label>
 					</div>
 					<textarea
 						name="comment"
@@ -153,36 +152,53 @@
 </div>
 
 <style>
+	.back {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.375rem;
+		font-weight: 500;
+		text-decoration: none;
+	}
 	.head {
 		display: flex;
 		align-items: center;
-		gap: 1rem;
-		margin-bottom: 1rem;
+		flex-wrap: wrap;
+		gap: 1.25rem;
+		margin: 1.25rem 0 2.5rem;
 	}
-	.head img {
-		width: 56px;
-		height: 56px;
+	.head img,
+	.initial {
+		width: 64px;
+		height: 64px;
 		border-radius: 50%;
+	}
+	.initial {
+		display: grid;
+		place-items: center;
+		background: var(--tint);
+		color: var(--accent-ink);
+		font-family: var(--font-display);
+		font-size: 1.5rem;
+		font-weight: 600;
 	}
 	.head div {
 		flex: 1;
 	}
 	.head h1 {
 		margin: 0;
-		font-size: 1.5rem;
 	}
 	.head p {
 		margin: 0.15rem 0 0;
 	}
 	.status {
-		padding: 0.25rem 0.8rem;
+		padding: 0.25rem 0.875rem;
 		border-radius: 999px;
-		background: var(--surface-2);
-		font-weight: 700;
+		background: color-mix(in oklab, var(--gold) 14%, var(--bg));
+		font-weight: 600;
 		color: var(--gold);
 	}
 	.status.accepted {
-		color: #56d364;
+		color: var(--good);
 	}
 	.status.refused,
 	.status.withdrawn {
@@ -191,7 +207,7 @@
 	.layout {
 		display: grid;
 		grid-template-columns: minmax(0, 3fr) minmax(18rem, 2fr);
-		gap: 1rem;
+		gap: 2rem;
 		align-items: start;
 	}
 	@media (max-width: 52rem) {
@@ -214,17 +230,26 @@
 		margin: 0;
 		font-size: 1.15rem;
 	}
+	.answers-title {
+		margin-top: 1.25rem !important;
+		padding-top: 1.25rem;
+		border-top: 1px solid var(--border);
+	}
 	.answers {
-		margin: 0.5rem 0 0;
+		margin: 0;
 		display: grid;
-		gap: 0.75rem;
+		gap: 1.25rem;
 	}
 	.answers dt {
 		color: var(--muted);
-		font-size: 0.9rem;
+		font-size: 0.875rem;
 	}
+	/* Les réponses se lisent comme un texte, en caractères de lecture. */
 	.answers dd {
-		margin: 0.2rem 0 0;
+		margin: 0.25rem 0 0;
+		font-family: var(--font-read);
+		font-size: 1.0625rem;
+		line-height: 1.5;
 	}
 	.answers :global(p) {
 		margin: 0 0 0.4rem;
@@ -235,7 +260,7 @@
 		font-variant-numeric: tabular-nums;
 	}
 	.up {
-		color: #56d364;
+		color: var(--good);
 	}
 	.down {
 		color: var(--danger);
@@ -248,13 +273,54 @@
 		gap: 0.5rem;
 	}
 	.votes li {
-		padding: 0.4rem 0.6rem;
-		border-left: 3px solid #3fb950;
-		background: var(--surface-2);
-		border-radius: 0 6px 6px 0;
+		padding: 0.5rem 0.75rem;
+		border-radius: 10px;
+		background: color-mix(in oklab, var(--good) 8%, var(--bg));
 	}
 	.votes li.negative {
-		border-left-color: var(--danger);
+		background: color-mix(in oklab, var(--danger) 8%, var(--bg));
+	}
+	.vote-ic {
+		display: inline-flex;
+		vertical-align: -0.15em;
+		margin-right: 0.25rem;
+		color: var(--good);
+	}
+	.negative .vote-ic {
+		color: var(--danger);
+	}
+	.pill {
+		margin: 0;
+	}
+	.pill input {
+		position: absolute;
+		opacity: 0;
+		pointer-events: none;
+	}
+	.pill span {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.375rem;
+		min-height: 38px;
+		padding: 0.25rem 0.875rem;
+		border: 1px solid var(--border);
+		border-radius: 999px;
+		color: var(--muted);
+		cursor: pointer;
+	}
+	.up-pill input:checked + span {
+		border-color: transparent;
+		background: color-mix(in oklab, var(--good) 14%, var(--bg));
+		color: var(--good);
+	}
+	.down-pill input:checked + span {
+		border-color: transparent;
+		background: color-mix(in oklab, var(--danger) 14%, var(--bg));
+		color: var(--danger);
+	}
+	.pill input:focus-visible + span {
+		outline: 2px solid var(--gold);
+		outline-offset: 2px;
 	}
 	.votes li p {
 		margin: 0.2rem 0 0;
@@ -273,16 +339,17 @@
 		color: var(--text);
 	}
 	.warn {
-		color: var(--gold);
+		color: var(--warn);
 	}
 	blockquote {
 		margin: 0;
-		padding: 0.4rem 0.8rem;
-		border-left: 3px solid var(--accent);
-		background: var(--surface-2);
+		padding: 0.625rem 0.875rem;
+		border-radius: 10px;
+		background: var(--tint);
+		font-family: var(--font-read);
 	}
 	.ok {
-		color: #56d364;
+		color: var(--good);
 	}
 	.charter {
 		display: inline-block;
@@ -290,14 +357,12 @@
 		padding: 0.15rem 0.6rem;
 		border-radius: 999px;
 		font-size: 0.85rem;
-		border: 1px solid color-mix(in srgb, #3fb950 55%, transparent);
-		background: color-mix(in srgb, #3fb950 12%, transparent);
-		color: #56d364;
+		background: color-mix(in oklab, var(--good) 11%, var(--bg));
+		color: var(--good);
 	}
 	.charter.changed {
-		border-color: color-mix(in srgb, #e3a03a 55%, transparent);
-		background: color-mix(in srgb, #e3a03a 12%, transparent);
-		color: #e3a03a;
+		background: color-mix(in oklab, var(--warn) 11%, var(--bg));
+		color: var(--warn);
 	}
 	.small {
 		font-size: 0.88rem;

@@ -61,7 +61,7 @@
 .app {
 	--tint: color-mix(in srgb, var(--accent) 17%, var(--bg));
 	--accent-ink: color-mix(in oklab, var(--accent) 42%, #ffd9a8);
-	--button: linear-gradient(180deg, color-mix(in oklab, var(--accent) 86%, #ff9a4a), color-mix(in oklab, var(--accent) 86%, black));
+	--button: linear-gradient(180deg, var(--accent), color-mix(in oklab, var(--accent) 84%, black));
 }
 
 * {
@@ -296,6 +296,7 @@ fieldset {
 }
 
 legend {
+	margin-bottom: 0.5rem;
 	padding: 0;
 	font-family: var(--font-display);
 	font-size: 1.125rem;

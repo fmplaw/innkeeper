@@ -37,6 +37,10 @@
 	function sortBy(col: (typeof COLUMNS)[number]) {
 		sort = sort?.key === col.key ? { key: col.key, dir: sort.dir === 'asc' ? 'desc' : 'asc' } : { key: col.key, dir: col.first ?? 'asc' };
 	}
+	function sortByKey(key: string) {
+		const col = COLUMNS.find((k) => k.key === key);
+		sort = col ? { key: col.key, dir: col.first ?? 'asc' } : null;
+	}
 	const ariaSort = (key: string) => (sort?.key === key ? (sort.dir === 'asc' ? 'ascending' : 'descending') : undefined);
 
 	// Rôles et classes se choisissent d'un clic ; un second clic retire le filtre.
@@ -212,6 +216,47 @@
 				{/each}
 			</tbody>
 		</table>
+	</div>
+
+	<!-- Téléphone : une carte par perso, plus lisible qu'un tableau à faire défiler. -->
+	<div class="mobile">
+		<label class="mobile-sort">
+			Trier par
+			<select value={sort?.key ?? ''} onchange={(e) => sortByKey(e.currentTarget.value)}>
+				<option value="">Classe</option>
+				{#each COLUMNS.filter((k) => k.key !== 'classe') as col (col.key)}<option value={col.key}>{col.label}</option>{/each}
+			</select>
+		</label>
+		<ul class="cards">
+			{#each rows as c (c.id)}
+				<li>
+					<div class="c-top">
+						<span class="crest" style:--c={classColor(cfg, c.class)} title={ROLE_LABELS[c.role]}><Glyph name={ROLE_ICONS[c.role]} size={18} /></span>
+						<div class="c-id">
+							<span class="name"><strong>{c.name}</strong>{#if c.surname}{' '}<span class="muted">{c.surname}</span>{/if}</span>
+							<span class="muted small">{className(cfg, c.class)} · {specRole(cfg, c.class, c.spec, c.role)}</span>
+						</div>
+						<span class="muted small num">niv. {c.level}</span>
+					</div>
+					<div class="tags">
+						{#if c.isMain}<span class="badge main">Main</span>{:else}<span class="muted small">reroll de {c.mainName ?? '?'}</span>{/if}
+						<GameBadge character={c} importAt={data.gameImportAt} />
+						<InterestBadges pve={c.pve} pvp={c.pvp} compact />
+					</div>
+					<p class="muted small">
+						<a class="player" href="/joueurs/{c.playerId}">{c.player}</a>{#if c.race}{' · '}{raceName(cfg, c.race)}{/if}{#if c.spec2 || c.role2}{' · '}aussi {specRole(cfg, c.class, c.spec2, c.role2)}{/if}
+					</p>
+					{#if c.professions.length}<p class="small">{professionNames(cfg, c.professions)}</p>{/if}
+					{#if data.roster && data.officer}
+						<form method="POST" action="?/remove" use:enhance>
+							<input type="hidden" name="rosterId" value={data.roster.id} />
+							<input type="hidden" name="characterId" value={c.id} />
+							<button class="secondary small">Retirer de {data.roster.name}</button>
+						</form>
+					{/if}
+				</li>
+			{/each}
+		</ul>
 	</div>
 {/if}
 
@@ -406,7 +451,69 @@
 		overflow: hidden;
 		clip-path: inset(50%);
 	}
+	.mobile {
+		display: none;
+	}
+	.mobile-sort {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		margin-bottom: 0.75rem;
+		white-space: nowrap;
+	}
+	.mobile-sort select {
+		min-height: 38px;
+		padding-block: 0.25rem;
+	}
+	.cards {
+		list-style: none;
+		display: grid;
+		gap: 0.75rem;
+		margin: 0;
+		padding: 0;
+	}
+	.cards li {
+		display: grid;
+		gap: 0.5rem;
+		padding: 1rem 1.125rem;
+		border-radius: var(--radius);
+		background: var(--surface);
+		box-shadow: var(--shadow);
+	}
+	.cards p {
+		margin: 0;
+	}
+	.c-top {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+	}
+	.crest {
+		flex: none;
+		display: grid;
+		place-items: center;
+		width: 40px;
+		height: 40px;
+		border-radius: 12px;
+		background: color-mix(in srgb, var(--c) 16%, var(--surface));
+		box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--c) 45%, rgb(0 0 0 / 0.3));
+	}
+	.c-id {
+		flex: 1;
+		display: grid;
+		min-width: 0;
+		line-height: 1.3;
+	}
+	.cards .tags {
+		flex-wrap: wrap;
+	}
 	@media (max-width: 760px) {
+		.table-wrap {
+			display: none;
+		}
+		.mobile {
+			display: block;
+		}
 		.picker {
 			grid-template-columns: 1fr 1fr;
 		}

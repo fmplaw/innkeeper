@@ -104,8 +104,8 @@
 		color: var(--muted);
 	}
 	.status.on {
-		background: color-mix(in srgb, #3fb950 20%, transparent);
-		color: #56d364;
+		background: color-mix(in srgb, var(--good) 20%, transparent);
+		color: var(--good);
 	}
 	.small {
 		font-size: 0.85rem;

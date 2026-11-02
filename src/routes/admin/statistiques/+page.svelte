@@ -1,14 +1,16 @@
 <script lang="ts">
 	import Donut from '$lib/components/Donut.svelte';
+	import Glyph from '$lib/components/Glyph.svelte';
+	import RoleBar from '$lib/components/RoleBar.svelte';
 	import { className, classColor } from '$lib/labels';
 	import { AXIS_LABELS } from '$lib/interests';
-	import { ROLES, ROLE_LABELS } from '$lib/roles';
+	import { ROLES, ROLE_ICONS, ROLE_LABELS, type Role } from '$lib/roles';
 
 	let { data } = $props();
 	const cfg = $derived(data.config);
 	const s = $derived(data.stats);
 
-	const ROLE_COLORS = { tank: '#5b8def', healer: '#4caf7d', melee: '#d9534f', ranged: '#e8c26a' } as const;
+	const roleCounts = $derived(Object.fromEntries(ROLES.map((r) => [r, s.roles.find((x) => x.role === r)?.mains ?? 0])) as Record<Role, number>);
 	const dayFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium' });
 	const pct = (n: number, total: number) => (total ? Math.round((n / total) * 100) : 0);
 
@@ -28,23 +30,35 @@
 	}
 </script>
 
-<h1>Statistiques</h1>
-<p class="muted intro">
-	Les mains comptent pour la composition, tous les persos pour les métiers. Seuls les joueurs qui ont encore accès au
-	site sont comptés.
-</p>
+<div class="page-head">
+	<div>
+		<h1>Statistiques</h1>
+		<p class="sub">
+			Les mains comptent pour la composition, tous les persos pour les métiers. Seuls les joueurs qui ont encore accès au
+			site sont comptés.
+		</p>
+	</div>
+</div>
 
-<section class="figures card">
-	<div><strong>{s.totals.members}</strong><span>membres</span></div>
-	<div><strong>{s.totals.withCharacters}</strong><span>avec au moins un perso</span></div>
-	<div><strong>{s.totals.characters}</strong><span>persos, dont {s.totals.mains} mains</span></div>
-	<div><strong>{s.totals.maxLevel}</strong><span>mains au niveau {cfg.maxLevel}</span></div>
+<section class="figures">
+	<div><strong class="serif num">{s.totals.members}</strong><span>membres</span></div>
+	<div><strong class="serif num">{s.totals.withCharacters}</strong><span>avec au moins un perso</span></div>
+	<div><strong class="serif num">{s.totals.characters}</strong><span>persos, dont {s.totals.mains} mains</span></div>
+	<div><strong class="serif num">{s.totals.maxLevel}</strong><span>mains au niveau {cfg.maxLevel}</span></div>
 </section>
 
-<div class="grid">
+<!-- Page longue : accès direct aux sections. -->
+<nav class="seg jump" aria-label="Sections">
+	<a href="#composition">Composition</a>
+	<a href="#classes">Classes</a>
+	<a href="#metiers">Métiers</a>
+	<a href="#activite">Activité</a>
+</nav>
+
+<div class="grid" id="composition">
 	<section class="card">
 		<h2>Rôles des mains</h2>
-		<Donut label="Rôles des mains" parts={ROLES.map((r) => ({ label: ROLE_LABELS[r], value: s.roles.find((x) => x.role === r)?.mains ?? 0, color: ROLE_COLORS[r] }))} />
+		<RoleBar counts={roleCounts} />
 		<div class="table-wrap">
 			<table class="compact">
 				<thead>
@@ -53,7 +67,7 @@
 				<tbody>
 					{#each s.roles as r (r.role)}
 						<tr>
-							<td>{ROLE_LABELS[r.role]}{#if r.wanted}{' '}<span class="badge wanted">recherché</span>{/if}</td>
+							<td><span class="cls"><span class="mark" style:color="var(--r-{r.role})"><Glyph name={ROLE_ICONS[r.role]} size={15} /></span>{ROLE_LABELS[r.role]}</span>{#if r.wanted}{' '}<span class="badge wanted">recherché</span>{/if}</td>
 							<td class="num">{r.mains}</td>
 							<td class="num">{r.offspec || '·'}</td>
 							<td class="num">{r.rerolls || '·'}</td>
@@ -88,7 +102,7 @@
 	</section>
 </div>
 
-<section class="card">
+<section class="card" id="classes">
 	<h2>Classes</h2>
 	<p class="muted small">
 		Mains par rôle ; un tiret signale un rôle que la classe ne peut pas tenir. Barre pleine : mains, barre claire :
@@ -99,7 +113,7 @@
 			<thead>
 				<tr>
 					<th>Classe</th>
-					{#each ROLES as r (r)}<th class="num">{ROLE_LABELS[r]}</th>{/each}
+					{#each ROLES as r (r)}<th class="num"><span class="cls"><span class="mark" style:color="var(--r-{r})"><Glyph name={ROLE_ICONS[r]} size={14} /></span>{ROLE_LABELS[r]}</span></th>{/each}
 					<th class="wide">Mains et rerolls</th>
 				</tr>
 			</thead>
@@ -138,7 +152,7 @@
 	{/if}
 </section>
 
-<section class="card">
+<section class="card" id="metiers">
 	<h2>Métiers</h2>
 	<p class="muted small">Tous les persos, rerolls compris. Le niveau n'est connu que s'il est renseigné sur la fiche ou importé du jeu.</p>
 	<div class="table-wrap">
@@ -162,15 +176,15 @@
 	</div>
 </section>
 
-<div class="grid">
+<div class="grid" id="activite">
 	<section class="card">
 		<h2>Activité sur le site</h2>
 		<Donut
 			label="Dernière connexion"
 			parts={[
-				{ label: 'Cette semaine', value: s.activity.week, color: '#4caf7d' },
-				{ label: 'Ce mois-ci', value: s.activity.month, color: '#e8c26a' },
-				{ label: 'Plus de 30 jours ou jamais', value: s.activity.older, color: '#8a817b' }
+				{ label: 'Cette semaine', value: s.activity.week, color: 'var(--good)' },
+				{ label: 'Ce mois-ci', value: s.activity.month, color: 'var(--warn)' },
+				{ label: 'Plus de 30 jours ou jamais', value: s.activity.older, color: 'color-mix(in srgb, var(--muted) 55%, var(--bg))' }
 			]}
 		/>
 		{#if s.activity.seenInGame !== null}
@@ -213,16 +227,18 @@
 </div>
 
 <style>
-	h1 {
-		margin: 0 0 0.25rem;
-	}
-	.intro {
-		margin: 0 0 1.25rem;
-	}
 	h2 {
 		margin: 0 0 0.75rem;
-		font-size: 1.15rem;
-		color: var(--gold);
+		font-size: 1.25rem;
+	}
+	.jump {
+		margin-bottom: 2rem;
+	}
+	.mark {
+		display: inline-flex;
+	}
+	[id] {
+		scroll-margin-top: 96px;
 	}
 	.spaced {
 		margin-top: 1.5rem;
@@ -242,20 +258,19 @@
 		grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
 		gap: 0 1.5rem;
 	}
-	section.card.figures {
+	.figures {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 1rem 2.5rem;
+		gap: 1.5rem 3.5rem;
+		margin-bottom: 2rem;
 	}
 	.figures div {
 		display: flex;
 		flex-direction: column;
 	}
 	.figures strong {
-		font-size: 2rem;
-		color: var(--gold);
-		line-height: 1.1;
-		font-variant-numeric: tabular-nums;
+		font-size: 3rem;
+		line-height: 1;
 	}
 	.figures span {
 		color: var(--muted);
@@ -283,11 +298,11 @@
 		border-top: 2px solid var(--border);
 	}
 	.badge.wanted {
-		border-color: color-mix(in srgb, #3fb950 55%, transparent);
-		color: #56d364;
+		background: color-mix(in oklab, var(--good) 11%, var(--bg));
+		color: var(--good);
 	}
 	.warn {
-		color: #e3a03a;
+		color: var(--warn);
 	}
 	.bar,
 	.interest {

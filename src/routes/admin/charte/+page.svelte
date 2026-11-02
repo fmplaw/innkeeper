@@ -64,7 +64,7 @@
 	}
 	.saved {
 		margin: 0 0 1rem;
-		border-color: color-mix(in srgb, #3fb950 50%, var(--border));
+		border-color: color-mix(in srgb, var(--good) 50%, var(--border));
 	}
 	.editor {
 		display: grid;
