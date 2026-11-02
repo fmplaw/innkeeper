@@ -1,4 +1,5 @@
 import { remember } from './bounded';
+import { tracked } from './health';
 
 const API = 'https://raid-helper.dev/api/v4';
 const CACHE_TTL_MS = 60_000;
@@ -58,7 +59,9 @@ export async function fetchEvent(id: string): Promise<RaidHelperEvent | null> {
 	const hit = cache.get(id);
 	if (hit && Date.now() - hit.at < CACHE_TTL_MS) return hit.event;
 
-	const res = await fetch(`${API}/events/${id}`, { signal: AbortSignal.timeout(10_000) });
+	const res = await tracked('raidhelper', 'lecture d’une sortie', () => fetch(`${API}/events/${id}`, { signal: AbortSignal.timeout(10_000) }), {
+		expected: [404]
+	});
 	if (res.status === 404) {
 		remember(cache, id, { at: Date.now(), event: null }, CACHE_MAX);
 		return null;
@@ -75,11 +78,13 @@ export async function fetchEvent(id: string): Promise<RaidHelperEvent | null> {
 export class RaidHelperError extends Error {}
 
 async function authed(path: string, apiKey: string, init: RequestInit = {}) {
-	const res = await fetch(`${API}${path}`, {
-		...init,
-		headers: { Authorization: apiKey, 'Content-Type': 'application/json; charset=utf-8', ...init.headers },
-		signal: AbortSignal.timeout(10_000)
-	});
+	const res = await tracked('raidhelper', `${init.method ?? 'GET'} ${path.replace(/\d{5,}/g, '…')}`, () =>
+		fetch(`${API}${path}`, {
+			...init,
+			headers: { Authorization: apiKey, 'Content-Type': 'application/json; charset=utf-8', ...init.headers },
+			signal: AbortSignal.timeout(10_000)
+		})
+	);
 	if (res.status === 401 || res.status === 403) {
 		// Un refus n'est pas forcément la clé : on garde la raison donnée par Raid-Helper.
 		const body = await res.text().catch(() => '');

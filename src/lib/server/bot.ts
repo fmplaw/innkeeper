@@ -1,3 +1,4 @@
+import { tracked } from './health';
 import { getDiscord } from './settings';
 
 // Actions du bot de la guilde (API REST de Discord, jeton du bot). Aucune connexion
@@ -26,11 +27,16 @@ async function retryAfter(res: Response) {
 
 async function call(path: string, init: RequestInit = {}, retried = false): Promise<Response> {
 	const { token } = config();
-	const res = await fetch(`${API}${path}`, {
-		...init,
-		headers: { Authorization: `Bot ${token}`, 'Content-Type': 'application/json', ...init.headers },
-		signal: AbortSignal.timeout(10_000)
-	});
+	// 404 : membre absent du serveur, réponse normale. Un premier 429 est réessayé plus bas.
+	const label = `${init.method ?? 'GET'} ${path.replace(/\d{5,}/g, '…')}`;
+	const res = await tracked('bot', label, () =>
+		fetch(`${API}${path}`, {
+			...init,
+			headers: { Authorization: `Bot ${token}`, 'Content-Type': 'application/json', ...init.headers },
+			signal: AbortSignal.timeout(10_000)
+		}),
+		{ expected: retried ? [404] : [404, 429] }
+	);
 	if (res.status === 429 && !retried) {
 		const wait = await retryAfter(res);
 		if (wait !== null && wait <= MAX_RETRY_WAIT_S) {
