@@ -2,6 +2,7 @@ import { desc, eq, sql } from 'drizzle-orm';
 import { botReady, guildMember } from './bot';
 import { db, schema } from './db';
 import type { GuildMember } from './discord';
+import { tracked } from './health';
 import { getAccess, getDiscord } from './settings';
 
 export type Permission = 'officer' | 'member';
@@ -122,10 +123,12 @@ export async function syncRolesFromBot() {
 	const discord = getDiscord();
 	if (!discord?.botToken) throw new Error('Aucun token de bot configuré');
 
-	const res = await fetch(`https://discord.com/api/v10/guilds/${discord.guildId}/roles`, {
-		headers: { Authorization: `Bot ${discord.botToken}` },
-		signal: AbortSignal.timeout(10_000)
-	});
+	const res = await tracked('bot', 'liste des rôles du serveur', () =>
+		fetch(`https://discord.com/api/v10/guilds/${discord.guildId}/roles`, {
+			headers: { Authorization: `Bot ${discord.botToken}` },
+			signal: AbortSignal.timeout(10_000)
+		})
+	);
 	if (res.status === 401) throw new Error('Token de bot refusé par Discord');
 	if (res.status === 403 || res.status === 404) throw new Error('Le bot n’est pas présent sur le serveur de la guilde');
 	if (!res.ok) throw new Error(`Discord a répondu ${res.status}`);

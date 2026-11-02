@@ -1,6 +1,7 @@
 import { SvelteKitAuth } from '@auth/sveltekit';
 import Discord from '@auth/sveltekit/providers/discord';
 import { fetchGuildMember } from '$lib/server/discord';
+import { recordFailure } from '$lib/server/health';
 import { recordDiscordLogin } from '$lib/server/permissions';
 import { getAuthSecret, getDiscord } from '$lib/server/settings';
 
@@ -27,6 +28,15 @@ export const { handle, signIn, signOut } = SvelteKitAuth(async () => {
 				]
 			: [],
 		pages: { signIn: '/connexion', error: '/connexion' },
+		// Les échecs de connexion (Discord injoignable, appli mal configurée…) apparaissent aussi
+		// dans Admin → État ; le message d'Auth.js reste dans les logs comme avant.
+		logger: {
+			error(error) {
+				const type = (error as Error & { type?: string }).type ?? error.name;
+				recordFailure('discord', `connexion d’un joueur : ${type}${error.message ? ` (${error.message.split('\n')[0]})` : ''}`);
+				console.error(error);
+			}
+		},
 		callbacks: {
 			async signIn({ account, profile, user }) {
 				if (account?.provider !== 'discord' || !account.access_token || !profile || !discord) return false;

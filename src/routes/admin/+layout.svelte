@@ -6,7 +6,7 @@
 
 	type Link = { href: string; label: string; icon: GlyphName; badge?: number };
 
-	// Quinze pages rangées par usage : le quotidien d'abord, les réglages techniques à la fin.
+	// Seize pages rangées par usage : le quotidien d'abord, les réglages techniques à la fin.
 	const groups = $derived<{ label: string; links: Link[] }[]>([
 		{
 			label: 'La guilde',
@@ -43,7 +43,8 @@
 								? ([
 										{ href: '/admin/roles', label: 'Rôles Discord', icon: 'key' },
 										{ href: '/admin/discord', label: 'Connexion Discord', icon: 'plug' },
-										{ href: '/admin/journal', label: 'Journal', icon: 'book' }
+										{ href: '/admin/journal', label: 'Journal', icon: 'book' },
+										{ href: '/admin/etat', label: 'État', icon: 'checks' }
 									] as const)
 								: []),
 							// Comptes admin et désignation des admins Discord : compte local seulement (accès de secours).

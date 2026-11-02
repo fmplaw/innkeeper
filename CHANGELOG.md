@@ -6,6 +6,8 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ### Ajouté
 
+- **Admin → État** (admin de l'instance) : pour la connexion Discord, le bot et Raid-Helper, la dernière réponse correcte, la dernière panne avec ce qui était demandé (« lecture d'une sortie : réponse 503 », « connexion d'un joueur : OAuthCallbackError »…) et le nombre de pannes depuis le démarrage. Aussi : dernière relecture des rôles par le bot, dernier envoi d'InnkeeperSync et dernier registre de guilde appliqué, dernière sauvegarde trouvée dans `/backups` (alerte au-delà d'un jour et demi). Jusqu'ici, une panne ne se voyait que dans les logs du conteneur.
+
 - **Médaillon du type de sortie**, dans l'esprit de la légende de la carte du jeu : « ! » jaune pour les quêtes, vortex bleu pour un donjon, vortex vert pour un raid, épées croisées pour le PvP, pelle pour le farm, « … » pour le reste. Il s'affiche dans la liste des sorties, sur la page d'une sortie et dans la carte « prochaine sortie » de l'accueil, avec le type en toutes lettres (« Raid · Barrow Deeps »). Une sortie créée directement sur Discord ou dans Raid-Helper, sans type connu du site, est marquée « Événement Discord ». Dessins propres au projet, aucune image de Blizzard.
 - **Icônes de classe** : Admin → Guilde accepte une image par classe, affichée en médaillon à côté de chaque perso (Mes persos, roster, fiches des joueurs, candidatures, filtres par classe), avec le rôle en pastille dans le coin. Sans icône, la classe garde un blason à sa couleur. Aucune image de Blizzard n'est fournie : chaque guilde envoie les siennes.
 
