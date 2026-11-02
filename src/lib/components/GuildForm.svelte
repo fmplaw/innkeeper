@@ -80,6 +80,7 @@
 		<div class="grid">
 			<div>
 				<label for="logo">Logo carré (PNG, JPEG ou WebP, 1 Mo max)</label>
+				<p class="hint muted">Au moins 600 × 600 px, fond transparent de préférence : il s'affiche en grand sur l'accueil.</p>
 				<input id="logo" name="logo" type="file" accept="image/png,image/jpeg,image/webp" />
 				{#if errors.logo}<p class="error">{errors.logo}</p>{/if}
 				{#if initial.logo}
@@ -90,7 +91,11 @@
 				{/if}
 			</div>
 			<div>
-				<label for="banner">Bannière (format 4:1 recommandé, ex. 1600 × 400 ; 4 Mo max)</label>
+				<label for="banner">Bannière (PNG, JPEG ou WebP, 4 Mo max)</label>
+				<p class="hint muted">
+					Grande image de fond de l'accueil : au moins 2400 × 1000 px, idéalement 3000 × 1300 px. Garde le sujet au centre :
+					les bords sont recadrés selon l'écran, et un téléphone n'en montre que le milieu.
+				</p>
 				<input id="banner" name="banner" type="file" accept="image/png,image/jpeg,image/webp" />
 				{#if errors.banner}<p class="error">{errors.banner}</p>{/if}
 				{#if initial.banner}
@@ -276,6 +281,7 @@
 	}
 	.current .banner {
 		width: 144px;
-		height: 48px;
+		height: 60px;
+		object-fit: cover;
 	}
 </style>
