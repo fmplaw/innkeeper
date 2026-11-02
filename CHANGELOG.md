@@ -4,6 +4,11 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ## [Non publié]
 
+### Modifié
+
+- **Prénoms en double** : dans Forever, plusieurs persos peuvent porter le même prénom (seul le nom complet est unique). L'avertissement ne conseille plus de corriger l'orthographe : il explique que l'import du jeu ne sait pas encore distinguer ces fiches, et rassure quand ce sont toutes les persos du même joueur. Dans Admin → Joueurs, le badge devient « prénom en double » et n'apparaît plus quand les fiches sont toutes au même joueur.
+- Journal : libellé pour l'attribution du rôle d'arrivée par le bot (« a donné le rôle d'arrivée à »).
+
 ## [0.14.0] - 2026-11-01
 
 ### Sécurité

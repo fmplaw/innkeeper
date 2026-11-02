@@ -13,6 +13,7 @@ export const AUDIT_ACTIONS = {
 	'application.vote': { group: 'Candidatures', label: 'a donné son avis sur la candidature de' },
 	'application.accept': { group: 'Candidatures', label: 'a accepté la candidature de' },
 	'application.refuse': { group: 'Candidatures', label: 'a refusé la candidature de' },
+	'member.arrival-role': { group: 'Candidatures', label: 'a donné le rôle d’arrivée à' },
 	'outing.create': { group: 'Sorties', label: 'a créé la sortie' },
 	'outing.update': { group: 'Sorties', label: 'a modifié la sortie' },
 	'outing.delete': { group: 'Sorties', label: 'a supprimé la sortie' },
