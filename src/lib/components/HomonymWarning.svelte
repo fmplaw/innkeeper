@@ -42,10 +42,10 @@
 	.homonym {
 		display: inline-flex;
 		align-items: center;
-		padding: 0.05rem 0.45rem;
+		padding: 0.0625rem 0.5rem;
 		border-radius: 999px;
-		border: 1px solid currentColor;
-		color: var(--gold);
+		background: color-mix(in oklab, var(--warn) 11%, var(--bg));
+		color: var(--warn);
 		font-size: 0.75rem;
 		font-weight: 600;
 		white-space: nowrap;
@@ -53,9 +53,9 @@
 	}
 	.homonym-note {
 		margin: 0.5rem 0;
-		padding: 0.5rem 0.75rem;
-		border-left: 3px solid var(--gold);
-		background: var(--surface-2);
-		font-size: 0.9rem;
+		padding: 0.625rem 0.875rem;
+		border-radius: 10px;
+		background: color-mix(in oklab, var(--warn) 9%, var(--bg));
+		font-size: 0.875rem;
 	}
 </style>
