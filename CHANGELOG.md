@@ -13,6 +13,7 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 - Migrations : un test refuse deux migrations du même numéro (deux branches fusionnées l'une après l'autre) et un journal qui ne reprend pas exactement les fichiers ; la CI vérifie que `npm run db:generate` ne produit plus rien, donc que le schéma et les migrations concordent.
 - Tests : matrice d'accès. Chaque chargement de page et chaque action de formulaire est appelé avec six profils (visiteur, candidat, membre, officier, admin Discord, admin local) et comparé au niveau déclaré ; une nouvelle page ou action non déclarée fait échouer les tests.
+- CI de l'image : vérification des types et tests en parallèle de la construction ; une pull request n'écrit plus le cache Docker (elle relit celui de main). La publication (main et tags) attend les deux et réutilise le cache.
 
 ### Corrigé
 
