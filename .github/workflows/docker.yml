@@ -10,6 +10,11 @@ permissions:
   contents: read
   packages: write
 
+# Un nouveau push sur une pull request annule la vérification en cours, devenue inutile.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   image:
     runs-on: ubuntu-latest
@@ -24,6 +29,8 @@ jobs:
       - run: npm run check
       - run: npm test
 
+      # QEMU ne sert plus qu'à la dernière étape de l'image arm64 (quelques commandes) : le site,
+      # lui, est construit sans émulation (voir le Dockerfile).
       - uses: docker/setup-qemu-action@v3
       - uses: docker/setup-buildx-action@v3
 
@@ -49,7 +56,21 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
+          # Une pull request ne publie rien : on vérifie seulement que l'image se construit.
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      # L'image de chaque architecture doit démarrer et répondre : /healthz passe par
+      # better-sqlite3 (migrations puis requête), donc par le binaire natif du bon processeur.
+      - name: Essai de démarrage (amd64 et arm64)
+        run: |
+          for arch in amd64 arm64; do
+            docker buildx build --platform linux/$arch --load -t innkeeper:essai-$arch --cache-from type=gha .
+            docker run -d --name essai-$arch --platform linux/$arch -p 0:3000 -e ORIGIN=http://localhost innkeeper:essai-$arch
+            port=$(docker port essai-$arch 3000 | head -1 | cut -d: -f2)
+            for i in $(seq 60); do curl -sf "http://127.0.0.1:$port/healthz" && break; sleep 2; done
+            curl -sf "http://127.0.0.1:$port/healthz" >/dev/null || { docker logs essai-$arch; exit 1; }
+            echo " : $arch, $(docker exec essai-$arch uname -m)"
+          done
