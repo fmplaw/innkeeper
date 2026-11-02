@@ -10,7 +10,7 @@
 
 <HomonymWarning homonyms={data.homonyms} viewerId={data.character.userId} />
 
-{#if form?.message}<p class="card error">{form.message}</p>{/if}
+{#if form?.message}<p class="notice bad">{form.message}</p>{/if}
 
 <CharacterForm
 	config={data.config}

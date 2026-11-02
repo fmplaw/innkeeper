@@ -1,5 +1,5 @@
 import { error, fail } from '@sveltejs/kit';
-import { and, asc, desc, eq, inArray, or, type SQL } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, type SQL } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/sqlite-core';
 import { audit } from '$lib/server/audit';
 import { characterTarget, getCharacter } from '$lib/server/characters';
@@ -49,11 +49,11 @@ export const load: PageServerLoad = ({ locals, url }) => {
 
 	const where: SQL[] = [];
 	if (roster) where.push(inArray(characters.id, memberIds));
-	if (filters.classe) where.push(eq(characters.class, filters.classe));
-	if (ROLES.includes(filters.role as Role)) {
-		const role = filters.role as Role;
-		where.push(filters.secondaire ? or(eq(characters.role, role), eq(characters.role2, role))! : eq(characters.role, role));
-	}
+	// Classe et rôle sont filtrés après la requête : chaque compteur ignore son propre filtre,
+	// pour qu'on voie combien de persos donnerait un autre choix.
+	const role = ROLES.includes(filters.role as Role) ? (filters.role as Role) : null;
+	const classMatch = (r: { class: string }) => !filters.classe || r.class === filters.classe;
+	const roleMatch = (r: { role: Role; role2: Role | null }) => !role || r.role === role || (filters.secondaire && r.role2 === role);
 	if (FACTIONS.includes(filters.faction as Faction))
 		where.push(inArray(characters.race, RACES.filter((r) => r.faction === filters.faction).map((r) => r.id)));
 	if (filters.type === 'main') where.push(eq(characters.isMain, true));
@@ -104,10 +104,12 @@ export const load: PageServerLoad = ({ locals, url }) => {
 	// Persos capables de tenir le rôle en spé secondaire (en plus de leur rôle principal).
 	const byRole2 = zero();
 	for (const row of rows) {
-		byClass[row.class] = (byClass[row.class] ?? 0) + 1;
+		if (roleMatch(row)) byClass[row.class] = (byClass[row.class] ?? 0) + 1;
+		if (!classMatch(row)) continue;
 		byRole[row.role]++;
 		if (row.role2 && row.role2 !== row.role) byRole2[row.role2]++;
 	}
+	rows = rows.filter((r) => classMatch(r) && roleMatch(r));
 
 	// Dans un roster, les officiers ajoutent des persos choisis parmi toute la guilde.
 	const candidates =

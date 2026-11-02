@@ -168,9 +168,8 @@
 				<span class="label">Classes recherchées</span>
 				<div class="checks">
 					{#each CLASSES as c (c.id)}
-						<label class="choice" style:color={c.color}>
-							<input type="checkbox" name="recruitmentClasses" value={c.id} checked={initial.recruitment?.classes.includes(c.id)} />
-							{c.name}
+						<label class="choice">
+							<input type="checkbox" name="recruitmentClasses" value={c.id} checked={initial.recruitment?.classes.includes(c.id)} /> <span class="dot" style:--c={c.color}></span> {c.name}
 						</label>
 					{/each}
 				</div>

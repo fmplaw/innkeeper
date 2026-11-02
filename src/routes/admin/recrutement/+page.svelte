@@ -12,13 +12,13 @@
 	que fait le bot quand une candidature arrive ou est acceptée, et les questions posées aux candidats.
 </p>
 
-{#if form?.saved}<p class="card ok">Réglages enregistrés.</p>{/if}
-{#if form?.tested}<p class="card ok">Message de test envoyé : vérifie le salon sur Discord.</p>{/if}
-{#if form?.error}<p class="card error">{form.error}</p>{/if}
+{#if form?.saved}<p class="notice ok">Réglages enregistrés.</p>{/if}
+{#if form?.tested}<p class="notice ok">Message de test envoyé : vérifie le salon sur Discord.</p>{/if}
+{#if form?.error}<p class="notice bad">{form.error}</p>{/if}
 {#if !data.botReady}
-	<p class="card warn">Le bot n'est pas encore configuré (Admin → Connexion Discord) : les salons ne peuvent pas être listés.</p>
+	<p class="notice warn">Le bot n'est pas encore configuré (Admin → Connexion Discord) : les salons ne peuvent pas être listés.</p>
 {:else if data.channelsError}
-	<p class="card warn">{data.channelsError}</p>
+	<p class="notice warn">{data.channelsError}</p>
 {/if}
 
 <form method="POST" action="?/save" use:enhance={keepValues} class="card form">
@@ -125,8 +125,5 @@
 	}
 	.warn {
 		color: var(--gold);
-	}
-	p.card.error {
-		margin-bottom: 1rem;
 	}
 </style>

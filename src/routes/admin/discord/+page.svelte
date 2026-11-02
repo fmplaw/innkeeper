@@ -7,13 +7,13 @@
 
 <h1>Connexion Discord</h1>
 {#if form?.saved}
-	<p class="card ok">
+	<p class="notice ok">
 		Identifiants vérifiés et enregistrés.
 		{#if form.synced !== null && form.synced !== undefined}{form.synced} rôles récupérés depuis le bot.{/if}
 	</p>
 {/if}
 {#if !data.values.clientId && !form}
-	<p class="card warn">Discord n'est pas encore configuré : les joueurs ne peuvent pas se connecter.</p>
+	<p class="notice warn">Discord n'est pas encore configuré : les joueurs ne peuvent pas se connecter.</p>
 {/if}
 
 {#if bot}

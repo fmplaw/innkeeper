@@ -39,11 +39,11 @@
 	</p>
 </section>
 
-{#if form?.error}<p class="card error">{form.error}</p>{/if}
+{#if form?.error}<p class="notice bad">{form.error}</p>{/if}
 {#if form?.applied !== undefined && form?.synced !== undefined}
 	{@const n = form.applied}
 	{@const synced = form.synced}
-	<p class="card ok">
+	<p class="notice ok">
 		Import terminé : {n} fiche{n > 1 ? 's' : ''} mise{n > 1 ? 's' : ''} à jour, {synced} perso{synced > 1 ? 's' : ''}
 		synchronisé{synced > 1 ? 's' : ''} (dernière connexion).
 	</p>
@@ -196,9 +196,6 @@
 	}
 	.ok {
 		border-color: var(--gold);
-		margin-bottom: 1rem;
-	}
-	p.card.error {
 		margin-bottom: 1rem;
 	}
 </style>

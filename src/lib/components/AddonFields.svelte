@@ -48,7 +48,7 @@
 		</div>
 		<div class="checks">
 			{#each config.classes as c (c.id)}
-				<label class="choice" style:color={c.color}><input type="checkbox" name="classes" value={c.id} checked={values.classes?.includes(c.id)} /> {c.name}</label>
+				<label class="choice"><input type="checkbox" name="classes" value={c.id} checked={values.classes?.includes(c.id)} /> <span class="dot" style:--c={c.color}></span> {c.name}</label>
 			{/each}
 		</div>
 	</fieldset>

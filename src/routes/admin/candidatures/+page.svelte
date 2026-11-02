@@ -37,7 +37,7 @@
 					<div class="who">
 						<strong>{a.name}</strong>
 						<span>
-							<span style:color={classColor(cfg, c.class)}>{c.name} · {className(cfg, c.class)}</span>
+							<span class="cls"><span class="dot" style:--c={classColor(cfg, c.class)}></span>{c.name} · {className(cfg, c.class)}</span>
 							<span class="muted">· {specRole(cfg, c.class, c.spec ?? null, c.role)} · niv. {c.level}</span>
 						</span>
 						<span><InterestBadges pve={c.pve ?? null} pvp={c.pvp ?? null} compact /></span>

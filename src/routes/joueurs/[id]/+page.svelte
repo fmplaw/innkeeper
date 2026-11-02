@@ -1,7 +1,8 @@
 <script lang="ts">
+	import CharacterTitle from '$lib/components/CharacterTitle.svelte';
 	import GameBadge from '$lib/components/GameBadge.svelte';
 	import InterestBadges from '$lib/components/InterestBadges.svelte';
-	import { className, classColor, fullName, professionNames, raceName, specRole } from '$lib/labels';
+	import { professionNames, specRole } from '$lib/labels';
 
 	let { data } = $props();
 	const cfg = $derived(data.config);
@@ -9,8 +10,8 @@
 	const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium' });
 </script>
 
-<header class="card head">
-	{#if p.avatar}<img src={p.avatar} alt="" />{/if}
+<header class="head">
+	{#if p.avatar}<img src={p.avatar} alt="" />{:else}<span class="initial" aria-hidden="true">{p.displayName[0]?.toUpperCase()}</span>{/if}
 	<div>
 		<h1>{p.displayName}</h1>
 		{#if p.roles.length}
@@ -27,21 +28,15 @@
 </header>
 
 {#if p.characters.length === 0}
-	<p class="card muted">Aucun perso renseigné pour l'instant.</p>
+	<p class="empty">Aucun perso renseigné pour l'instant.</p>
 {:else}
 	<div class="list">
 		{#each p.characters as c (c.id)}
 			<article class="card" class:main={c.isMain}>
-				<div class="row title">
-					<h2 style:color={classColor(cfg, c.class)}>{fullName(c)}</h2>
-					<span class="badge" class:main={c.isMain}>{c.isMain ? 'Main' : 'Reroll'}</span>
+				<CharacterTitle {cfg} character={c}>
+					<span class="badge" class:main={c.isMain} class:plain={!c.isMain}>{c.isMain ? 'Main' : 'Reroll'}</span>
 					<GameBadge character={c} importAt={data.gameImportAt} />
-				</div>
-				<p>
-					Niv. {c.level}
-					{raceName(cfg, c.race)}
-					{className(cfg, c.class)} · {specRole(cfg, c.class, c.spec, c.role)}
-				</p>
+				</CharacterTitle>
 				{#if c.spec2 || c.role2}<p class="muted">Spé secondaire : {specRole(cfg, c.class, c.spec2, c.role2)}</p>{/if}
 				{#if c.pve || c.pvp}<p><InterestBadges pve={c.pve} pvp={c.pvp} /></p>{/if}
 				{#if c.professions.length}<p class="muted">{professionNames(cfg, c.professions)}</p>{/if}
@@ -69,36 +64,49 @@
 	.head {
 		display: flex;
 		align-items: center;
-		gap: 1rem;
-		margin-bottom: 1.25rem;
 		flex-wrap: wrap;
+		gap: 1.25rem;
+		margin-bottom: 2.5rem;
 	}
-	.head img {
-		width: 64px;
-		height: 64px;
+	.head img,
+	.initial {
+		width: 72px;
+		height: 72px;
 		border-radius: 50%;
+	}
+	.initial {
+		display: grid;
+		place-items: center;
+		background: var(--tint);
+		color: var(--accent-ink);
+		font-family: var(--font-display);
+		font-size: 1.75rem;
+		font-weight: 600;
 	}
 	.head > div {
 		flex: 1;
 		display: grid;
-		gap: 0.35rem;
+		gap: 0.5rem;
 	}
-	h1 {
+	.head p {
 		margin: 0;
-		font-size: 1.6rem;
 	}
-	.roles,
+	.roles {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.375rem;
+	}
 	.known summary {
-		cursor: pointer;
-		font-size: 0.9rem;
+		font-size: 0.875rem;
+		color: var(--muted);
 	}
 	.known p {
-		margin: 0.3rem 0 0;
+		margin: 0.375rem 0 0;
 	}
 	.rosters {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.3rem;
+		gap: 0.375rem;
 	}
 	.rosters a {
 		color: var(--text);
@@ -106,26 +114,21 @@
 	}
 	.list {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+		grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
 		gap: 1rem;
 	}
 	article {
 		display: grid;
-		gap: 0.45rem;
+		gap: 0.625rem;
 		align-content: start;
 	}
 	article p {
 		margin: 0;
 	}
 	article.main {
-		border-color: var(--gold);
-	}
-	h2 {
-		margin: 0;
-		font-size: 1.2rem;
+		box-shadow: var(--shadow), inset 0 0 0 1px color-mix(in oklab, var(--gold) 35%, transparent);
 	}
 	.small {
-		font-size: 0.85rem;
 		margin: 0;
 	}
 	.notes {

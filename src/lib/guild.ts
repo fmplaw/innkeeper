@@ -11,13 +11,13 @@ export const AMBITION_LABELS: Record<Ambition, string> = {
 	hardcore: 'Progression exigeante'
 };
 
-export const AMBITION_ICONS: Record<Ambition, string> = {
-	pve: '⚔️',
-	pvp: '🛡️',
-	rp: '🎭',
-	casual: '🍺',
-	hardcore: '🔥'
-};
+export const AMBITION_ICONS = {
+	pve: 'swords',
+	pvp: 'shield',
+	rp: 'drama',
+	casual: 'beer',
+	hardcore: 'flame'
+} as const satisfies Record<Ambition, string>;
 
 /** Couleur d'accent par défaut selon la faction de la guilde. */
 export const DEFAULT_ACCENTS = { horde: '#b3261e', alliance: '#2f6fd6', both: '#8a5cd0' } as const;

@@ -28,20 +28,21 @@
 	.game {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.15rem;
-		padding: 0.05rem 0.45rem;
+		gap: 0.2rem;
+		padding: 0.0625rem 0.5rem;
 		border-radius: 999px;
-		border: 1px solid currentColor;
 		font-size: 0.75rem;
 		font-weight: 600;
 		white-space: nowrap;
 		vertical-align: middle;
 	}
 	.seen {
-		color: #56d364;
+		background: color-mix(in oklab, var(--good) 11%, var(--bg));
+		color: var(--good);
 	}
 	.missing {
-		color: var(--gold);
+		background: color-mix(in oklab, var(--warn) 11%, var(--bg));
+		color: var(--warn);
 	}
 	.pending {
 		color: var(--muted);

@@ -107,7 +107,7 @@
 				{#each classes as c (c.id)}
 					<tr class:empty={!c.mains}>
 						<td>
-							<span style:color={classColor(cfg, c.id)}>{className(cfg, c.id)}</span>
+							<span class="cls"><span class="dot" style:--c={classColor(cfg, c.id)}></span>{className(cfg, c.id)}</span>
 							{#if c.wanted}{' '}<span class="badge wanted">recherché</span>{/if}
 						</td>
 						{#each ROLES as r (r)}

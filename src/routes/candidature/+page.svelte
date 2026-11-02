@@ -69,7 +69,7 @@
 </section>
 
 <section class="card">
-	<h2 style:color={classColor(cfg, c.class)}>{fullName({ name: c.name, surname: c.surname ?? null })}</h2>
+	<h2 class="cls"><span class="dot" style:--c={classColor(cfg, c.class)}></span>{fullName({ name: c.name, surname: c.surname ?? null })}</h2>
 	<p>
 		Niv. {c.level}
 		{raceName(cfg, c.race ?? null)}

@@ -45,11 +45,11 @@
 	<span class="status {app.status}">{STATUS[app.status]}</span>
 </header>
 
-{#if form?.error}<p class="card error">{form.error}</p>{/if}
+{#if form?.error}<p class="notice bad">{form.error}</p>{/if}
 
 <div class="layout">
 	<section class="card">
-		<h2 style:color={classColor(cfg, c.class)}>{fullName({ name: c.name, surname: c.surname ?? null })}</h2>
+		<h2 class="cls"><span class="dot" style:--c={classColor(cfg, c.class)}></span>{fullName({ name: c.name, surname: c.surname ?? null })}</h2>
 		<p>
 			Niv. {c.level}
 			{raceName(cfg, c.race ?? null)}
@@ -301,8 +301,5 @@
 	}
 	.small {
 		font-size: 0.88rem;
-	}
-	p.card.error {
-		margin-bottom: 1rem;
 	}
 </style>

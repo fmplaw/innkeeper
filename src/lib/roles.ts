@@ -7,3 +7,6 @@ export const ROLE_LABELS: Record<Role, string> = {
 	melee: 'Mêlée',
 	ranged: 'Distance'
 };
+
+/** Icône de chaque rôle (voir Glyph.svelte) : un rôle se lit toujours avec son icône et son libellé. */
+export const ROLE_ICONS = { tank: 'shield', healer: 'cross', melee: 'swords', ranged: 'crosshair' } as const;

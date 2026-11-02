@@ -21,7 +21,7 @@
 <h1>Progression</h1>
 
 {#if !data.arrivalRole}
-	<p class="card warn">
+	<p class="notice warn">
 		Choisis d'abord le rôle d'arrivée des recrues dans <a href="/admin/recrutement">Recrutement</a> : c'est lui qui
 		désigne les nouveaux membres à suivre.
 	</p>
@@ -31,7 +31,7 @@
 		{data.reviewDays} jours (réglable dans <a href="/admin/recrutement">Recrutement</a>), ils sont signalés pour
 		qu'un officier décide d'une promotion. La promotion se fait sur Discord ; « Revu » repousse le rappel de 30 jours.
 	</p>
-	{#if form?.error}<p class="card error">{form.error}</p>{/if}
+	{#if form?.error}<p class="notice bad">{form.error}</p>{/if}
 
 	{#snippet member(n: (typeof data.newcomers)[number])}
 		<li class="card member" class:due={n.due}>
@@ -41,7 +41,7 @@
 					<a href="/joueurs/{n.id}"><strong>{n.name}</strong></a>
 					{#if n.main}
 						<span class="muted">
-							· <span style:color={classColor(cfg, n.main.class)}>{n.main.name}</span>
+							· <span class="cls"><span class="dot" style:--c={classColor(cfg, n.main.class)}></span>{n.main.name}</span>
 							{className(cfg, n.main.class)} niv. {n.main.level}
 						</span>
 					{/if}
@@ -143,8 +143,5 @@
 	.warn {
 		border-color: var(--gold);
 		color: var(--gold);
-	}
-	p.card.error {
-		margin-bottom: 1rem;
 	}
 </style>

@@ -104,7 +104,7 @@
 							{#if a.roles.length || a.classes.length}
 								<span class="who">
 									{#each a.roles as r (r)}<span class="tag">{ROLE_LABELS[r]}</span>{/each}
-									{#each a.classes as c (c)}<span class="tag" style:color={classColor(cfg, c)}>{className(cfg, c)}</span>{/each}
+									{#each a.classes as c (c)}<span class="cls tag"><span class="dot" style:--c={classColor(cfg, c)}></span>{className(cfg, c)}</span>{/each}
 								</span>
 							{/if}
 						</td>

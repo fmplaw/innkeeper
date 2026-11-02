@@ -78,8 +78,8 @@
 	</div>
 {/if}
 
-{#if form?.error}<p class="card error">{form.error}</p>{/if}
-{#if data.channelsError}<p class="card warn">{data.channelsError}</p>{/if}
+{#if form?.error}<p class="notice bad">{form.error}</p>{/if}
+{#if data.channelsError}<p class="notice warn">{data.channelsError}</p>{/if}
 
 {#key data.template}
 	<form
@@ -236,9 +236,6 @@
 	.warn {
 		border-color: var(--gold);
 		color: var(--gold);
-		margin-bottom: 1rem;
-	}
-	p.card.error {
 		margin-bottom: 1rem;
 	}
 </style>
