@@ -23,7 +23,10 @@ export const init: ServerInit = () => {
 };
 
 // En premier, pour couvrir les réponses de toutes les étapes suivantes (pages, Auth.js, images).
-const securityHeaders: Handle = async ({ event, resolve }) => withSecurityHeaders(await resolve(event));
+// Derrière un reverse proxy, adapter-node construit event.url à partir d'ORIGIN : son protocole
+// est celui que voit le visiteur.
+const securityHeaders: Handle = async ({ event, resolve }) =>
+	withSecurityHeaders(await resolve(event), { https: event.url.protocol === 'https:' });
 
 const ALWAYS_OPEN = ['/installation', '/healthz', '/logo', '/banniere', '/admin/connexion'];
 
