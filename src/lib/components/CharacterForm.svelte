@@ -159,7 +159,7 @@
 			{:else}
 				<label>
 					<input type="checkbox" name="isMain" checked={initial.isMain ?? false} />
-					Reroll de <strong>{mainName}</strong> — en faire le main
+					<span>Reroll de <strong>{mainName}</strong> — en faire le main</span>
 				</label>
 			{/if}
 		</div>
@@ -344,13 +344,15 @@
 		margin: 0 0 0.625rem;
 	}
 	.check label {
-		display: block;
+		display: flex;
+		align-items: baseline;
+		gap: 0.375rem;
 		margin: 0 0 0.625rem;
 		color: var(--text);
 	}
 	.check label input {
-		margin-right: 0.375rem;
-		vertical-align: -0.2em;
+		flex: none;
+		align-self: center;
 	}
 	.specs {
 		grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));

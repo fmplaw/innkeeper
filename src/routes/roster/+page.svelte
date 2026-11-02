@@ -390,7 +390,11 @@
 		color: var(--text);
 	}
 	.table-wrap {
-		padding: 0.5rem 0.75rem;
+		padding: 0.5rem;
+	}
+	/* Neuf colonnes : des marges plus serrées pour que les métiers tiennent sans défilement. */
+	.table-wrap :is(th, td) {
+		padding-inline: 0.5rem;
 	}
 	.perso {
 		display: grid;
