@@ -41,6 +41,11 @@
 		const col = COLUMNS.find((k) => k.key === key);
 		sort = col ? { key: col.key, dir: col.first ?? 'asc' } : null;
 	}
+	// Métiers principaux en clair (deux au plus) ; les secondaires (cuisine, secourisme, pêche) sont résumés,
+	// sinon un perso qui les a tous remplit sa cellule sur cinq lignes.
+	const isSecondary = (id: string) => cfg.professions.find((p) => p.id === id)?.secondary ?? false;
+	const primaryProfessions = (c: Row) => c.professions.filter((p) => !isSecondary(p.id));
+	const secondaryProfessions = (c: Row) => c.professions.filter((p) => isSecondary(p.id));
 	const ariaSort = (key: string) => (sort?.key === key ? (sort.dir === 'asc' ? 'ascending' : 'descending') : undefined);
 
 	// Rôles et classes se choisissent d'un clic ; un second clic retire le filtre.
@@ -189,7 +194,7 @@
 								</span>
 							</div>
 						</td>
-						<td><a class="player" href="/joueurs/{c.playerId}">{c.player}</a></td>
+						<td><a class="player" href="/joueurs/{c.playerId}">{#each c.player.split('/') as part, i (i)}{#if i}/<wbr />{/if}{part}{/each}</a></td>
 						<td>
 							<span class="spec">
 								<span class="mark" style:color="var(--r-{c.role})" title={ROLE_LABELS[c.role]}><Glyph name={ROLE_ICONS[c.role]} size={15} /></span>
@@ -201,7 +206,11 @@
 						<td>{raceName(cfg, c.race)}</td>
 						<td><InterestBadges pve={c.pve} pvp={c.pvp} compact /></td>
 						<td class="muted small profs" title={c.recipes ?? undefined}>
-							{#each professionNames(cfg, c.professions).split(', ').filter(Boolean) as name, i (name)}{i ? ', ' : ''}<span>{name}</span>{/each}
+							{#each primaryProfessions(c) as p (p.id)}<span>{professionNames(cfg, [p])}</span>{/each}
+							{#if secondaryProfessions(c).length}
+								{@const sec = secondaryProfessions(c)}
+								<span class="secondary" title={professionNames(cfg, sec)}>+ {sec.length} secondaire{sec.length > 1 ? 's' : ''}</span>
+							{/if}
 						</td>
 						{#if data.roster && data.officer}
 							<td>
@@ -392,9 +401,16 @@
 	.table-wrap {
 		padding: 0.5rem;
 	}
-	/* Neuf colonnes : des marges plus serrées pour que les métiers tiennent sans défilement. */
+	/* Des marges serrées, et le texte peut passer à la ligne : le tableau tient dans la page au lieu de
+	   déborder (noms longs, badges « pas trouvé en jeu », spé secondaire…). Les nombres restent sur une ligne. */
 	.table-wrap :is(th, td) {
 		padding-inline: 0.5rem;
+	}
+	.table-wrap td {
+		white-space: normal;
+	}
+	.table-wrap td.num {
+		white-space: nowrap;
 	}
 	.perso {
 		display: grid;
@@ -410,8 +426,9 @@
 	}
 	.tags {
 		display: flex;
+		flex-wrap: wrap;
 		align-items: center;
-		gap: 0.375rem;
+		gap: 0.25rem 0.375rem;
 	}
 	.spec {
 		display: inline-flex;
@@ -424,14 +441,22 @@
 	.player {
 		color: var(--text);
 	}
-	/* Métiers à la suite, sur deux lignes au plus : une ligne par métier rendait les rangées très hautes. */
+	/* Pseudos à rallonge (« Artémis/christcosmik/néfélion ») : coupés où il faut plutôt que d'élargir la colonne. */
+	.table-wrap .player,
+	.table-wrap .name {
+		overflow-wrap: anywhere;
+	}
+	/* Un métier principal par ligne (deux au plus), puis le résumé des secondaires. */
 	.profs {
 		min-width: 9rem;
-		max-width: 13rem;
-		white-space: normal;
 	}
 	.profs span {
+		display: block;
 		white-space: nowrap;
+	}
+	.profs .secondary {
+		color: color-mix(in srgb, var(--muted) 80%, transparent);
+		cursor: help;
 	}
 	button.sort {
 		all: unset;
