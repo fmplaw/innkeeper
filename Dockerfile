@@ -1,6 +1,11 @@
 # syntax=docker/dockerfile:1
 
-FROM node:22-bookworm-slim AS build
+# Construction sur l'architecture de la machine qui construit, même pour une image arm64 : le site
+# compilé est du JavaScript identique partout, et better-sqlite3 embarque ses binaires précompilés
+# pour toutes les plateformes (prebuilds/linux-x64.node, linux-arm64.node…), choisis au démarrage
+# selon le processeur. Sans ça, l'image arm64 compile et teste le site sous émulation (QEMU),
+# une dizaine de fois plus lentement.
+FROM --platform=$BUILDPLATFORM node:22-bookworm-slim AS build
 # npm lance node-gyp pour better-sqlite3 (présence d'un binding.gyp), même
 # quand le binaire précompilé fourni dans le paquet est utilisé.
 RUN apt-get update \
