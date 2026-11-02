@@ -359,11 +359,15 @@ Un addon WoW n'a aucun accès au réseau, et le jeu n'écrit son fichier qu'à l
 ## Exploitation
 
 - **Santé** : `GET /healthz` répond `ok` ; l'image a un healthcheck Docker.
-- **Sauvegardes** : copie à chaud de la base, 14 copies gardées (`BACKUP_KEEP`) :
-  ```sh
-  docker compose exec site node scripts/backup.mjs
-  ```
-  Monte `/backups` sur un autre disque et planifie la commande (cron, timer systemd).
+- **Sauvegardes** : le site copie lui-même sa base à chaud une fois par jour (au démarrage s'il n'y a pas de copie de moins de 24 h, puis toutes les 24 h) dans `/backups`, et garde les 14 dernières copies (`guilde-AAAA-MM-JJ-HH-MM.db`, heure UTC). Avec le `docker-compose.yml` fourni, `/backups` est le volume `backups`. Les échecs sont écrits dans les logs (`Sauvegarde impossible…`).
+  - Réglages : `BACKUP_INTERVAL_HOURS` (24 ; `0` désactive la copie intégrée), `BACKUP_KEEP` (14), `BACKUP_DIR` (`/backups`).
+  - **Ailleurs que sur le disque du site** : un volume sur le même disque ne protège pas d'une panne de ce disque. Monte plutôt un dossier d'un autre disque, appartenant à l'utilisateur du conteneur (uid 1000), sinon la copie échoue :
+    ```sh
+    mkdir -p /mnt/autre-disque/innkeeper && sudo chown 1000:1000 /mnt/autre-disque/innkeeper
+    ```
+    puis `- /mnt/autre-disque/innkeeper:/backups` à la place de `- backups:/backups`. Le même `chown` s'applique au dossier `./backups` de `docker-compose.traefik.yml` (Docker le crée sinon au nom de root).
+  - Copie à la demande (même format, même rotation) : `docker compose exec site node scripts/backup.mjs`.
+  - Restauration : arrête le site, remplace `/data/guilde.db` par une copie (en supprimant `guilde.db-wal` et `guilde.db-shm`), relance.
 - **Mises à jour** : lis le [CHANGELOG](CHANGELOG.md), remplace le numéro de version sur la ligne `image:` de ton `docker-compose.yml` (ou récupère le fichier à jour), puis `docker compose pull && docker compose up -d` ; les migrations s'appliquent seules. Depuis les sources : `docker compose build --pull` (pour récupérer aussi les correctifs de sécurité de l'image de base Node). Les sessions sont conservées, sauf changement de domaine.
 - **Supervision conseillée** : `/healthz`, et, avec une IP dynamique, un contrôle que le DNS pointe toujours sur l'IP publique.
 

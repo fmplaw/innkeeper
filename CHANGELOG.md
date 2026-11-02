@@ -4,6 +4,10 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ## [Non publié]
 
+### Ajouté
+
+- **Sauvegarde quotidienne intégrée** : le site copie sa base à chaud une fois par jour dans `/backups` et garde les 14 dernières copies, sans cron à planifier sur la machine. Le `docker-compose.yml` fourni monte un volume `backups` pour que les copies survivent à une mise à jour du conteneur. Réglages : `BACKUP_INTERVAL_HOURS` (`0` pour désactiver), `BACKUP_KEEP`, `BACKUP_DIR`. `scripts/backup.mjs` reste disponible pour une copie à la demande.
+
 ## [0.15.0] - 2026-11-02
 
 ### Publication

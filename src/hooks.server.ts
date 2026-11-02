@@ -1,10 +1,12 @@
 import { redirect, type Handle, type ServerInit } from '@sveltejs/kit';
 import { sequence } from '@sveltejs/kit/hooks';
 import { eq } from 'drizzle-orm';
+import { dev } from '$app/environment';
 import { env } from '$env/dynamic/private';
 import { handle as authHandle } from './auth';
 import { db, schema } from '$lib/server/db';
 import { purgeAuditLog } from '$lib/server/audit';
+import { scheduleBackups } from '$lib/server/backup';
 import { demoEnabled, demoSessionUser, initDemo } from '$lib/server/demo';
 import { hasLocalAdmin, mustChangePasswordFirst, sessionAdmin, setupCode } from '$lib/server/local-admin';
 import { refreshMembership, sitePermission } from '$lib/server/permissions';
@@ -16,6 +18,8 @@ export const init: ServerInit = () => {
 	// Journal d'audit : purge des entrées de plus de 12 mois, au démarrage puis chaque jour.
 	purgeAuditLog();
 	setInterval(purgeAuditLog, 86_400_000).unref();
+	// Copie quotidienne de la base dans BACKUP_DIR (ni en démo ni en développement).
+	if (!demoEnabled() && !dev) scheduleBackups();
 	if (!hasLocalAdmin()) {
 		const url = `${env.ORIGIN ?? 'http://localhost:3000'}/installation`;
 		console.log(`\n=== Installation d'Innkeeper ===\nOuvre ${url}\nCode d'installation : ${setupCode()}\n`);
