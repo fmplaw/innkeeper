@@ -22,8 +22,9 @@
 		border-radius: 999px;
 		font-size: 0.8125rem;
 		font-weight: 500;
-		background: color-mix(in oklab, var(--good) 11%, var(--bg));
-		color: var(--good);
+		/* Neutre : le vert est la couleur des soigneurs. */
+		background: color-mix(in oklab, var(--text) 9%, var(--bg));
+		color: var(--text);
 		white-space: nowrap;
 	}
 	.interest.competitive {

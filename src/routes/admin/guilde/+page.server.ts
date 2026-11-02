@@ -1,5 +1,6 @@
 import { fail } from '@sveltejs/kit';
 import { audit, diff } from '$lib/server/audit';
+import { removeClassIcon, saveClassIcon } from '$lib/server/class-icons';
 import { parseGuildForm } from '$lib/server/guild-form';
 import { requireOfficer } from '$lib/server/guards';
 import { getGuild, setGuild } from '$lib/server/settings';
@@ -11,7 +12,7 @@ export const load: PageServerLoad = ({ locals }) => {
 };
 
 export const actions: Actions = {
-	default: async ({ locals, request }) => {
+	save: async ({ locals, request }) => {
 		requireOfficer(locals);
 		const before = getGuild();
 		const parsed = await parseGuildForm(await request.formData(), before);
@@ -21,5 +22,20 @@ export const actions: Actions = {
 		const fields = Object.keys(diff(before, parsed.data, Object.keys(parsed.data)));
 		if (fields.length) audit(locals, 'guild.update', { label: parsed.data.name, url: '/admin/guilde' }, { champs: fields });
 		return { saved: true };
+	},
+	classIcon: async ({ locals, request }) => {
+		requireOfficer(locals);
+		const form = await request.formData();
+		const classId = String(form.get('classId') ?? '');
+		const file = form.get('icon');
+		if (form.has('remove')) {
+			removeClassIcon(classId);
+		} else {
+			if (!(file instanceof File) || file.size === 0) return fail(400, { iconError: 'Choisis une image.', iconClass: classId });
+			const problem = await saveClassIcon(classId, file);
+			if (problem) return fail(400, { iconError: problem, iconClass: classId });
+		}
+		audit(locals, 'class-icon.update', { label: classId, url: '/admin/guilde' }, { action: form.has('remove') ? 'retirée' : 'envoyée' });
+		return { iconSaved: classId };
 	}
 };

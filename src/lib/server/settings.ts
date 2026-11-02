@@ -174,6 +174,10 @@ export const setCharter = (charter: Charter) => write('charter', charter);
 export const getActivityImages = () => read<Record<string, string>>('activityImages') ?? {};
 export const setActivityImages = (images: Record<string, string>) => write('activityImages', images);
 
+// Icônes de classe envoyées par la guilde : identifiant de classe → fichier dans uploads/.
+export const getClassIcons = () => read<Record<string, string>>('classIcons') ?? {};
+export const setClassIcons = (icons: Record<string, string>) => write('classIcons', icons);
+
 // Dernier import du registre de guilde (addon InnkeeperSync) : sert à dire si un perso
 // a été vu en jeu. Dates en secondes Unix.
 export interface GameImportInfo {

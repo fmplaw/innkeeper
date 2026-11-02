@@ -27,7 +27,7 @@
 - **Import des données du jeu** par un addon, à la main ou automatiquement avec l'application InnkeeperSync pour PC (registre de guilde, métiers, recettes, dernière connexion).
 - **Statistiques pour les officiers** : composition par classe et par rôle face au recrutement, métiers et meilleurs artisans, niveaux, intérêts, activité, fiches à compléter.
 - **Administration** sans éditer de fichiers : assistant d'installation, profil de guilde, rôles, journal des actions.
-- **Aux couleurs de la guilde** : palette de fond selon la faction (bruns chauds pour la Horde, bleu nuit pour l'Alliance, anthracite pour une guilde multi-faction), couleur d'accent, logo et bannière au choix.
+- **Aux couleurs de la guilde** : palette de fond selon la faction (bruns chauds pour la Horde, bleu nuit pour l'Alliance, anthracite pour une guilde multi-faction), couleur d'accent, logo, bannière et icônes de classe au choix (aucune image de Blizzard n'est fournie).
 
 Le guide d'utilisation (membres et officiers) est dans [docs/GUIDE.md](docs/GUIDE.md).
 
@@ -298,6 +298,7 @@ Pour que les sorties **officielles** apparaissent aussi dans la liste des évén
 - **Membres** : proposées par tout membre (pas de raid), salon dédié, le créateur en est l'organisateur et peut la modifier ou la supprimer ; trois sorties à venir au plus par joueur.
 - Places, durée et image sont fixées selon le type de sortie et l'instance ; le titre est toujours envoyé sans police décorative (celle de Raid-Helper supprime les accents).
 - Images d'instances : Admin → Sorties → Images des sorties (aucune image de Blizzard n'est fournie).
+- Icônes de classe : Admin → Guilde → Icônes de classe, affichées à côté de chaque perso (sans icône, un blason à la couleur de la classe).
 
 ---
 

@@ -27,8 +27,9 @@
 		values = {},
 		errors = {},
 		submitLabel,
-		timezones
-	}: { values?: Values; errors?: Record<string, string>; submitLabel: string; timezones: string[] } = $props();
+		timezones,
+		action
+	}: { values?: Values; errors?: Record<string, string>; submitLabel: string; timezones: string[]; action?: string } = $props();
 
 	const initial = untrack(() => values);
 	let faction = $state(initial.faction ?? '');
@@ -41,7 +42,7 @@
 	}
 </script>
 
-<form method="POST" enctype="multipart/form-data" use:enhance class="card form">
+<form method="POST" {action} enctype="multipart/form-data" use:enhance class="card form">
 	{#if errors.form}<p class="error">{errors.form}</p>{/if}
 
 	<fieldset>
