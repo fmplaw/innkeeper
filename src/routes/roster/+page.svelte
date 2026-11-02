@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import ClassEmblem from '$lib/components/ClassEmblem.svelte';
 	import GameBadge from '$lib/components/GameBadge.svelte';
 	import Glyph from '$lib/components/Glyph.svelte';
 	import { ROLES, ROLE_ICONS, ROLE_LABELS } from '$lib/roles';
@@ -20,7 +21,6 @@
 	const COLUMNS: { key: string; label: string; value: (c: Row) => SortValue; first?: SortDir }[] = [
 		{ key: 'perso', label: 'Perso', value: (c) => c.name },
 		{ key: 'joueur', label: 'Joueur', value: (c) => c.player },
-		{ key: 'classe', label: 'Classe', value: (c) => className(cfg, c.class) },
 		{ key: 'spe', label: 'Spé', value: (c) => specRole(cfg, c.class, c.spec, c.role) },
 		{ key: 'niveau', label: 'Niv.', value: (c) => c.level, first: 'desc' },
 		{ key: 'race', label: 'Race', value: (c) => raceName(cfg, c.race) },
@@ -114,7 +114,7 @@
 	{#each cfg.classes as c (c.id)}
 		{@const n = data.byClass[c.id] ?? 0}
 		<a class:on={data.filters.classe === c.id} class:none={!n} href={toggle('classe', c.id)} aria-current={data.filters.classe === c.id ? 'true' : undefined} data-sveltekit-noscroll data-sveltekit-keepfocus>
-			<span class="dot" style:--c={c.color}></span>{c.name} <span class="num muted">{n}</span>
+			<ClassEmblem {cfg} classId={c.id} size={24} />{c.name} <span class="num muted">{n}</span>
 		</a>
 	{/each}
 </section>
@@ -181,7 +181,8 @@
 					<tr>
 						<td>
 							<div class="perso">
-								<span class="name"><strong>{c.name}</strong>{#if c.surname}{' '}<span class="muted">{c.surname}</span>{/if}</span>
+								<ClassEmblem {cfg} classId={c.class} role={c.role} size={38} />
+								<span class="name"><strong class="class-ink" style:--c={classColor(cfg, c.class)}>{c.name}</strong>{#if c.surname}{' '}<span class="muted">{c.surname}</span>{/if}</span>
 								<span class="tags">
 									{#if c.isMain}<span class="badge main">Main</span>{:else}<span class="muted small">reroll de {c.mainName ?? '?'}</span>{/if}
 									<GameBadge character={c} importAt={data.gameImportAt} />
@@ -189,7 +190,6 @@
 							</div>
 						</td>
 						<td><a class="player" href="/joueurs/{c.playerId}">{c.player}</a></td>
-						<td><span class="dot" style:--c={classColor(cfg, c.class)}></span> {className(cfg, c.class)}</td>
 						<td>
 							<span class="spec">
 								<span class="mark" style:color="var(--r-{c.role})" title={ROLE_LABELS[c.role]}><Glyph name={ROLE_ICONS[c.role]} size={15} /></span>
@@ -201,7 +201,7 @@
 						<td>{raceName(cfg, c.race)}</td>
 						<td><InterestBadges pve={c.pve} pvp={c.pvp} compact /></td>
 						<td class="muted small profs" title={c.recipes ?? undefined}>
-							{#each professionNames(cfg, c.professions).split(', ').filter(Boolean) as name (name)}<span>{name}</span>{/each}
+							{#each professionNames(cfg, c.professions).split(', ').filter(Boolean) as name, i (name)}{i ? ', ' : ''}<span>{name}</span>{/each}
 						</td>
 						{#if data.roster && data.officer}
 							<td>
@@ -231,9 +231,9 @@
 			{#each rows as c (c.id)}
 				<li>
 					<div class="c-top">
-						<span class="crest" style:--c={classColor(cfg, c.class)} title={ROLE_LABELS[c.role]}><Glyph name={ROLE_ICONS[c.role]} size={18} /></span>
+						<ClassEmblem {cfg} classId={c.class} role={c.role} size={40} />
 						<div class="c-id">
-							<span class="name"><strong>{c.name}</strong>{#if c.surname}{' '}<span class="muted">{c.surname}</span>{/if}</span>
+							<span class="name"><strong class="class-ink" style:--c={classColor(cfg, c.class)}>{c.name}</strong>{#if c.surname}{' '}<span class="muted">{c.surname}</span>{/if}</span>
 							<span class="muted small">{className(cfg, c.class)} · {specRole(cfg, c.class, c.spec, c.role)}</span>
 						</div>
 						<span class="muted small num">niv. {c.level}</span>
@@ -398,7 +398,12 @@
 	}
 	.perso {
 		display: grid;
-		gap: 0.125rem;
+		grid-template-columns: auto 1fr;
+		align-items: center;
+		gap: 0.125rem 0.625rem;
+	}
+	.perso > :global(:first-child) {
+		grid-row: span 2;
 	}
 	.name strong {
 		font-weight: 600;
@@ -419,8 +424,14 @@
 	.player {
 		color: var(--text);
 	}
+	/* Métiers à la suite, sur deux lignes au plus : une ligne par métier rendait les rangées très hautes. */
+	.profs {
+		min-width: 9rem;
+		max-width: 13rem;
+		white-space: normal;
+	}
 	.profs span {
-		display: block;
+		white-space: nowrap;
 	}
 	button.sort {
 		all: unset;
@@ -491,16 +502,6 @@
 		display: flex;
 		align-items: center;
 		gap: 0.75rem;
-	}
-	.crest {
-		flex: none;
-		display: grid;
-		place-items: center;
-		width: 40px;
-		height: 40px;
-		border-radius: 12px;
-		background: color-mix(in srgb, var(--c) 16%, var(--surface));
-		box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--c) 45%, rgb(0 0 0 / 0.3));
 	}
 	.c-id {
 		flex: 1;

@@ -33,6 +33,7 @@ export const AUDIT_ACTIONS = {
 	'roles.sync': { group: 'Rôles et accès', label: 'a synchronisé les rôles depuis le bot' },
 	'access.update': { group: 'Rôles et accès', label: "a changé le mode d'accès au site" },
 	'guild.update': { group: 'Configuration', label: 'a modifié le profil de la guilde' },
+	'class-icon.update': { group: 'Configuration', label: "a changé l'icône de classe" },
 	'charter.update': { group: 'Configuration', label: 'a modifié la charte de la guilde' },
 	'addon.create': { group: 'Configuration', label: 'a ajouté l’addon conseillé' },
 	'addon.update': { group: 'Configuration', label: 'a modifié l’addon conseillé' },

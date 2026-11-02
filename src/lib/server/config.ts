@@ -6,6 +6,7 @@ import {
 	racesFor,
 	type GuildFaction
 } from '$lib/game/forever';
+import { classIconUrls } from './class-icons';
 import { DEFAULT_ACCENTS, getCharter, getGuild } from './settings';
 import { db, schema } from './db';
 import { demoEnabled } from './demo';
@@ -37,6 +38,8 @@ export function publicConfig() {
 		dualSpecLevel: DUAL_SPEC_LEVEL,
 		races: racesFor(faction),
 		classes: CLASSES,
+		// Icônes envoyées par la guilde (Admin → Guilde) ; une classe sans icône garde son blason.
+		classIcons: classIconUrls() as Record<string, string>,
 		professions: PROFESSIONS
 	};
 }

@@ -15,11 +15,12 @@
 	--good: #63cfa2;
 	--warn: #efb65f;
 
-	/* Rôles : couleurs fixes, indépendantes de l'accent, testées pour les daltonismes sur fond sombre. */
-	--r-tank: #4f83e8;
-	--r-healer: #b38c1e;
-	--r-melee: #9a6ddc;
-	--r-ranged: #1e9a82;
+	/* Rôles : couleurs fixes, indépendantes de l'accent, celles du jeu (tank bleu, soigneur vert, DPS rouge) ;
+	   la distance en violet pour la distinguer de la mêlée. Chaque rôle a aussi son icône. */
+	--r-tank: #4f8ff0;
+	--r-healer: #4fbf5a;
+	--r-melee: #e0503f;
+	--r-ranged: #a07ae8;
 
 	--radius: 14px;
 	--shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 28px rgb(0 0 0 / 0.28);
@@ -422,6 +423,11 @@ tbody tr:last-child td {
 	border-radius: 50%;
 	background: var(--c);
 	box-shadow: 0 0 0 1px rgb(255 238 220 / 0.14);
+}
+
+/* Nom d'un perso dans la couleur de sa classe (--c), éclaircie pour rester lisible sur fond sombre. */
+.class-ink {
+	color: color-mix(in oklab, var(--c) 78%, white);
 }
 
 /* Nom ou classe précédé de sa pastille. */
