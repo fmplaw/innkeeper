@@ -16,6 +16,7 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ### Modifié
 
+- **Badges « en jeu », « existe en jeu »… : vraie infobulle** au survol, au clavier et au toucher (l'ancienne, celle du navigateur, ne s'affichait pas sur téléphone), avec des explications plus claires. « en jeu » : dans le registre de la guilde. « existe en jeu » : le perso existe, mais n'est pas dans la guilde (pas encore invité, ou parti).
 - **Recettes en français**, même exportées d'un jeu en anglais (« Enchant Bracer - Minor Stamina » devient « Ench. de bracelets (Endurance mineure) ») : le site retient les noms des exports faits en français et demande les autres à Wowhead, en arrière-plan, en n'envoyant que le numéro de la recette. Les recettes déjà importées sont traduites au démarrage. La recherche de la page Artisans trouve donc aussi leurs recettes.
 - **Longues listes de recettes** (Artisans, Mes persos, fiches des joueurs) : au-delà d'une douzaine, la liste défile dans un cadre au lieu de repousser la page ; à partir de 20, un champ permet de la filtrer.
 - **Import du jeu : changement de métier.** Les métiers du perso qui exporte suivent ceux du jeu : un métier abandonné quitte sa fiche, avec ses recettes. Pour les autres membres (onglet des métiers de guilde, peut-être incomplet), l'import ajoute et met à jour sans rien retirer. Un export sans liste de métiers (pas encore chargée à la connexion) ne retire rien.
