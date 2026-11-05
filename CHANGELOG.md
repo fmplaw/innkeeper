@@ -9,6 +9,10 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 - **HSTS** : un site servi en HTTPS (`ORIGIN` en `https://`) demande au navigateur de n'utiliser que HTTPS pendant un an.
 - **`docker-compose.yml` ne publie plus le port 3000 que sur la machine elle-même** (`127.0.0.1:3000`) : Docker passant outre le pare-feu, le site était aussi joignable en HTTP clair depuis le réseau. Avec un reverse proxy sur une autre machine, remettre `"3000:3000"` (voir le README).
 
+### Ajouté
+
+- **Admin → Import du jeu : dernière synchronisation.** Le registre de guilde envoyé par l'application InnkeeperSync (ou déposé à la main) est gardé : la page montre quand et par qui, le nombre de persos reconnus, les fiches introuvables et les membres de la guilde sans fiche, sans dépôt manuel. Les listes sont recalculées avec les fiches du moment : une fiche corrigée en sort aussitôt. La page présente la synchronisation automatique comme la voie normale, et précise que prénom et nom de famille doivent être ceux du jeu.
+
 ### Modifié
 
 - Migrations : un test refuse deux migrations du même numéro (deux branches fusionnées l'une après l'autre) et un journal qui ne reprend pas exactement les fichiers ; la CI vérifie que `npm run db:generate` ne produit plus rien, donc que le schéma et les migrations concordent.

@@ -193,7 +193,7 @@ Admin → **Import du jeu**, à faire par un officier de temps en temps (une foi
 
 L'addon n'envoie rien sur Internet ; il écrit seulement ce fichier. Il n'exporte ni les notes du registre (publiques et d'officier) ni la zone des membres.
 
-**Plus simple : la synchronisation automatique.** Avec l'application InnkeeperSync pour PC, connectée par un officier (voir plus haut), le registre de la guilde est envoyé tout seul à chaque déconnexion, sans aperçu à valider.
+**Plus simple : la synchronisation automatique.** Avec l'application InnkeeperSync pour PC, connectée par un officier (voir plus haut), le registre de la guilde est envoyé tout seul à chaque déconnexion, sans aperçu à valider. Le haut de la page Import du jeu montre alors la **dernière synchronisation** (quand, par qui, combien de persos reconnus) avec les **fiches introuvables** et les **membres sans fiche**. Ces listes sont comparées aux fiches du moment : un nom de famille corrigé sur une fiche la fait sortir de la liste tout de suite, sans attendre le prochain envoi.
 
 ### Recrutement et rôles
 

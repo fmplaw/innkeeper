@@ -3,6 +3,7 @@
 	import { professionNames } from '$lib/labels';
 
 	let { data, form } = $props();
+	type Report = NonNullable<typeof data.report>;
 	const cfg = $derived(data.config);
 	const plan = $derived(form && 'plan' in form ? form.plan : null);
 	const changes = $derived(plan?.updates.filter((u) => u.level || u.professions || u.recipes) ?? []);
@@ -14,12 +15,69 @@
 <h1>Import du jeu</h1>
 <p class="muted intro">
 	L'addon <strong>InnkeeperSync</strong> exporte depuis le jeu le registre de guilde (niveaux, dernière connexion),
-	les métiers de tous les membres et les recettes de ton perso. Le site met à jour les fiches en reliant les persos par
-	leur nom : il faut que le nom de la fiche soit exactement celui du jeu.
+	les métiers de tous les membres et les recettes de ton perso. Le site relie les persos par leur nom complet : le
+	prénom et le nom de famille de la fiche doivent être exactement ceux du jeu.
 </p>
+
+{#snippet lists(notFound: Report['notFound'], withoutSheet: Report['withoutSheet'], afterImport: boolean)}
+	{#if notFound.length}
+		<section class="card">
+			<h2>Fiches du site introuvables dans la guilde en jeu <span class="muted">({notFound.length})</span></h2>
+			<p class="muted small">
+				Prénom ou nom de famille différent de celui du jeu, perso pas encore dans la guilde, ou ancien perso.{afterImport
+					? ' Elles seront marquées « pas trouvé en jeu » après l\'import.'
+					: ' Elles sont marquées « pas trouvé en jeu ».'}
+			</p>
+			<ul class="without">
+				{#each notFound as n (n.characterId)}
+					<li><a href="/persos/{n.characterId}"><strong>{n.name}</strong></a> <span class="muted">{n.player}</span></li>
+				{/each}
+			</ul>
+		</section>
+	{/if}
+
+	{#if withoutSheet.length}
+		<section class="card">
+			<h2>Membres de la guilde sans fiche sur le site <span class="muted">({withoutSheet.length})</span></h2>
+			<p class="muted small">Nom en jeu introuvable sur le site : pas de compte, pas de fiche, ou nom différent sur la fiche.</p>
+			<ul class="without">
+				{#each withoutSheet as m (m.name)}
+					<li><strong>{m.name}</strong> <span class="muted">niv. {m.level}{m.class ? ` · ${m.class}` : ''}{m.rank ? ` · ${m.rank}` : ''}</span></li>
+				{/each}
+			</ul>
+		</section>
+	{/if}
+{/snippet}
+
+{#if data.report && !plan}
+	{@const r = data.report}
+	<section class="card">
+		<h2>Dernière synchronisation</h2>
+		<p>
+			{dateFormat.format(r.appliedAt)}{r.by ? `, par ${r.by}` : ''}
+			{r.via === 'sync' ? "avec l'application InnkeeperSync" : 'en déposant le fichier'} · {r.rosterSize} membres en jeu
+		</p>
+		<p>
+			<strong>{r.linked}</strong> perso{r.linked > 1 ? 's' : ''} reconnu{r.linked > 1 ? 's' : ''} ·
+			<strong>{r.withoutSheet.length}</strong> membre{r.withoutSheet.length > 1 ? 's' : ''} sans fiche ·
+			<strong>{r.notFound.length}</strong> fiche{r.notFound.length > 1 ? 's' : ''} introuvable{r.notFound.length > 1 ? 's' : ''}
+		</p>
+		{#if r.ambiguous.length}
+			<p class="warn">Impossible de savoir quelle fiche correspond à ces persos (même nom, ou fiche sans nom de famille) : {r.ambiguous.join(', ')}.</p>
+		{/if}
+		<p class="muted small">Comparé aux fiches d'aujourd'hui : une fiche corrigée sort de ces listes tout de suite.</p>
+	</section>
+	{@render lists(r.notFound, r.withoutSheet, false)}
+{/if}
 
 <section class="card steps">
 	<h2>Comment faire</h2>
+	<p>
+		<strong>Le plus simple :</strong> un officier installe l'addon et l'application <strong>InnkeeperSync</strong>
+		(Mes persos → Synchronisation automatique). Le registre de la guilde arrive alors tout seul à chaque déconnexion du
+		jeu, et s'affiche ci-dessus.
+	</p>
+	<p>Sans l'application, dépose le fichier à la main :</p>
 	<ol>
 		<li>
 			Installer l'addon <strong>Innkeeper Sync</strong> : dans l'application CurseForge ou Wago (version de jeu
@@ -119,32 +177,7 @@
 		</form>
 	</section>
 
-	{#if plan.notFound.length}
-		<section class="card">
-			<h2>Fiches du site introuvables dans la guilde en jeu <span class="muted">({plan.notFound.length})</span></h2>
-			<p class="muted small">
-				Nom mal orthographié sur la fiche, perso pas encore dans la guilde, ou ancien perso. Elles seront marquées « pas
-				trouvé en jeu » après l'import.
-			</p>
-			<ul class="without">
-				{#each plan.notFound as n (n.characterId)}
-					<li><a href="/persos/{n.characterId}"><strong>{n.name}</strong></a> <span class="muted">{n.player}</span></li>
-				{/each}
-			</ul>
-		</section>
-	{/if}
-
-	{#if plan.withoutSheet.length}
-		<section class="card">
-			<h2>Membres de la guilde sans fiche sur le site <span class="muted">({plan.withoutSheet.length})</span></h2>
-			<p class="muted small">Nom en jeu introuvable sur le site : pas de compte, pas de fiche, ou nom différent sur la fiche.</p>
-			<ul class="without">
-				{#each plan.withoutSheet as m (m.name)}
-					<li><strong>{m.name}</strong> <span class="muted">niv. {m.level}{m.class ? ` · ${m.class}` : ''}{m.rank ? ` · ${m.rank}` : ''}</span></li>
-				{/each}
-			</ul>
-		</section>
-	{/if}
+	{@render lists(plan.notFound, plan.withoutSheet, true)}
 {/if}
 
 <style>

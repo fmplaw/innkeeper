@@ -1,7 +1,7 @@
 import { randomBytes } from 'node:crypto';
 import { fail } from '@sveltejs/kit';
 import { audit } from '$lib/server/audit';
-import { applyImport, ImportError, planImport, readExport, type ImportPlan } from '$lib/server/game-import';
+import { applyImport, ImportError, planImport, readExport, rosterReport, type ImportPlan } from '$lib/server/game-import';
 import { requireOfficer } from '$lib/server/guards';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -12,6 +12,7 @@ const TTL_MS = 15 * 60_000;
 
 export const load: PageServerLoad = ({ locals }) => {
 	requireOfficer(locals);
+	return { report: rosterReport() };
 };
 
 export const actions: Actions = {
@@ -38,7 +39,7 @@ export const actions: Actions = {
 		const entry = pending.get(token);
 		if (!entry) return fail(400, { error: 'Aperçu expiré : dépose le fichier à nouveau.' });
 		pending.delete(token);
-		const changed = applyImport(entry.plan);
+		const changed = applyImport(entry.plan, { by: locals.user?.displayName ?? locals.admin?.username ?? null, via: 'manual' });
 		audit(locals, 'game.import', { label: entry.plan.guild ?? 'Import du jeu', url: '/admin/import' }, {
 			persos: changed,
 			synchronises: entry.plan.updates.length,

@@ -125,7 +125,7 @@ export function syncExport(who: SyncIdentity, source: string, now = Date.now()):
 		plan.updates = plan.updates.filter((u) => own.has(u.characterId));
 		plan.rosterSize = 0;
 	}
-	const changed = applyImport(plan);
+	const changed = applyImport(plan, { by: who.user.displayName, via: 'sync' });
 	touch({ lastUsedAt: new Date(now), lastFileHash: fileHash });
 
 	if (changed) {

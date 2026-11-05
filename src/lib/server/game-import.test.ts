@@ -1,8 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { createUser, horde } from '../../test/helpers';
-import { createCharacter, getCharacter } from './characters';
-import { applyImport, homonyms, ImportError, planImport, readExport } from './game-import';
+import { createCharacter, getCharacter, updateCharacter } from './characters';
+import { applyImport, homonyms, ImportError, planImport, readExport, rosterReport } from './game-import';
 import { parseSavedVariables, toPlain } from './lua-saved-variables';
 
 horde();
@@ -278,5 +278,32 @@ describe('noms complets du registre de Forever', () => {
 		expect(plan.updates.some((u) => u.characterId === rehgar.id)).toBe(false);
 		expect(plan.ambiguous.sort()).toEqual(['Rehgar Prime', 'Rehgar Terremine']);
 		expect(plan.notFound.map((n) => n.characterId)).not.toContain(rehgar.id);
+	});
+});
+
+describe('dernière synchronisation', () => {
+	it('garde le dernier registre et le compare aux fiches du moment', () => {
+		createUser('s1');
+		const fiche = sheet('s1', 'Mokvar', { surname: 'Faute', class: 'warrior', spec: 'arms', role: 'melee' });
+		const roster = [{ name: 'Mokvar Lame', level: 12, class: 'WARRIOR', rank: 'Novice', online: true }];
+		applyImport(planImport({ format: 1, exportedAt: 1793900000, roster }), { by: 'Vinshal', via: 'sync' });
+
+		const before = rosterReport()!;
+		expect(before).toMatchObject({ by: 'Vinshal', via: 'sync', rosterSize: 1, linked: 0 });
+		expect(before.withoutSheet).toEqual([{ name: 'Mokvar Lame', level: 12, class: 'Guerrier', rank: 'Novice' }]);
+		expect(before.notFound.map((n) => n.characterId)).toContain(fiche.id);
+
+		// Nom de famille corrigé sur la fiche : les listes suivent sans nouvel envoi.
+		updateCharacter(getCharacter(fiche.id)!, { ...getCharacter(fiche.id)!, surname: 'Lame' } as Parameters<typeof updateCharacter>[1]);
+		const after = rosterReport()!;
+		expect(after.linked).toBe(1);
+		expect(after.withoutSheet).toEqual([]);
+		expect(after.notFound.map((n) => n.characterId)).not.toContain(fiche.id);
+	});
+
+	it('un envoi sans registre (clé de membre, perso hors guilde) ne remplace pas le dernier registre', () => {
+		const before = rosterReport();
+		applyImport(planImport({ format: 1, exportedAt: 1793950000, player: { name: 'Mokvar', level: 13 } }), { by: 'Autre', via: 'sync' });
+		expect(rosterReport()?.by).toBe(before?.by);
 	});
 });
