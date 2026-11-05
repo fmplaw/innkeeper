@@ -121,6 +121,8 @@ function lastOnline(exportedAt: number, member: NonNullable<GameExport['roster']
 export interface CharacterUpdate {
 	characterId: number;
 	name: string;
+	/** Nom complet en jeu qui a désigné cette fiche. */
+	gameName?: string;
 	player: string;
 	level?: { from: number; to: number };
 	professions?: { from: ProfessionEntry[]; to: ProfessionEntry[] };
@@ -265,7 +267,7 @@ export function planImport(data: GameExport, options: PlanOptions = {}): ImportP
 			continue;
 		}
 		const { c, player } = matches[0];
-		const update: CharacterUpdate = { characterId: c.id, name: c.name, player };
+		const update: CharacterUpdate = { characterId: c.id, name: c.name, gameName: who, player };
 		// Fichier renvoyé après coup (autre compte WoW du même PC, export d'un autre joueur…) :
 		// les données de la fiche sont plus récentes, on ne revient pas en arrière. Seules ses
 		// recettes encore inconnues s'ajoutent : la fiche a pu être mise à jour par un registre

@@ -1,4 +1,5 @@
 import { error, fail, redirect } from '@sveltejs/kit';
+import { verifyCharacter } from '$lib/server/battlenet';
 import {
 	AUDITED_CHARACTER_FIELDS,
 	canEdit,
@@ -36,6 +37,7 @@ export const actions: Actions = {
 		if (!parsed.data) return fail(400, { errors: parsed.errors, values: parsed.values });
 
 		updateCharacter(character, parsed.data);
+		await verifyCharacter(character.id).catch(() => null);
 		if (character.userId !== locals.user?.id)
 			audit(locals, 'character.update', characterTarget(character), diff(character, parsed.data, AUDITED_CHARACTER_FIELDS));
 		redirect(303, backTo(locals, character.userId));

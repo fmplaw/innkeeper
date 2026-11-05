@@ -148,6 +148,13 @@
       "when": 1793879179737,
       "tag": "0020_recipe_names",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "6",
+      "when": 1793889453266,
+      "tag": "0021_armory_check",
+      "breakpoints": true
     }
   ]
 }

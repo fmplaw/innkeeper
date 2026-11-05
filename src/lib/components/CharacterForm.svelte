@@ -5,6 +5,7 @@
 	import { ROLES, ROLE_ICONS, ROLE_LABELS, type Role } from '$lib/roles';
 	import { FACTIONS, FACTION_LABELS, MAX_PRIMARY_PROFESSIONS, MAX_PROFESSION_LEVEL } from '$lib/game/forever';
 	import { AXIS_LABELS, INTEREST_AXES, INTEREST_LEVELS, LEVEL_LABELS } from '$lib/interests';
+	import type { ArmoryLookup } from '$lib/server/battlenet';
 	import type { PublicConfig } from '$lib/server/config';
 
 	interface Values {
@@ -23,6 +24,7 @@
 		pve?: string | null;
 		pvp?: string | null;
 		notes?: string | null;
+		declaredNew?: boolean;
 	}
 
 	let {
@@ -53,6 +55,8 @@
 
 	// Valeurs initiales seulement : le formulaire est remonté à chaque navigation.
 	const initial = untrack(() => values);
+	let name = $state(initial.name ?? '');
+	let surname = $state(initial.surname ?? '');
 	let race = $state(initial.race ?? '');
 	let cls = $state(initial.class ?? '');
 	// Nouveau perso : niveau 1 par défaut.
@@ -65,7 +69,9 @@
 	// Métiers cochés : au-delà de 2 métiers principaux, les autres principaux se grisent.
 	let chosen = $state<string[]>(initial.professions?.map((p) => p.id) ?? []);
 	// Un métier coché démarre au niveau 1.
-	const levelOf = (id: string) => initial.professions?.find((p) => p.id === id)?.level ?? 1;
+	let professionLevels = $state<Record<string, number>>(
+		untrack(() => Object.fromEntries(config.professions.map((p) => [p.id, initial.professions?.find((x) => x.id === p.id)?.level ?? 1])))
+	);
 	const primaryCount = $derived(chosen.filter((id) => !config.professions.find((p) => p.id === id)?.secondary).length);
 
 	const raceClasses = $derived(config.races.find((r) => r.id === race)?.classes);
@@ -94,6 +100,61 @@
 		}
 	}
 
+	// Vérification dans l'Armurerie de Blizzard, quand la guilde a connecté Battle.net : dès que le
+	// prénom et le nom de famille sont tapés (avec un court délai), le site cherche le perso.
+	let armory = $state<ArmoryLookup | null>(null);
+	let checking = $state(false);
+	let declaredNew = $state(initial.declaredNew ?? false);
+	$effect(() => {
+		const first = name.trim();
+		const last = surname.trim();
+		if (!config.armory || first.length < 2 || last.length < 2) {
+			armory = null;
+			return;
+		}
+		const controller = new AbortController();
+		const timer = setTimeout(async () => {
+			checking = true;
+			try {
+				const res = await fetch(`/api/armurerie?prenom=${encodeURIComponent(first)}&nom=${encodeURIComponent(last)}`, { signal: controller.signal });
+				armory = res.ok ? ((await res.json()) as ArmoryLookup) : null;
+			} catch {
+				// Recherche annulée (nouvelle frappe) ou réseau : rien à afficher.
+			} finally {
+				checking = false;
+			}
+		}, 600);
+		return () => {
+			clearTimeout(timer);
+			controller.abort();
+		};
+	});
+	const found = $derived(armory?.status === 'found' ? armory : null);
+	const nameOf = (list: readonly { id: string; name: string }[], id: string | null) => list.find((x) => x.id === id)?.name ?? id ?? '?';
+	const differences = $derived.by(() => {
+		if (!found) return [];
+		const list: string[] = [];
+		if (found.classId && cls && cls !== found.classId) list.push(`classe ${nameOf(config.classes, found.classId)} en jeu`);
+		if (found.raceId && race && race !== found.raceId) list.push(`race ${nameOf(config.races, found.raceId)} en jeu`);
+		return list;
+	});
+
+	/** Remplit race, classe, niveau et métiers avec ceux de l'Armurerie. */
+	function fillFromArmory() {
+		if (!found) return;
+		if (found.raceId && config.races.some((r) => r.id === found.raceId)) race = found.raceId;
+		if (found.classId) {
+			cls = found.classId;
+			onClassChange();
+		}
+		level = Math.min(found.level, config.maxLevel);
+		if (found.professions.length) {
+			chosen = found.professions.map((p) => p.id);
+			for (const p of found.professions) professionLevels[p.id] = p.level ?? 1;
+		}
+		declaredNew = false;
+	}
+
 	function onClassChange() {
 		if (!specs.some((s) => s.id === spec)) spec = '';
 		if (!specs.some((s) => s.id === spec2)) spec2 = '';
@@ -110,12 +171,12 @@
 	<div class="grid">
 		<div>
 			<label for="name">Nom du perso *</label>
-			<input id="name" name="name" required minlength="2" maxlength="24" value={initial.name ?? ''} />
+			<input id="name" name="name" required minlength="2" maxlength="24" bind:value={name} />
 			{#if errors.name}<p class="error">{errors.name}</p>{/if}
 		</div>
 		<div>
 			<label for="surname">Nom de famille *</label>
-			<input id="surname" name="surname" required minlength="2" maxlength="24" value={initial.surname ?? ''} />
+			<input id="surname" name="surname" required minlength="2" maxlength="24" bind:value={surname} />
 			{#if errors.surname}<p class="error">{errors.surname}</p>{/if}
 		</div>
 		<div>
@@ -164,6 +225,37 @@
 			{/if}
 		</div>
 	</div>
+	{#if config.armory}
+		<div class="armory" aria-live="polite">
+			{#if checking && !armory}
+				<p class="muted small">Recherche dans l'Armurerie…</p>
+			{:else if found}
+				<p class="found">
+					<span>
+						✔ Trouvé dans l'Armurerie : {nameOf(config.races, found.raceId)} · {nameOf(config.classes, found.classId)} · niveau
+						{found.level}{found.guild ? ` · ${found.guild}` : ''}
+					</span>
+					<button type="button" class="secondary small-button" onclick={fillFromArmory}>Remplir avec ces infos</button>
+				</p>
+				{#if differences.length}
+					<p class="warn small">⚠ Ta saisie ne correspond pas au jeu : {differences.join(', ')}.</p>
+				{/if}
+			{:else if armory?.status === 'missing'}
+				<p class="warn small">
+					Introuvable dans l'Armurerie. Vérifie l'orthographe exacte du prénom et du nom de famille. L'Armurerie ne
+					connaît que les persos qui se sont déconnectés du jeu récemment.
+				</p>
+			{/if}
+			{#if armory?.status === 'missing' || declaredNew}
+				<label class="new">
+					<input type="checkbox" name="declaredNew" bind:checked={declaredNew} />
+					<span>Ce perso n'existe pas encore en jeu : je vais le créer</span>
+				</label>
+			{/if}
+		</div>
+	{:else if declaredNew}
+		<input type="hidden" name="declaredNew" value="on" />
+	{/if}
 	</fieldset>
 
 	<div class="specs">
@@ -274,7 +366,7 @@
 								max={MAX_PROFESSION_LEVEL}
 								placeholder="Niv."
 								aria-label="Niveau en {p.name}"
-								value={levelOf(p.id)}
+								bind:value={professionLevels[p.id]}
 							/>
 						{/if}
 					</div>
@@ -335,6 +427,37 @@
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
 		gap: 1rem 1.25rem;
+	}
+	.armory {
+		display: grid;
+		gap: 0.5rem;
+	}
+	.armory p {
+		margin: 0;
+	}
+	.found {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.5rem 1rem;
+		color: var(--good);
+		font-size: 0.9375rem;
+	}
+	.small-button {
+		min-height: 34px;
+		padding: 0.25rem 0.875rem;
+		font-size: 0.875rem;
+	}
+	.warn {
+		color: var(--warn);
+	}
+	.new {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		margin: 0;
+		color: var(--text);
+		font-weight: 400;
 	}
 	.check {
 		display: flex;

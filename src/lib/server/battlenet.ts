@@ -1,5 +1,9 @@
+import { asc, eq, inArray, isNull, ne, or } from 'drizzle-orm';
 import { z } from 'zod';
+import { PROFESSIONS } from '$lib/game/forever';
 import { audit } from './audit';
+import { db, schema } from './db';
+import type { ArmoryStatus, ProfessionEntry } from './db/schema';
 import { applyImport, nameKey, planImport, type GameExport } from './game-import';
 import { getBattlenet, getGameRanks, setBattlenetStatus, type BattlenetSettings } from './settings';
 
@@ -37,6 +41,17 @@ const rosterSchema = z.object({
 	)
 });
 const profileSchema = z.object({ last_login_timestamp: z.number().nullish() });
+const characterSchema = z.object({
+	name: z.string(),
+	surname: z.string().nullish(),
+	level: z.number().int(),
+	character_class: z.object({ id: z.number().int() }).nullish(),
+	race: z.object({ id: z.number().int() }).nullish(),
+	guild: z.object({ name: z.string() }).nullish(),
+	last_login_timestamp: z.number().nullish()
+});
+// Races de l'API (playable_race.id) → identifiants du site.
+const RACE_IDS: Record<number, string> = { 1: 'human', 2: 'orc', 3: 'dwarf', 4: 'night-elf', 5: 'undead', 6: 'tauren', 7: 'gnome', 8: 'troll' };
 const tierSchema = z.object({ skill_points: z.number().int().nullish() });
 const professionsSchema = z.object({
 	primaries: z.array(z.object({ profession: z.object({ id: z.number().int(), name: z.string().nullish() }), tiers: z.array(tierSchema).default([]) })).default([]),
@@ -139,6 +154,7 @@ async function run(by: App.Locals | null, fetchFn: Fetch) {
 		const { data, complete, dataAt } = await buildExport(s, fetchFn);
 		const plan = planImport(data, { completeProfessions: complete, dataAt });
 		const changed = applyImport(plan, { by: 'Battle.net', via: 'battlenet' });
+		await markVerified(data.roster ?? [], plan.updates, fetchFn);
 		const message = `${plan.rosterSize} membres en jeu, ${plan.updates.length} persos reconnus, ${changed} fiche${changed > 1 ? 's' : ''} mise${changed > 1 ? 's' : ''} à jour.`;
 		setBattlenetStatus({ at: Date.now(), ok: true, message });
 		if (by || changed) {
@@ -165,3 +181,128 @@ export function startBattlenetSchedule() {
 
 /** Pour les tests : oublie le jeton en mémoire. */
 export const resetBattlenetToken = () => (token = null);
+
+// ---------------------------------------------------------------------------------------------
+// Vérification d'un perso dans l'Armurerie : à la saisie (formulaire), à l'enregistrement, et à
+// chaque synchronisation pour ceux qui ne sont pas encore vérifiés. L'Armurerie ne connaît que
+// les persos déconnectés depuis son ouverture : « introuvable » n'est donc pas une preuve.
+
+export type ArmoryLookup =
+	| { status: 'found'; name: string; surname: string | null; level: number; classId: string | null; raceId: string | null; guild: string | null; professions: ProfessionEntry[] }
+	| { status: 'missing' }
+	| { status: 'unavailable' };
+
+const LOOKUP_TTL_MS = 10 * 60_000;
+const lookups = new Map<string, { at: number; result: ArmoryLookup }>();
+
+/** Adresse d'un perso dans l'Armurerie : « Vinshal Haal » → « vinshal-haal ». */
+export const characterSlug = (name: string, surname: string | null | undefined) =>
+	[name, surname]
+		.map((v) => v?.trim())
+		.filter(Boolean)
+		.join('-')
+		.toLocaleLowerCase('fr')
+		.replace(/\s+/g, '-');
+
+const professionsOf = (raw: unknown): ProfessionEntry[] => {
+	const p = professionsSchema.safeParse(raw ?? {});
+	if (!p.success) return [];
+	return [...p.data.primaries, ...p.data.secondaries].flatMap((e) => {
+		const known = PROFESSIONS.find((x) => x.skillLine === e.profession.id);
+		const level = Math.max(0, ...e.tiers.map((t) => t.skill_points ?? 0));
+		return known ? [{ id: known.id, level: level || null }] : [];
+	});
+};
+
+/** Cherche un perso dans l'Armurerie (résultat gardé 10 minutes). */
+export async function lookupCharacter(name: string, surname: string | null | undefined, fetchFn: Fetch = fetch): Promise<ArmoryLookup> {
+	const s = getBattlenet();
+	const slug = characterSlug(name, surname);
+	if (!isConfigured(s) || slug.length < 3) return { status: 'unavailable' };
+	const cached = lookups.get(slug);
+	if (cached && Date.now() - cached.at < LOOKUP_TTL_MS) return cached.result;
+	let result: ArmoryLookup;
+	try {
+		const base = `/profile/wow/character/${encodeURIComponent(slug)}`;
+		const raw = await get(s, base, fetchFn);
+		const c = raw === null ? null : characterSchema.safeParse(raw);
+		if (raw === null) result = { status: 'missing' };
+		else if (!c?.success) result = { status: 'unavailable' };
+		else {
+			const professions = professionsOf(await get(s, `${base}/professions`, fetchFn).catch(() => null));
+			result = {
+				status: 'found',
+				name: c.data.name,
+				surname: c.data.surname ?? null,
+				level: c.data.level,
+				classId: c.data.character_class ? (CLASS_FILES[c.data.character_class.id]?.toLowerCase() ?? null) : null,
+				raceId: c.data.race ? (RACE_IDS[c.data.race.id] ?? null) : null,
+				guild: c.data.guild?.name ?? null,
+				professions
+			};
+		}
+	} catch {
+		return { status: 'unavailable' };
+	}
+	if (lookups.size > 500) lookups.clear();
+	lookups.set(slug, { at: Date.now(), result });
+	return result;
+}
+
+/** Statut d'une fiche d'après l'Armurerie ; null si Battle.net n'a pas répondu (rien à changer). */
+export function armoryStatusFor(sheetClass: string, lookup: ArmoryLookup): ArmoryStatus | null {
+	if (lookup.status === 'unavailable') return null;
+	if (lookup.status === 'missing') return 'missing';
+	return !lookup.classId || lookup.classId === sheetClass ? 'found' : 'mismatch';
+}
+
+function setArmoryStatus(characterId: number, status: ArmoryStatus) {
+	db().update(schema.characters).set({ armoryStatus: status, armoryCheckedAt: new Date() }).where(eq(schema.characters.id, characterId)).run();
+}
+
+/** Vérifie une fiche tout de suite (après son enregistrement). */
+export async function verifyCharacter(characterId: number, fetchFn: Fetch = fetch) {
+	const c = db().select().from(schema.characters).where(eq(schema.characters.id, characterId)).get();
+	if (!c || !isConfigured()) return null;
+	const status = armoryStatusFor(c.class, await lookupCharacter(c.name, c.surname, fetchFn));
+	if (status) setArmoryStatus(c.id, status);
+	return status;
+}
+
+const PENDING_PER_PASS = 40;
+
+/** Fiches pas encore vérifiées (ou introuvables) : revues à chaque synchronisation, 40 au plus. */
+async function verifyPending(skip: Set<number>, fetchFn: Fetch) {
+	const pending = db()
+		.select({ id: schema.characters.id, name: schema.characters.name, surname: schema.characters.surname, class: schema.characters.class })
+		.from(schema.characters)
+		.where(or(isNull(schema.characters.armoryStatus), ne(schema.characters.armoryStatus, 'found')))
+		.orderBy(asc(schema.characters.armoryCheckedAt))
+		.all()
+		.filter((c) => !skip.has(c.id))
+		.slice(0, PENDING_PER_PASS);
+	for (let i = 0; i < pending.length; i += PARALLEL) {
+		await Promise.all(
+			pending.slice(i, i + PARALLEL).map(async (c) => {
+				const status = armoryStatusFor(c.class, await lookupCharacter(c.name, c.surname, fetchFn));
+				if (status) setArmoryStatus(c.id, status);
+			})
+		);
+	}
+}
+
+/** Après une synchronisation : les persos du registre existent en jeu, avec la classe du registre. */
+async function markVerified(roster: NonNullable<GameExport['roster']>, updates: { characterId: number; gameName?: string }[], fetchFn: Fetch) {
+	const classes = new Map(roster.map((m) => [nameKey(m.name), m.class?.toLowerCase() ?? null]));
+	const ids = updates.map((u) => u.characterId);
+	const sheets = ids.length ? db().select({ id: schema.characters.id, class: schema.characters.class }).from(schema.characters).where(inArray(schema.characters.id, ids)).all() : [];
+	for (const u of updates) {
+		const sheet = sheets.find((x) => x.id === u.characterId);
+		const cls = u.gameName ? classes.get(nameKey(u.gameName)) : undefined;
+		if (sheet && cls !== undefined) setArmoryStatus(sheet.id, !cls || cls === sheet.class ? 'found' : 'mismatch');
+	}
+	await verifyPending(new Set(ids), fetchFn);
+}
+
+/** Pour les tests : oublie les recherches en mémoire. */
+export const resetArmoryCache = () => lookups.clear();

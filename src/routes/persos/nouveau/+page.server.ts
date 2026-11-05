@@ -1,6 +1,7 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 import { audit } from '$lib/server/audit';
+import { verifyCharacter } from '$lib/server/battlenet';
 import { characterTarget, createCharacter, getMain, parseCharacterForm } from '$lib/server/characters';
 import { db, schema } from '$lib/server/db';
 import { requireOfficer, requireUser } from '$lib/server/guards';
@@ -32,6 +33,8 @@ export const actions: Actions = {
 		if (!parsed.data) return fail(400, { errors: parsed.errors, values: parsed.values });
 
 		const created = createCharacter(owner.id, parsed.data);
+		// Vérification dans l'Armurerie (sans bloquer : Battle.net peut ne pas répondre).
+		await verifyCharacter(created.id).catch(() => null);
 		if (!owner.self) audit(locals, 'character.create', characterTarget(created));
 		redirect(303, owner.self ? '/persos' : '/admin');
 	}

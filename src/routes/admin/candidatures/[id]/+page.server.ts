@@ -1,6 +1,7 @@
 import { error, fail } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 import { audit } from '$lib/server/audit';
+import { lookupCharacter } from '$lib/server/battlenet';
 import { botReady, guildMember } from '$lib/server/bot';
 import { db, schema } from '$lib/server/db';
 import { requireOfficer } from '$lib/server/guards';
@@ -46,6 +47,9 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 		}
 	}
 
+	// Le perso dans l'Armurerie de Blizzard (si la guilde a connecté Battle.net).
+	const armory = app.status === 'pending' ? await lookupCharacter(app.character.name, app.character.surname) : null;
+
 	const votes = votesFor(app.id);
 	// Charte modifiée après son acceptation : le candidat a accepté une version antérieure.
 	const charterUpdatedAt = getCharter()?.updatedAt ?? null;
@@ -57,6 +61,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 		charterChangedAt,
 		candidate: { name: user?.displayName ?? '?', username: user?.discordUsername ?? '', avatar: user?.avatar ?? null },
 		discord,
+		armory: armory?.status === 'unavailable' ? null : armory,
 		votes,
 		myVote: votes.find((v) => v.voterId === voter.id) ?? null
 	};
