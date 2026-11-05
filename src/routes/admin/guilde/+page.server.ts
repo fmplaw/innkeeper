@@ -3,12 +3,12 @@ import { audit, diff } from '$lib/server/audit';
 import { removeClassIcon, saveClassIcon } from '$lib/server/class-icons';
 import { parseGuildForm } from '$lib/server/guild-form';
 import { requireOfficer } from '$lib/server/guards';
-import { getGuild, setGuild } from '$lib/server/settings';
+import { getGuild, getWowheadTooltips, setGuild, setWowheadTooltips } from '$lib/server/settings';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = ({ locals }) => {
 	requireOfficer(locals);
-	return { guild: getGuild(), timezones: Intl.supportedValuesOf('timeZone') };
+	return { guild: getGuild(), timezones: Intl.supportedValuesOf('timeZone'), wowheadTooltips: getWowheadTooltips() };
 };
 
 export const actions: Actions = {
@@ -37,5 +37,14 @@ export const actions: Actions = {
 		}
 		audit(locals, 'class-icon.update', { label: classId, url: '/admin/guilde' }, { action: form.has('remove') ? 'retirée' : 'envoyée' });
 		return { iconSaved: classId };
+	},
+	wowhead: async ({ locals, request }) => {
+		requireOfficer(locals);
+		const on = (await request.formData()).get('tooltips') === 'on';
+		if (on !== getWowheadTooltips()) {
+			setWowheadTooltips(on);
+			audit(locals, 'guild.update', { label: 'Bulles Wowhead', url: '/admin/guilde' }, { champs: ['wowheadTooltips'], valeur: on ? 'activées' : 'désactivées' });
+		}
+		return { wowheadSaved: true };
 	}
 };

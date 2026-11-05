@@ -23,7 +23,8 @@
 		...(data.user || data.admin
 			? ([
 					{ href: '/sorties', label: 'Sorties', icon: 'calendar' },
-					{ href: '/roster', label: 'Roster', icon: 'users' }
+					{ href: '/roster', label: 'Roster', icon: 'users' },
+					{ href: '/artisans', label: 'Artisans', icon: 'hammer' }
 				] as const)
 			: []),
 		...(data.user ? ([{ href: '/persos', label: 'Mes persos', icon: 'user' }] as const) : []),
@@ -57,6 +58,18 @@
 	function closeOnOutside(e: MouseEvent) {
 		if (accountOpen && !(e.target as Element).closest('.account')) accountOpen = false;
 	}
+	// Bulles Wowhead (réglage de la guilde) : le script de Wowhead repère tout seul les liens
+	// vers wowhead.com, y compris sur les pages ouvertes ensuite. Chargé une seule fois.
+	$effect(() => {
+		if (!data.config.wowheadTooltips || document.getElementById('wowhead-tooltips')) return;
+		(window as unknown as { whTooltips: object }).whTooltips = { colorLinks: false, iconizeLinks: true, renameLinks: false };
+		const script = document.createElement('script');
+		script.id = 'wowhead-tooltips';
+		script.src = 'https://wow.zamimg.com/js/tooltips.js';
+		script.async = true;
+		document.head.append(script);
+	});
+
 	function closeOnEscape(e: KeyboardEvent) {
 		if (e.key !== 'Escape') return;
 		sheetOpen = false;

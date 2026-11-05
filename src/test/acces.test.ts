@@ -69,7 +69,7 @@ const PAGES: Record<string, Record<string, Rule>> = {
 		logout: { exempt: 'déconnexion' }
 	},
 	'/admin/discord': { load: 'adminInstance', save: 'adminInstance' },
-	'/admin/guilde': { load: 'officier', save: 'officier', classIcon: 'officier' },
+	'/admin/guilde': { load: 'officier', save: 'officier', classIcon: 'officier', wowhead: 'officier' },
 	'/admin/import': { load: 'officier', preview: 'officier', apply: 'officier' },
 	'/admin/journal': { load: 'adminInstance' },
 	'/admin/progression': { load: 'officier', review: 'officier', joined: 'officier' },
@@ -78,6 +78,7 @@ const PAGES: Record<string, Record<string, Rule>> = {
 	'/admin/rosters': { load: 'officier', create: 'officier', update: 'officier', delete: 'officier' },
 	'/admin/sorties': { load: 'officier', connection: 'officier', create: 'officier', update: 'officier', image: 'officier', delete: 'officier' },
 	'/admin/statistiques': { load: 'officier' },
+	'/artisans': { load: 'connecte' },
 	'/candidature': { load: { exempt: 'parcours candidat' }, withdraw: { exempt: 'parcours candidat' } },
 	'/charte': { load: { exempt: 'charte publique' } },
 	'/connexion': { load: { exempt: 'connexion Discord' }, default: { exempt: 'connexion Discord' } },

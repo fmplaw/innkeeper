@@ -9,7 +9,7 @@
 	<h1>Confidentialité</h1>
 	<p class="lead">
 		Ce site est l'outil de {guild}, une guilde de World of Warcraft Forever. Il est géré bénévolement par des membres
-		de la guilde, sans publicité ni pistage. Il n'est lié ni à Blizzard, ni à Discord.
+		de la guilde, sans publicité ni pistage{data.config.wowheadTooltips ? ' (voir « Bulles Wowhead » plus bas)' : ''}. Il n'est lié ni à Blizzard, ni à Discord.
 	</p>
 
 	<h2>Connexion avec Discord</h2>
@@ -40,6 +40,15 @@
 		Les données restent sur le serveur de la guilde, avec des sauvegardes gardées 60 jours au plus. Elles ne sont ni
 		vendues ni partagées.
 	</p>
+
+	{#if data.config.wowheadTooltips}
+		<h2>Bulles Wowhead</h2>
+		<p>
+			Pour afficher la fiche d'une recette au survol, le site charge un script de <strong>Wowhead</strong>, la base de
+			données du jeu. Ton navigateur contacte alors les serveurs de Wowhead, qui reçoivent ton adresse IP et la page
+			consultée, selon leur propre politique de confidentialité.
+		</p>
+	{/if}
 
 	<h2>Cookies</h2>
 	<p>

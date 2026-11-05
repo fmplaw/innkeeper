@@ -44,7 +44,31 @@
 	{/each}
 </div>
 
+<h2 class="section" id="wowhead">Bulles Wowhead</h2>
+<p class="muted intro">
+	Les recettes (Mes persos, fiches des joueurs, Artisans) renvoient vers leur page Wowhead. Avec les bulles, survoler
+	une recette affiche sa fiche du jeu sans quitter le site. Le script vient de Wowhead : chaque visiteur lui envoie
+	alors son adresse IP et la page consultée. La page Confidentialité le mentionne quand les bulles sont activées.
+</p>
+<form method="POST" action="?/wowhead" use:enhance class="wowhead">
+	<label class="check"><input type="checkbox" name="tooltips" checked={data.wowheadTooltips} /> Afficher les bulles Wowhead au survol des recettes</label>
+	<button class="secondary small">Enregistrer</button>
+	{#if form?.wowheadSaved}<span class="muted small">Enregistré.</span>{/if}
+</form>
+
 <style>
+	.wowhead {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.75rem 1rem;
+		margin-top: 1rem;
+	}
+	.check {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
 	.saved {
 		border-color: var(--gold);
 		margin-bottom: 1rem;
