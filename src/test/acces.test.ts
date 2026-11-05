@@ -70,7 +70,7 @@ const PAGES: Record<string, Record<string, Rule>> = {
 	},
 	'/admin/discord': { load: 'adminInstance', save: 'adminInstance' },
 	'/admin/guilde': { load: 'officier', save: 'officier', classIcon: 'officier', wowhead: 'officier' },
-	'/admin/import': { load: 'officier', preview: 'officier', apply: 'officier' },
+	'/admin/import': { load: 'officier', preview: 'officier', apply: 'officier', battlenet: 'officier', battlenetSync: 'officier', battlenetOff: 'officier' },
 	'/admin/journal': { load: 'adminInstance' },
 	'/admin/progression': { load: 'officier', review: 'officier', joined: 'officier' },
 	'/admin/recrutement': { load: 'officier', save: 'officier', test: 'officier' },

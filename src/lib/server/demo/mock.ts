@@ -1,5 +1,6 @@
 import { eq } from 'drizzle-orm';
 import { db, schema } from '../db';
+import { PROFESSIONS } from '$lib/game/forever';
 import { getDemoEvents, setDemoEvents } from '../settings';
 
 // Mode démo : le site ne parle jamais au vrai Discord ni au vrai Raid-Helper. Cette simulation
@@ -42,6 +43,8 @@ export function installDemoFetch(channels: { id: string; name: string }[], guild
 	const realFetch = globalThis.fetch;
 	globalThis.fetch = async (input, init = {}) => {
 		const url = new URL(typeof input === 'string' ? input : input instanceof URL ? input.href : input.url);
+		if (url.hostname === 'oauth.battle.net') return json({ access_token: 'demo', expires_in: 86400 });
+		if (url.hostname.endsWith('.api.blizzard.com')) return battlenet(decodeURIComponent(url.pathname));
 		const method = (init.method ?? 'GET').toUpperCase();
 		const body = typeof init.body === 'string' ? (JSON.parse(init.body) as Record<string, unknown>) : {};
 		if (url.hostname === 'discord.com') return discord(url.pathname.replace(/^\/api\/v10/, ''), method, body, channels, guild);
@@ -154,4 +157,32 @@ function raidHelper(path: string, method: string, body: Record<string, unknown>)
 		return json(event);
 	}
 	return json({ error: 'not found' }, 404);
+}
+
+// Battle.net simulé : l'Armurerie connaît les persos de la démo (sauf les candidats), un peu
+// plus avancés que leur fiche, comme s'ils avaient joué depuis.
+const CLASS_IDS: Record<string, number> = { warrior: 1, paladin: 2, hunter: 3, rogue: 4, priest: 5, shaman: 7, mage: 8, warlock: 9, druid: 11 };
+const slug = (c: { name: string; surname: string | null }) => [c.name, c.surname].filter(Boolean).join('-').toLocaleLowerCase('fr').replace(/\s+/g, '-');
+
+function battlenet(path: string) {
+	const chars = db()
+		.select({ c: schema.characters })
+		.from(schema.characters)
+		.innerJoin(schema.users, eq(schema.users.discordId, schema.characters.userId))
+		.where(eq(schema.users.inGuild, true))
+		.all()
+		.map((r) => r.c);
+	if (/^\/data\/wow\/guild\/[^/]+\/roster$/.test(path))
+		return json({
+			members: chars.map((c, i) => ({
+				character: { name: c.name, surname: c.surname, slug: slug(c), level: Math.min(c.level + (i % 3), 60), playable_class: { id: CLASS_IDS[c.class] ?? 1 } },
+				rank: c.isMain ? i % 4 : 4
+			}))
+		});
+	const m = path.match(/^\/profile\/wow\/character\/([^/]+)(\/professions)?$/);
+	const c = m && chars.find((x) => slug(x) === m[1]);
+	if (!c) return json({ code: 404 }, 404);
+	if (!m![2]) return json({ last_login_timestamp: Date.now() - (c.id % 5) * 7 * 3_600_000 });
+	const list = c.professions.map((p) => ({ profession: { id: PROFESSIONS.find((x) => x.id === p.id)?.skillLine ?? 0 }, tiers: [{ skill_points: (p.level ?? 1) + 3 }] }));
+	return json({ primaries: list.filter((_, i) => !PROFESSIONS.find((x) => x.id === c.professions[i].id)?.secondary), secondaries: list.filter((_, i) => PROFESSIONS.find((x) => x.id === c.professions[i].id)?.secondary) });
 }

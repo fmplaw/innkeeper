@@ -6,6 +6,8 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ### Ajouté
 
+- **Synchronisation Battle.net** (Admin → Import du jeu) : avec un client de l'API Battle.net, le site lit l'Armurerie de Forever toutes les 3 heures, et sur demande. Il récupère le registre de la guilde avec les noms complets, ainsi que le niveau, les métiers (avec leurs points) et la dernière connexion de chaque perso, sans addon. Les métiers de Battle.net sont complets : un métier abandonné quitte la fiche. Un export de l'addon fait depuis la dernière déconnexion reste prioritaire. Les noms des rangs sont appris du registre de l'addon. Les recettes restent l'affaire de l'addon. Battle.net est simulé en mode démo.
+
 - **Page Artisans** (menu) : les persos de la guilde regroupés par métier, du plus haut niveau au plus bas, avec leurs recettes connues, et une recherche de recette (« qui connaît… ? », sans tenir compte des accents). **Recettes connues dans Mes persos**, repliées par métier. Chaque recette renvoie vers sa page Wowhead (base de Forever, en français, bulles comprises). **Bulles Wowhead** au survol, à activer dans Admin → Guilde (désactivées par défaut : le script vient de Wowhead, la page Confidentialité le mentionne quand elles sont activées).
 
 ### Modifié

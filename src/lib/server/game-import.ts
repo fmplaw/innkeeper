@@ -5,7 +5,7 @@ import { db, schema } from './db';
 import type { Character, KnownRecipes, ProfessionEntry } from './db/schema';
 import { parseSavedVariables, toPlain } from './lua-saved-variables';
 import { isFrench, learnFrenchNames, scheduleTranslation, translateRecipes } from './recipe-names';
-import { getGameImport, getGameRoster, setGameImport, setGameRoster, type GameRosterInfo } from './settings';
+import { getGameImport, getGameRanks, getGameRoster, setGameImport, setGameRanks, setGameRoster, type GameRosterInfo } from './settings';
 
 // Import de l'export de l'addon InnkeeperSync : met à jour niveau, métiers, dernière
 // connexion en jeu et recettes des fiches du site, en reliant les persos par leur nom
@@ -26,6 +26,7 @@ const exportSchema = z.object({
 				level: z.number().int().min(1).max(100),
 				class: z.string().nullish(),
 				rank: z.string().nullish(),
+				rankIndex: z.number().int().min(0).max(20).nullish(),
 				online: z.boolean().optional(),
 				offline: z.object({ years: count, months: count, days: count, hours: count }).partial().optional()
 			})
@@ -127,6 +128,8 @@ export interface CharacterUpdate {
 	lastOnlineAt?: Date;
 	/** La fiche a des données d'un export plus récent : reconnue en jeu, rien n'est remplacé. */
 	outdated?: true;
+	/** Date des données de ce perso, quand elle diffère de celle de l'export (Battle.net). */
+	dataAt?: Date;
 }
 
 export interface ImportPlan {
@@ -146,6 +149,8 @@ export interface ImportPlan {
 	roster: GameRosterInfo['roster'];
 	/** Recettes exportées par un jeu en français : leurs noms servent à traduire les autres. */
 	frenchRecipes: KnownRecipes[];
+	/** Noms des rangs par numéro, d'après le registre de l'addon (Battle.net ne donne que le numéro). */
+	rankNames: Record<string, string>;
 }
 
 export interface Homonym {
@@ -184,7 +189,21 @@ export function homonyms(characterIds: number[]): Record<number, Homonym[]> {
  * ceux qui manquent, sans retirer les autres (l'onglet de guilde n'affiche peut-être pas
  * tous les métiers), sauf s'il faut libérer une place de métier principal.
  */
-export function planImport(data: GameExport): ImportPlan {
+export interface PlanOptions {
+	/**
+	 * Noms dont la liste de métiers est complète (Battle.net donne tous les métiers de chaque
+	 * perso) : comme pour le perso qui exporte, un métier absent quitte la fiche.
+	 */
+	completeProfessions?: string[];
+	/**
+	 * Date des données de chaque perso (millisecondes ; 0 = inconnue). Battle.net : l'Armurerie
+	 * date de la dernière déconnexion, un export de l'addon fait en jeu depuis reste prioritaire.
+	 */
+	dataAt?: Record<string, number>;
+}
+
+export function planImport(data: GameExport, options: PlanOptions = {}): ImportPlan {
+	const complete = new Set((options.completeProfessions ?? []).map(nameKey));
 	const chars = db()
 		.select({ c: schema.characters, player: schema.users.displayName })
 		.from(schema.characters)
@@ -220,7 +239,7 @@ export function planImport(data: GameExport): ImportPlan {
 	const ownIds = (data.professions ?? []).map((p) => professionBySkillLine(p.skillLine, p.name)?.id).filter((id) => id !== undefined);
 	const ownProfessions = exporter && ownIds.length ? new Set<string>([...ownIds, ...recipes.map((r) => r.profession)]) : null;
 
-	const plan: ImportPlan = { exportedAt: new Date(data.exportedAt * 1000), guild: data.player?.guild ?? null, updates: [], withoutSheet: [], ambiguous: [], outdated: [], notFound: [], rosterSize: data.roster?.length ?? 0, roster: (data.roster ?? []).map((m) => ({ name: m.name, level: m.level, class: m.class ?? null, rank: m.rank ?? null })), frenchRecipes: isFrench(data.locale) ? recipes : [] };
+	const plan: ImportPlan = { exportedAt: new Date(data.exportedAt * 1000), guild: data.player?.guild ?? null, updates: [], withoutSheet: [], ambiguous: [], outdated: [], notFound: [], rosterSize: data.roster?.length ?? 0, roster: (data.roster ?? []).map((m) => ({ name: m.name, level: m.level, class: m.class ?? null, rank: m.rank ?? null })), frenchRecipes: isFrench(data.locale) ? recipes : [], rankNames: Object.fromEntries((data.roster ?? []).filter((m) => m.rank && m.rankIndex != null).map((m) => [String(m.rankIndex), m.rank!])) };
 
 	// Chaque nom du jeu une seule fois : registre, onglet des métiers, perso qui exporte.
 	const people = new Map<string, { name: string; member?: NonNullable<GameExport['roster']>[number] }>();
@@ -251,7 +270,9 @@ export function planImport(data: GameExport): ImportPlan {
 		// les données de la fiche sont plus récentes, on ne revient pas en arrière. Seules ses
 		// recettes encore inconnues s'ajoutent : la fiche a pu être mise à jour par un registre
 		// de guilde, qui n'en contient pas, et une recette apprise ne se perd pas.
-		if (c.gameExportedAt && c.gameExportedAt.getTime() >= plan.exportedAt.getTime()) {
+		const dataAt = options.dataAt ? new Date(options.dataAt[key] ?? 0) : plan.exportedAt;
+		if (options.dataAt) update.dataAt = dataAt;
+		if (c.gameExportedAt && c.gameExportedAt.getTime() >= dataAt.getTime()) {
 			plan.outdated.push(c.name);
 			const added = isExporter(key) ? addRecipes(c.knownRecipes, recipes) : null;
 			plan.updates.push({ ...update, outdated: true, ...(added && { recipes: added }) });
@@ -259,17 +280,18 @@ export function planImport(data: GameExport): ImportPlan {
 		}
 		const level = member?.level ?? (isExporter(key) ? exporter!.level : undefined);
 		if (level && level !== c.level) update.level = { from: c.level, to: level };
-		const profs = professions.get(key)?.list;
+		const profs = professions.get(key)?.list ?? (complete.has(key) ? [] : undefined);
 		// Le perso qui exporte : le jeu donne la liste complète de ses métiers, ceux qu'il a
 		// abandonnés quittent la fiche, avec leurs recettes. Les autres : l'onglet de guilde
 		// n'affiche peut-être pas tout, on ajoute sans retirer.
-		const learned = isExporter(key) ? ownProfessions : null;
+		const learned = isExporter(key) ? ownProfessions : complete.has(key) ? new Set(profs!.map((e) => e.id)) : null;
 		const merged = profs && (learned ? sortProfessions(profs.filter((e) => learned.has(e.id))) : mergeProfessions(c.professions, profs));
 		if (merged && !sameProfessions(c.professions, merged)) update.professions = { from: c.professions, to: merged };
 		if (isExporter(key) && recipes.length) update.recipes = mergeRecipes(c.knownRecipes, recipes);
 		const dropped = learned && (update.recipes ?? c.knownRecipes ?? []).filter((r) => isProfession(r.profession) && !learned.has(r.profession));
 		if (dropped?.length) update.recipes = (update.recipes ?? c.knownRecipes ?? []).filter((r) => !dropped.includes(r));
-		if (member) update.lastOnlineAt = lastOnline(data.exportedAt, member);
+		// Sans date (perso absent de l'Armurerie de Battle.net), on ne devine pas.
+		if (member && (member.online || member.offline)) update.lastOnlineAt = lastOnline(data.exportedAt, member);
 		plan.updates.push(update);
 	}
 	plan.withoutSheet.sort((a, b) => b.level - a.level || a.name.localeCompare(b.name));
@@ -331,7 +353,7 @@ export function applyImport(plan: ImportPlan, by: Pick<GameRosterInfo, 'by' | 'v
 	db().transaction((tx) => {
 		for (const u of plan.updates) {
 			const values: Partial<Character> = { gameSyncedAt: now };
-			if (!u.outdated) values.gameExportedAt = plan.exportedAt;
+			if (!u.outdated) values.gameExportedAt = u.dataAt ?? plan.exportedAt;
 			if (u.level) values.level = u.level.to;
 			if (u.professions) values.professions = u.professions.to;
 			if (u.recipes) values.knownRecipes = translateRecipes(u.recipes);
@@ -352,6 +374,8 @@ export function applyImport(plan: ImportPlan, by: Pick<GameRosterInfo, 'by' | 'v
 		setGameImport({ ...dates, rosterSize: plan.rosterSize });
 		setGameRoster({ ...dates, ...by, roster: plan.roster });
 	}
+	// Noms des rangs : même d'un registre plus ancien (une synchro Battle.net a pu passer entre-temps).
+	if (Object.keys(plan.rankNames).length) setGameRanks({ ...getGameRanks(), ...plan.rankNames });
 	// Noms français manquants (jeu en anglais…) : demandés à Wowhead en arrière-plan.
 	if (plan.updates.some((u) => u.recipes)) scheduleTranslation();
 	return changed;
