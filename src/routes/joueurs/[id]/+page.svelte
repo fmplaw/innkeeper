@@ -1,4 +1,5 @@
 <script lang="ts">
+	import KnownRecipes from '$lib/components/KnownRecipes.svelte';
 	import CharacterTitle from '$lib/components/CharacterTitle.svelte';
 	import GameBadge from '$lib/components/GameBadge.svelte';
 	import InterestBadges from '$lib/components/InterestBadges.svelte';
@@ -41,12 +42,7 @@
 				{#if c.pve || c.pvp}<p><InterestBadges pve={c.pve} pvp={c.pvp} /></p>{/if}
 				{#if c.professions.length}<p class="muted">{professionNames(cfg, c.professions)}</p>{/if}
 				{#if c.recipes}<p class="muted small">Recettes : {c.recipes}</p>{/if}
-				{#each c.knownRecipes ?? [] as k (k.profession)}
-					<details class="known">
-						<summary>{professionNames(cfg, [{ id: k.profession, level: k.skill }]) || k.profession} : {k.recipes.length} recettes connues</summary>
-						<p class="small">{k.recipes.map((r) => r.name).sort((a, b) => a.localeCompare(b)).join(' · ')}</p>
-					</details>
-				{/each}
+				<KnownRecipes {cfg} known={c.knownRecipes} />
 				{#if c.lastOnlineAt}<p class="muted small">Vu en jeu le {dateFormat.format(c.lastOnlineAt)}</p>{/if}
 				{#if c.rosters.length}
 					<p class="rosters">
@@ -95,13 +91,6 @@
 		display: flex;
 		flex-wrap: wrap;
 		gap: 0.375rem;
-	}
-	.known summary {
-		font-size: 0.875rem;
-		color: var(--muted);
-	}
-	.known p {
-		margin: 0.375rem 0 0;
 	}
 	.rosters {
 		display: flex;

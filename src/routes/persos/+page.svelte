@@ -5,6 +5,7 @@
 	import HomonymWarning from '$lib/components/HomonymWarning.svelte';
 	import { enhance } from '$app/forms';
 	import InterestBadges from '$lib/components/InterestBadges.svelte';
+	import KnownRecipes from '$lib/components/KnownRecipes.svelte';
 	import { professionNames, specRole } from '$lib/labels';
 
 	const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium' });
@@ -51,7 +52,10 @@
 					</dd>
 				</div>
 			{/if}
-			{#if c.recipes}<div><dt>Recettes</dt><dd>{c.recipes}</dd></div>{/if}
+			{#if c.knownRecipes?.length}
+				<div class="wide"><dt>Recettes connues en jeu</dt><dd class="recipes"><KnownRecipes {cfg} known={c.knownRecipes} /></dd></div>
+			{/if}
+			{#if c.recipes}<div><dt>Recettes notables</dt><dd>{c.recipes}</dd></div>{/if}
 			{#if c.notes}<div><dt>Notes</dt><dd class="notes">{c.notes}</dd></div>{/if}
 		</dl>
 		<div class="actions">
@@ -127,6 +131,13 @@
 	}
 	.notes {
 		white-space: pre-line;
+	}
+	.facts .wide {
+		grid-column: 1 / -1;
+	}
+	.facts dd.recipes {
+		display: grid;
+		gap: 0.25rem;
 	}
 	.actions {
 		display: flex;

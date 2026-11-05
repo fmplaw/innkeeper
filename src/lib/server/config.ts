@@ -7,7 +7,7 @@ import {
 	type GuildFaction
 } from '$lib/game/forever';
 import { classIconUrls } from './class-icons';
-import { DEFAULT_ACCENTS, getCharter, getGuild } from './settings';
+import { DEFAULT_ACCENTS, getCharter, getGuild, getWowheadTooltips } from './settings';
 import { db, schema } from './db';
 import { demoEnabled } from './demo';
 
@@ -32,6 +32,8 @@ export function publicConfig() {
 		hasCharter: Boolean(getCharter()),
 		// Lien « Addons » dans le menu, seulement quand la guilde en conseille.
 		hasAddons: Boolean(db().select({ id: schema.addons.id }).from(schema.addons).limit(1).get()),
+		// Bulles Wowhead au survol des liens de recettes (réglage de la guilde).
+		wowheadTooltips: getWowheadTooltips(),
 		// Site de démonstration : bandeau en haut de chaque page.
 		demo: demoEnabled(),
 		maxLevel: MAX_LEVEL,

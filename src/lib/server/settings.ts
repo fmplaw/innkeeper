@@ -196,6 +196,11 @@ export interface GameRosterInfo {
 	via: 'sync' | 'manual';
 	roster: { name: string; level: number; class: string | null; rank: string | null }[];
 }
+// Bulles Wowhead au survol des recettes : script de Wowhead chargé chez chaque visiteur, donc
+// désactivé tant que la guilde ne le choisit pas (Admin → Guilde, mention dans Confidentialité).
+export const getWowheadTooltips = () => read<boolean>('wowheadTooltips') ?? false;
+export const setWowheadTooltips = (on: boolean) => write('wowheadTooltips', on);
+
 export const getGameRoster = () => read<GameRosterInfo>('gameRoster') ?? null;
 export const setGameRoster = (info: GameRosterInfo) => write('gameRoster', info);
 

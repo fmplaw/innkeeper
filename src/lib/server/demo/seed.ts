@@ -40,6 +40,19 @@ const QUESTIONS = [
 type Char = [name: string, surname: string, race: string, cls: string, spec: string, role: 'tank' | 'healer' | 'melee' | 'ranged', level: number, professions: [string, number][]];
 const { officer: R_OFF, member: R_MEM, newcomer: R_NEW } = DEMO_ROLES;
 
+// Recettes exportées par l'addon (identifiants de sorts du Classic), pour la page Artisans.
+const R = (id: number, name: string) => ({ id, name });
+const DEMO_RECIPES: Record<string, { profession: string; skill: number; recipes: { id: number; name: string }[] }[]> = {
+	Aldren: [{ profession: 'blacksmithing', skill: 182, recipes: [R(2660, 'Pierre à aiguiser brute'), R(2663, 'Brassards en cuivre')] }],
+	Ysolde: [{ profession: 'alchemy', skill: 168, recipes: [R(2330, 'Potion de soins mineure'), R(2329, 'Élixir de force du lion')] }],
+	Lysandre: [{ profession: 'tailoring', skill: 170, recipes: [R(2963, 'Rouleau d’étoffe de lin'), R(2387, 'Cape en lin')] }],
+	Eodric: [{ profession: 'leatherworking', skill: 171, recipes: [R(2881, 'Cuir léger'), R(2149, 'Bottes en cuir cousues main')] }],
+	Brunhild: [
+		{ profession: 'first-aid', skill: 150, recipes: [R(3275, 'Bandage en lin'), R(3276, 'Bandage épais en lin'), R(3277, 'Bandage en laine'), R(7934, 'Anti-venin')] },
+		{ profession: 'cooking', skill: 120, recipes: [R(2538, 'Viande de loup grillée'), R(2540, 'Viande de sanglier rôtie'), R(8604, 'Œufs aux herbes')] }
+	]
+};
+
 // [pseudo, rôles Discord, persos (le premier est le main)]
 const PLAYERS: [string, string[], Char[]][] = [
 	['Aldren', [R_OFF, R_MEM], [['Aldren', 'Bouclier-d’Aube', 'human', 'paladin', 'protection', 'tank', 34, [['blacksmithing', 182], ['mining', 190]]], ['Mirabel', 'Bouclier-d’Aube', 'gnome', 'mage', 'frost', 'ranged', 17, [['tailoring', 95]]]]],
@@ -193,6 +206,7 @@ export function seedDemo(now = Date.now()): DemoEvent[] {
 					professions: professions(profs),
 					pve: role === 'healer' || role === 'tank' ? 'competitive' : 'casual',
 					pvp: i % 3 === 0 ? 'casual' : null,
+					knownRecipes: DEMO_RECIPES[name] ?? null,
 					lastOnlineAt: new Date(now - (i % 4) * DAY - 3_600_000),
 					gameSyncedAt: new Date(now - 2 * 3_600_000)
 				})
