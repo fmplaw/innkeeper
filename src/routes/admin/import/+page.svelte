@@ -10,14 +10,107 @@
 	const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium', timeStyle: 'short' });
 	const dayFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium' });
 	let sending = $state(false);
+	let syncing = $state(false);
+	const bnet = $derived(data.battlenet);
+	const bnetResult = $derived(form && 'battlenetResult' in form ? form.battlenetResult : null);
+	const ranks = $derived(Object.entries(bnet.ranks).sort(([a], [b]) => Number(a) - Number(b)));
+	const busy = () => {
+		syncing = true;
+		return async ({ update }: { update: () => Promise<void> }) => {
+			await update();
+			syncing = false;
+		};
+	};
 </script>
 
 <h1>Import du jeu</h1>
 <p class="muted intro">
-	L'addon <strong>InnkeeperSync</strong> exporte depuis le jeu le registre de guilde (niveaux, dernière connexion),
-	les métiers de tous les membres et les recettes de ton perso. Le site relie les persos par leur nom complet : le
-	prénom et le nom de famille de la fiche doivent être exactement ceux du jeu.
+	Deux sources pour mettre les fiches à jour : <strong>Battle.net</strong> (l'Armurerie de Blizzard) donne tout seul
+	le registre de la guilde, les niveaux, les métiers et la dernière connexion ; l'addon <strong>InnkeeperSync</strong>
+	ajoute les recettes. Le site relie les persos par leur nom complet : le prénom et le nom de famille de la fiche
+	doivent être exactement ceux du jeu.
 </p>
+
+<section class="card bnet">
+	<h2>Battle.net</h2>
+	{#if bnet.configured}
+		<p>
+			Synchronisation automatique <strong>toutes les 3 heures</strong> avec la guilde
+			<a href="https://worldofwarcraft.blizzard.com/fr-fr/forever/{bnet.region}/armory/guild/{bnet.guildSlug}" target="_blank" rel="noopener">{bnet.guildSlug}</a>
+			({bnet.region.toUpperCase()}). L'Armurerie se met à jour quand un perso se déconnecte du jeu.
+		</p>
+	{:else}
+		<p>
+			Avec un client de l'API Battle.net (gratuit), le site lit l'Armurerie de Forever toutes les 3 heures : registre de
+			la guilde avec les noms complets, niveaux, métiers et dernière connexion. Personne n'a besoin d'installer quoi
+			que ce soit pour ça.
+		</p>
+	{/if}
+	{#if bnetResult}
+		<p class="notice" class:ok={bnetResult.ok} class:bad={!bnetResult.ok}>{bnetResult.message}</p>
+	{:else if bnet.status}
+		<p class:warn={!bnet.status.ok}>
+			Dernier passage le {dateFormat.format(bnet.status.at)} : {bnet.status.message}
+		</p>
+	{/if}
+	{#if form && 'battlenetError' in form}<p class="notice bad">{form.battlenetError}</p>{/if}
+
+	{#if bnet.configured}
+		<div class="row">
+			<form method="POST" action="?/battlenetSync" use:enhance={busy}>
+				<button disabled={syncing}>{syncing ? 'Synchronisation… (quelques secondes)' : 'Synchroniser maintenant'}</button>
+			</form>
+		</div>
+	{/if}
+
+	<details open={!bnet.configured}>
+		<summary>{bnet.configured ? 'Modifier la connexion' : 'Connecter Battle.net'}</summary>
+		{#if !bnet.configured}
+			<ol class="small">
+				<li>
+					Sur <a href="https://develop.battle.net/access/clients" target="_blank" rel="noopener">develop.battle.net</a>,
+					connecte-toi avec ton compte Battle.net et clique sur <strong>Create Client</strong>.
+				</li>
+				<li>Nom : unique au monde (par exemple « Innkeeper - {data.config.guild.name} »). Coche « I do not have a service URL ». Usage : « Guild website ».</li>
+				<li>Copie ci-dessous le <strong>Client ID</strong> et le <strong>Client Secret</strong>.</li>
+			</ol>
+		{/if}
+		<form method="POST" action="?/battlenet" class="bnet-form" use:enhance={busy}>
+			<label for="bnet-id">Client ID</label>
+			<input id="bnet-id" name="clientId" value={bnet.clientId ?? ''} autocomplete="off" spellcheck="false" required />
+			<label for="bnet-secret">Client Secret</label>
+			<input
+				id="bnet-secret"
+				name="clientSecret"
+				type="password"
+				autocomplete="new-password"
+				placeholder={bnet.hasSecret ? 'Enregistrée : laisse vide pour la garder' : ''}
+				required={!bnet.hasSecret}
+			/>
+			<label for="bnet-guild">Guilde (comme dans l'adresse de l'Armurerie)</label>
+			<input id="bnet-guild" name="guildSlug" value={bnet.guildSlug} spellcheck="false" required />
+			<label for="bnet-region">Région</label>
+			<select id="bnet-region" name="region" value={bnet.region}>
+				<option value="eu">Europe</option>
+				<option value="us">Amériques</option>
+			</select>
+			<div class="row">
+				<button disabled={syncing}>{syncing ? 'Essai en cours…' : 'Enregistrer et synchroniser'}</button>
+			</div>
+		</form>
+		{#if bnet.configured}
+			<form method="POST" action="?/battlenetOff" use:enhance>
+				<button class="secondary">Retirer la connexion</button>
+			</form>
+		{/if}
+	</details>
+	<p class="muted small">
+		Battle.net ne donne ni les recettes ni le nom des rangs : les recettes viennent de l'addon, et le site retient les
+		noms des rangs du dernier registre envoyé par l'addon{ranks.length
+			? ` (${ranks.map(([i, n]) => `${i} : ${n}`).join(', ')})`
+			: ' (aucun pour l’instant : « Rang 1 », « Rang 2 »… en attendant)'}.
+	</p>
+</section>
 
 {#snippet lists(notFound: Report['notFound'], withoutSheet: Report['withoutSheet'], afterImport: boolean)}
 	{#if notFound.length}
@@ -54,8 +147,8 @@
 	<section class="card">
 		<h2>Dernière synchronisation</h2>
 		<p>
-			{dateFormat.format(r.appliedAt)}{r.by ? `, par ${r.by}` : ''}
-			{r.via === 'sync' ? "avec l'application InnkeeperSync" : 'en déposant le fichier'} · {r.rosterSize} membres en jeu
+			{dateFormat.format(r.appliedAt)}{r.via === 'battlenet' ? ', par Battle.net' : r.by ? `, par ${r.by}` : ''}
+			{r.via === 'sync' ? "avec l'application InnkeeperSync" : r.via === 'manual' ? 'en déposant le fichier' : ''} · {r.rosterSize} membres en jeu
 		</p>
 		<p>
 			<strong>{r.linked}</strong> perso{r.linked > 1 ? 's' : ''} reconnu{r.linked > 1 ? 's' : ''} ·
@@ -73,11 +166,11 @@
 <section class="card steps">
 	<h2>Comment faire</h2>
 	<p>
-		<strong>Le plus simple :</strong> un officier installe l'addon et l'application <strong>InnkeeperSync</strong>
-		(Mes persos → Synchronisation automatique). Le registre de la guilde arrive alors tout seul à chaque déconnexion du
-		jeu, et s'affiche ci-dessus.
+		<strong>Le plus simple :</strong> Battle.net, ci-dessus. Pour les <strong>recettes</strong>, chacun installe l'addon
+		et l'application <strong>InnkeeperSync</strong> (Mes persos → Synchronisation automatique) : elles arrivent alors
+		toutes seules à chaque déconnexion du jeu.
 	</p>
-	<p>Sans l'application, dépose le fichier à la main :</p>
+	<p>Sans l'application, l'addon permet aussi de déposer le fichier à la main :</p>
 	<ol>
 		<li>
 			Installer l'addon <strong>Innkeeper Sync</strong> : dans l'application CurseForge ou Wago (version de jeu
@@ -226,6 +319,29 @@
 	}
 	.warn {
 		color: var(--gold);
+	}
+	.bnet details {
+		display: grid;
+		gap: 0.6rem;
+	}
+	.bnet summary {
+		cursor: pointer;
+		font-weight: 600;
+	}
+	.bnet ol {
+		margin: 0.5rem 0;
+		padding-left: 1.25rem;
+		display: grid;
+		gap: 0.3rem;
+	}
+	.bnet-form {
+		display: grid;
+		gap: 0.35rem;
+		max-width: 32rem;
+		margin: 0.5rem 0;
+	}
+	.bnet-form .row {
+		margin-top: 0.4rem;
 	}
 	.ok {
 		border-color: var(--gold);

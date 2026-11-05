@@ -193,7 +193,7 @@ export interface GameRosterInfo {
 	appliedAt: number;
 	exportedAt: number;
 	by: string | null;
-	via: 'sync' | 'manual';
+	via: 'sync' | 'manual' | 'battlenet';
 	roster: { name: string; level: number; class: string | null; rank: string | null }[];
 }
 // Bulles Wowhead au survol des recettes : script de Wowhead chargé chez chaque visiteur, donc
@@ -203,6 +203,42 @@ export const setWowheadTooltips = (on: boolean) => write('wowheadTooltips', on);
 
 export const getGameRoster = () => read<GameRosterInfo>('gameRoster') ?? null;
 export const setGameRoster = (info: GameRosterInfo) => write('gameRoster', info);
+
+// Noms des rangs de la guilde par numéro (0 = chef de guilde), appris des exports de l'addon :
+// Battle.net ne donne que le numéro.
+export const getGameRanks = () => read<Record<string, string>>('gameRanks') ?? {};
+export const setGameRanks = (ranks: Record<string, string>) => write('gameRanks', ranks);
+
+// API Battle.net : registre de guilde, niveaux, métiers et dernière connexion, sans addon.
+// Client créé par la guilde sur develop.battle.net ; la clé secrète n'est jamais renvoyée au navigateur.
+export const battlenetSchema = z.object({
+	clientId: z.string().trim().min(20, 'Client ID invalide').max(64).nullable().default(null),
+	clientSecret: z.string().trim().min(20, 'Clé secrète invalide').max(128).nullable().default(null),
+	region: z.enum(['eu', 'us']).default('eu'),
+	// Nom de la guilde dans l'adresse de l'Armurerie : « le-pacte-des-anciens ».
+	guildSlug: z
+		.string()
+		.trim()
+		.toLowerCase()
+		.max(80)
+		.regex(/^[\p{L}\p{N}-]*$/u, 'Nom de guilde attendu comme dans l’adresse de l’Armurerie : le-pacte-des-anciens')
+		.default('')
+});
+export type BattlenetSettings = z.output<typeof battlenetSchema>;
+export function getBattlenet(): BattlenetSettings {
+	const parsed = battlenetSchema.safeParse(read('battlenet') ?? {});
+	return parsed.success ? parsed.data : battlenetSchema.parse({});
+}
+export const setBattlenet = (settings: BattlenetSettings) => write('battlenet', settings);
+
+/** Résultat de la dernière synchronisation Battle.net (dates en millisecondes). */
+export interface BattlenetStatus {
+	at: number;
+	ok: boolean;
+	message: string;
+}
+export const getBattlenetStatus = () => read<BattlenetStatus>('battlenetStatus') ?? null;
+export const setBattlenetStatus = (status: BattlenetStatus) => write('battlenetStatus', status);
 
 // Base créée par le mode démo (INNKEEPER_DEMO=1) : sans cette marque, le mode démo refuse de démarrer.
 export const getDemoMarker = () => read<{ seededAt: number }>('demo') ?? null;

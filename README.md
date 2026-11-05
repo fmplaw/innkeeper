@@ -25,7 +25,7 @@
 - **Charte et règlement** rédigés dans l'admin, publiés pour tous et à accepter pour postuler.
 - **Addons conseillés** par la guilde : indispensables, requis en raid, recommandés, confort, avec le public visé (classes, rôles) et les liens CurseForge et Wago.
 - **Recrutement** : candidature en ligne, avis des officiers, entrée sur le serveur Discord et rôle d'arrivée posés par le bot, suivi des nouveaux membres.
-- **Import des données du jeu** par un addon, à la main ou automatiquement avec l'application InnkeeperSync pour PC (registre de guilde, métiers, recettes, dernière connexion).
+- **Import des données du jeu** : par l'**API Battle.net** toutes les 3 heures (registre de guilde avec les noms complets, niveaux, métiers, dernière connexion), et par un addon pour les recettes, à la main ou automatiquement avec l'application InnkeeperSync pour PC.
 - **Statistiques pour les officiers** : composition par classe et par rôle face au recrutement, métiers et meilleurs artisans, niveaux, intérêts, activité, fiches à compléter.
 - **Administration** sans éditer de fichiers : assistant d'installation, profil de guilde, rôles, journal des actions.
 - **Aux couleurs de la guilde** : palette de fond selon la faction (bruns chauds pour la Horde, bleu nuit pour l'Alliance, anthracite pour une guilde multi-faction), couleur d'accent, logo, bannière et icônes de classe au choix (aucune image de Blizzard n'est fournie).
@@ -62,13 +62,14 @@ Captures prises sur une guilde de démonstration fictive.
 3. [Installation](#installation)
 4. [Configuration Discord](#configuration-discord)
 5. [Raid-Helper et sorties](#raid-helper-et-sorties)
-6. [Addon InnkeeperSync](#addon-innkeepersync)
-7. [Sécurité et données personnelles](#sécurité-et-données-personnelles)
-8. [Exploitation](#exploitation)
-9. [Mode démo](#mode-démo)
-10. [Développement](#développement)
-11. [Limites connues](#limites-connues)
-12. [Licence](#licence)
+6. [Battle.net](#battlenet)
+7. [Addon InnkeeperSync](#addon-innkeepersync)
+8. [Sécurité et données personnelles](#sécurité-et-données-personnelles)
+9. [Exploitation](#exploitation)
+10. [Mode démo](#mode-démo)
+11. [Développement](#développement)
+12. [Limites connues](#limites-connues)
+13. [Licence](#licence)
 
 ---
 
@@ -301,6 +302,20 @@ Pour que les sorties **officielles** apparaissent aussi dans la liste des évén
 - Places, durée et image sont fixées selon le type de sortie et l'instance ; le titre est toujours envoyé sans police décorative (celle de Raid-Helper supprime les accents).
 - Images d'instances : Admin → Sorties → Images des sorties (aucune image de Blizzard n'est fournie).
 - Icônes de classe : Admin → Guilde → Icônes de classe, affichées à côté de chaque perso (sans icône, un blason à la couleur de la classe).
+
+---
+
+## Battle.net
+
+L'API officielle de Blizzard couvre WoW Forever : l'espace de noms `profile-forever-<région>` et des persos sans royaume (`/profile/wow/character/prenom-nom`). Le site s'en sert pour lire, toutes les 3 heures, le registre de la guilde et la fiche de chaque membre.
+
+- **Configuration** : Admin → Import du jeu → Battle.net. Un officier crée un client sur [develop.battle.net](https://develop.battle.net/access/clients) (nom unique au monde, « I do not have a service URL » coché), puis saisit le Client ID, la clé secrète, le nom de la guilde tel qu'il apparaît dans l'adresse de l'Armurerie (`le-pacte-des-anciens`) et la région. Le site fait un premier essai aussitôt. La clé secrète reste sur le serveur : la page indique seulement qu'elle est enregistrée.
+- **Données lues** : le registre (`/data/wow/guild/<guilde>/roster`), avec prénom, nom de famille, niveau, classe et numéro de rang. Puis, pour chaque membre, sa fiche (dernière connexion) et ses métiers avec leurs points (`/professions`). Ce sont 2 appels par membre, 6 à la fois : environ 2 secondes pour 60 membres.
+- **Application** : même plan que l'import de l'addon (`planImport`). Les métiers donnés par Battle.net sont complets, donc un métier absent quitte la fiche. Les données de chaque perso sont datées de sa dernière déconnexion (l'Armurerie ne bouge qu'à ce moment) : un export de l'addon fait depuis reste prioritaire. Un perso absent de l'Armurerie (pas reconnecté depuis son ouverture) garde ses données, sans date de connexion inventée.
+- **Rangs** : Battle.net ne donne que leur numéro. Le site retient leurs noms d'après le registre envoyé par l'addon (`rankIndex`) ; en attendant, il affiche « Rang 1 », « Rang 2 »…
+- **Recettes** : l'API les donne, mais en anglais et avec des numéros de recette qui ne sont pas ceux des sorts (Wowhead). Elles restent l'affaire de l'addon.
+- **Synchronisation** : au démarrage (après 1 minute) puis toutes les 3 heures, et sur demande (« Synchroniser maintenant »). Le résultat du dernier passage est affiché ; le journal d'audit note les passages qui modifient des fiches.
+- **Mode démo** : Battle.net est simulé à partir des persos de la démo.
 
 ---
 

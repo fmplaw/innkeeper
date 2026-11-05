@@ -33,7 +33,10 @@
 	<ul>
 		<li>Les fiches de tes personnages et ce que tu y écris (niveau, spécialisations, métiers, intérêts, notes).</li>
 		<li>Ta candidature, si tu en déposes une, et l'avis des officiers.</li>
-		<li>Les données venues du jeu quand un officier importe le registre de guilde : niveau, métiers, dernière connexion en jeu.</li>
+		<li>
+			Les données venues du jeu : niveau, métiers, dernière connexion en jeu et recettes. Elles viennent de l'addon de
+			la guilde, et de l'Armurerie publique de Blizzard (API Battle.net) si la guilde l'a connectée.
+		</li>
 		<li>Un journal des actions des officiers, gardé 1 an, consulté seulement en cas de litige.</li>
 	</ul>
 	<p>

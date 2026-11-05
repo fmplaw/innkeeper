@@ -181,7 +181,19 @@ Admin → **Sorties** contient aussi :
 
 ### Import du jeu
 
-Admin → **Import du jeu**, à faire par un officier de temps en temps (une fois par semaine par exemple) :
+**Le plus simple : Battle.net.** Admin → **Import du jeu** → **Battle.net**. Une fois connecté, le site lit l'Armurerie de Forever toutes les 3 heures : registre de la guilde avec les noms complets, niveaux, métiers et dernière connexion de chaque perso. Personne n'a rien à installer pour ça.
+
+1. Sur [develop.battle.net](https://develop.battle.net/access/clients), connecte-toi avec ton compte Battle.net et clique sur **Create Client**. Le nom doit être unique au monde (par exemple « Innkeeper - Le Pacte des Anciens » ; avec un nom déjà pris, le site de Blizzard affiche seulement « 500 INTERNAL_SERVER_ERROR »). Coche « I do not have a service URL » ; usage : « Guild website ».
+2. Copie le **Client ID** et le **Client Secret** dans la page, vérifie le nom de la guilde (celui de l'adresse de l'Armurerie, par exemple `le-pacte-des-anciens`) et clique sur **Enregistrer et synchroniser**. Le résultat s'affiche aussitôt.
+
+Bon à savoir :
+- l'Armurerie se met à jour quand un perso **se déconnecte** du jeu. Un perso qui ne s'est pas reconnecté depuis l'ouverture de l'Armurerie n'y figure pas encore : sa fiche garde ses données ;
+- les métiers donnés par Battle.net sont complets : un métier abandonné quitte la fiche ;
+- un export de l'addon fait en jeu depuis la dernière déconnexion d'un perso reste prioritaire : Battle.net ne fait pas revenir son niveau en arrière ;
+- Battle.net ne donne pas le nom des rangs : le site le retient du dernier registre envoyé par l'addon (« Rang 1 », « Rang 2 »… en attendant) ;
+- les **recettes** viennent de l'addon (voir ci-dessous).
+
+**Avec l'addon**, à la main (la synchronisation automatique par l'application est décrite plus bas) :
 
 1. Télécharge l'**addon InnkeeperSync** et décompresse-le dans `Interface/AddOns` du jeu.
 2. En jeu, avec un perso de la guilde : tape **`/innkeeper`** (ou `/ik`). Pour exporter tes recettes, ouvre la fenêtre de chacun de tes métiers. Puis tape **`/reload`**.
