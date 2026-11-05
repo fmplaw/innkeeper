@@ -20,6 +20,7 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ### Corrigé
 
+- **Races Skyborne** : l'Armurerie (Battle.net) les reconnaît maintenant ; un druide Éolide n'apparaît plus avec la race déjà choisie sur la fiche. Elles prennent leurs noms français officiels : **Éolide de l’Ordre suprême** (Alliance) et **Éolide sculpte-vents** (Horde).
 - Addon Innkeeper Sync 1.2.2 (zip du site) : le message « N recettes enregistrées » ne se répète plus à chaque fabrication, fenêtre de métier ouverte ; il n'apparaît que si le nombre de recettes connues change.
 
 ## [0.16.0] - 2026-11-05

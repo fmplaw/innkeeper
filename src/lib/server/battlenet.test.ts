@@ -64,6 +64,8 @@ function fakeBattlenet(opts: { token?: number; guild?: boolean } = {}) {
 		if (path === '/profile/wow/character/nova-etoile') return profile('Nova', 'Etoile', 24, 11, 6, NOW - 3_600_000);
 		if (path === '/profile/wow/character/nova-etoile/professions')
 			return json({ primaries: [{ profession: { id: 182 }, tiers: [{ skill_points: 120 }] }], secondaries: [] });
+		// Éolide sculpte-vents (race 96, propre à Forever).
+		if (path === '/profile/wow/character/lin-dorya') return profile('Lin', 'Dorya', 10, 11, 96, NOW - 3_600_000);
 		if (path === '/profile/wow/character/brak-dur') return profile('Brak', 'Dur', 30, 1, 2, NOW - 3_600_000);
 		// Métiers de Dayce indisponibles : on ne touche pas à sa fiche.
 		if (path === '/profile/wow/character/dayce-lumen/professions') return json({}, 500);
@@ -183,6 +185,7 @@ describe('synchronisation Battle.net', () => {
 		await lookupCharacter('nova', 'ETOILE', fetchFn);
 		expect(calls).toHaveLength(asked);
 		expect(await lookupCharacter('Ghost', 'Inconnu', fetchFn)).toEqual({ status: 'missing' });
+		expect(await lookupCharacter('Lin', 'Dorya', fetchFn)).toMatchObject({ status: 'found', classId: 'druid', raceId: 'skyborne-horde' });
 		// Battle.net en panne : « indisponible », jamais « introuvable ».
 		resetArmoryCache();
 		resetBattlenetToken();

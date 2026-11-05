@@ -139,19 +139,19 @@ export const CLASSES: readonly GameClass[] = [
 	}
 ];
 
-// Le Skyborne choisit sa faction à la création : une entrée par variante.
-// Noms des variantes en anglais en attendant les noms officiels français.
+// Le Skyborne (Éolide) choisit sa faction à la création : une entrée par variante.
+// Noms français officiels (API Battle.net, playable-race 95 et 96).
 export const RACES: readonly Race[] = [
 	{ id: 'human', name: 'Humain', faction: 'alliance', classes: ['warrior', 'paladin', 'hunter', 'rogue', 'priest', 'mage', 'warlock'] },
 	{ id: 'dwarf', name: 'Nain', faction: 'alliance', classes: ['warrior', 'paladin', 'hunter', 'rogue', 'priest', 'shaman'] },
 	{ id: 'gnome', name: 'Gnome', faction: 'alliance', classes: ['warrior', 'rogue', 'priest', 'mage', 'warlock'] },
 	{ id: 'night-elf', name: 'Elfe de la nuit', faction: 'alliance', classes: ['warrior', 'hunter', 'rogue', 'priest', 'druid'] },
-	{ id: 'skyborne-alliance', name: 'Skyborne (High Order)', faction: 'alliance', classes: ['warrior', 'hunter', 'rogue', 'druid', 'mage'] },
+	{ id: 'skyborne-alliance', name: 'Éolide de l’Ordre suprême', faction: 'alliance', classes: ['warrior', 'hunter', 'rogue', 'druid', 'mage'] },
 	{ id: 'orc', name: 'Orc', faction: 'horde', classes: ['warrior', 'hunter', 'rogue', 'shaman', 'warlock', 'mage'] },
 	{ id: 'tauren', name: 'Tauren', faction: 'horde', classes: ['warrior', 'hunter', 'shaman', 'druid'] },
 	{ id: 'troll', name: 'Troll', faction: 'horde', classes: ['warrior', 'hunter', 'rogue', 'priest', 'mage', 'shaman', 'warlock'] },
 	{ id: 'undead', name: 'Mort-vivant', faction: 'horde', classes: ['warrior', 'rogue', 'priest', 'mage', 'warlock', 'paladin'] },
-	{ id: 'skyborne-horde', name: 'Skyborne (Windshaper)', faction: 'horde', classes: ['warrior', 'hunter', 'rogue', 'druid', 'shaman'] }
+	{ id: 'skyborne-horde', name: 'Éolide sculpte-vents', faction: 'horde', classes: ['warrior', 'hunter', 'rogue', 'druid', 'shaman'] }
 ];
 
 // Métiers principaux (2 au maximum par perso) et secondaires (sans limite).
