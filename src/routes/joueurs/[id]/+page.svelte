@@ -1,5 +1,6 @@
 <script lang="ts">
 	import KnownRecipes from '$lib/components/KnownRecipes.svelte';
+	import { armoryHref } from '$lib/armory';
 	import CharacterTitle from '$lib/components/CharacterTitle.svelte';
 	import GameBadge from '$lib/components/GameBadge.svelte';
 	import InterestBadges from '$lib/components/InterestBadges.svelte';
@@ -34,7 +35,7 @@
 	<div class="list">
 		{#each p.characters as c (c.id)}
 			<article class="card" class:main={c.isMain}>
-				<CharacterTitle {cfg} character={c}>
+				<CharacterTitle {cfg} character={c} armoryHref={armoryHref(cfg, c)}>
 					<span class="badge" class:main={c.isMain} class:plain={!c.isMain}>{c.isMain ? 'Main' : 'Reroll'}</span>
 					<GameBadge character={c} importAt={data.gameImportAt} />
 				</CharacterTitle>

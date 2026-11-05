@@ -36,6 +36,8 @@ export function publicConfig() {
 		wowheadTooltips: getWowheadTooltips(),
 		// Vérification des persos dans l'Armurerie (Battle.net connecté par la guilde).
 		armory: ((b) => Boolean(b.clientId && b.clientSecret && b.guildSlug))(getBattlenet()),
+		// Région de l'Armurerie pour les liens vers les persos (null sans Battle.net).
+		armoryRegion: ((b) => (b.clientId && b.clientSecret && b.guildSlug ? b.region : null))(getBattlenet()),
 		// Site de démonstration : bandeau en haut de chaque page.
 		demo: demoEnabled(),
 		maxLevel: MAX_LEVEL,

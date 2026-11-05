@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { armoryHref } from '$lib/armory';
+	import ArmoryLink from '$lib/components/ArmoryLink.svelte';
 	import ClassEmblem from '$lib/components/ClassEmblem.svelte';
 	import Glyph from '$lib/components/Glyph.svelte';
 	import RecipeList from '$lib/components/RecipeList.svelte';
@@ -43,7 +45,7 @@
 	<li class="artisan">
 		<ClassEmblem {cfg} classId={a.class} role={a.role as Role} size={30} />
 		<span class="ident">
-			<a class="name class-ink" style:--c={classColor(cfg, a.class)} href="/joueurs/{a.playerId}">{a.name}</a>
+			<a class="name class-ink" style:--c={classColor(cfg, a.class)} href="/joueurs/{a.playerId}">{a.name}</a><ArmoryLink href={armoryHref(cfg, a)} name={a.name} />
 			<span class="muted small">{a.player}{a.isMain ? '' : ' · reroll'}</span>
 		</span>
 		<span class="skill num" title="Niveau du métier">{a.skill ?? '—'}</span>

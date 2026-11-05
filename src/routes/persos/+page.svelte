@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { armoryHref } from '$lib/armory';
 	import CharacterTitle from '$lib/components/CharacterTitle.svelte';
 	import GameBadge from '$lib/components/GameBadge.svelte';
 	import Glyph from '$lib/components/Glyph.svelte';
@@ -31,7 +32,7 @@
 
 {#snippet card(c: (typeof data.characters)[number])}
 	<article class="card" class:main={c.isMain}>
-		<CharacterTitle {cfg} character={c} big={c.isMain}>
+		<CharacterTitle {cfg} character={c} big={c.isMain} armoryHref={armoryHref(cfg, c)}>
 			{#if c.isMain}<span class="badge main">Main</span>{:else}<span class="badge plain">Reroll</span>{/if}
 			<GameBadge character={c} importAt={data.gameImportAt} showPending />
 		</CharacterTitle>

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import ArmoryLink from '$lib/components/ArmoryLink.svelte';
 	import ClassEmblem from '$lib/components/ClassEmblem.svelte';
 	import { className, classColor, raceName, specRole } from '$lib/labels';
 	import type { Role } from '$lib/roles';
@@ -10,11 +11,14 @@
 		cfg,
 		character: c,
 		big = false,
+		armoryHref = null,
 		children
 	}: {
 		cfg: Config;
 		character: { name: string; surname: string | null; class: string; spec: string | null; role: Role; race: string | null; level: number };
 		big?: boolean;
+		// Page du perso dans l'Armurerie de Blizzard (voir $lib/armory).
+		armoryHref?: string | null;
 		children?: Snippet;
 	} = $props();
 </script>
@@ -22,7 +26,7 @@
 <div class="title" class:big>
 	<ClassEmblem {cfg} classId={c.class} role={c.role} size={big ? 56 : 44} />
 	<div class="id">
-		<h2><span class="name class-ink" style:--c={classColor(cfg, c.class)}>{c.name}</span>{#if c.surname}{' '}<span class="surname">{c.surname}</span>{/if}</h2>
+		<h2><span class="name class-ink" style:--c={classColor(cfg, c.class)}>{c.name}</span>{#if c.surname}{' '}<span class="surname">{c.surname}</span>{/if}<ArmoryLink href={armoryHref} name={c.name} /></h2>
 		<span class="meta">Niv. {c.level}{#if c.race}{' '}{raceName(cfg, c.race)}{/if} {className(cfg, c.class)} · {specRole(cfg, c.class, c.spec, c.role)}</span>
 	</div>
 	{#if children}<div class="extra">{@render children()}</div>{/if}

@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { armoryHref } from '$lib/armory';
+	import ArmoryLink from '$lib/components/ArmoryLink.svelte';
 	import ClassEmblem from '$lib/components/ClassEmblem.svelte';
 	import GameBadge from '$lib/components/GameBadge.svelte';
 	import Glyph from '$lib/components/Glyph.svelte';
@@ -187,7 +189,7 @@
 						<td>
 							<div class="perso">
 								<ClassEmblem {cfg} classId={c.class} role={c.role} size={38} />
-								<span class="name"><strong class="class-ink" style:--c={classColor(cfg, c.class)}>{c.name}</strong>{#if c.surname}{' '}<span class="muted">{c.surname}</span>{/if}</span>
+								<span class="name"><strong class="class-ink" style:--c={classColor(cfg, c.class)}>{c.name}</strong>{#if c.surname}{' '}<span class="muted">{c.surname}</span>{/if}<ArmoryLink href={armoryHref(cfg, c)} name={c.name} /></span>
 								<span class="tags">
 									{#if c.isMain}<span class="badge main">Main</span>{:else}<span class="muted small">reroll de {c.mainName ?? '?'}</span>{/if}
 									<GameBadge character={c} importAt={data.gameImportAt} />
@@ -242,7 +244,7 @@
 					<div class="c-top">
 						<ClassEmblem {cfg} classId={c.class} role={c.role} size={40} />
 						<div class="c-id">
-							<span class="name"><strong class="class-ink" style:--c={classColor(cfg, c.class)}>{c.name}</strong>{#if c.surname}{' '}<span class="muted">{c.surname}</span>{/if}</span>
+							<span class="name"><strong class="class-ink" style:--c={classColor(cfg, c.class)}>{c.name}</strong>{#if c.surname}{' '}<span class="muted">{c.surname}</span>{/if}<ArmoryLink href={armoryHref(cfg, c)} name={c.name} /></span>
 							<span class="muted small">{className(cfg, c.class)} · {specRole(cfg, c.class, c.spec, c.role)}</span>
 						</div>
 						<span class="muted small num">niv. {c.level}</span>
