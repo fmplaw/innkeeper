@@ -10,6 +10,7 @@ import {
 	setDemoMarker,
 	setDiscord,
 	setGameImport,
+	setGameRoster,
 	setGuild,
 	setRaidHelper,
 	setRecruitment
@@ -133,7 +134,20 @@ export function seedDemo(now = Date.now()): DemoEvent[] {
 			questions: QUESTIONS
 		})
 	);
-	setGameImport({ appliedAt: Math.floor((now - 2 * 3_600_000) / 1000), exportedAt: Math.floor((now - 3 * 3_600_000) / 1000), rosterSize: 18 });
+	// Registre du dernier envoi d'InnkeeperSync : tous les persos sauf Quillon (pas encore dans la
+	// guilde en jeu), plus deux membres sans fiche sur le site.
+	const gameRoster = [
+		...PLAYERS.flatMap(([, roles, chars]) =>
+			chars
+				.filter(([name]) => name !== 'Quillon')
+				.map(([name, surname, , cls, , , level]) => ({ name: `${name} ${surname}`, level, class: cls.toUpperCase(), rank: roles.includes(R_OFF) ? 'Officier' : roles.includes(R_NEW) ? 'Recrue' : 'Membre' }))
+		),
+		{ name: 'Rowena Brisevent', level: 22, class: 'MAGE', rank: 'Recrue' },
+		{ name: 'Garrick Tonnelier', level: 18, class: 'WARRIOR', rank: 'Recrue' }
+	];
+	const synced = { appliedAt: Math.floor((now - 2 * 3_600_000) / 1000), exportedAt: Math.floor((now - 3 * 3_600_000) / 1000) };
+	setGameImport({ ...synced, rosterSize: gameRoster.length });
+	setGameRoster({ ...synced, by: 'Aldren', via: 'sync', roster: gameRoster });
 	setCharter({ text: CHARTER, updatedAt: now, updatedBy: 'Aldren' });
 
 	for (const [id, name, permission, position] of [

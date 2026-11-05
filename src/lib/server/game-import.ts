@@ -4,7 +4,7 @@ import { CLASSES, MAX_PRIMARY_PROFESSIONS, MAX_PROFESSION_LEVEL, PROFESSIONS } f
 import { db, schema } from './db';
 import type { Character, KnownRecipes, ProfessionEntry } from './db/schema';
 import { parseSavedVariables, toPlain } from './lua-saved-variables';
-import { getGameImport, setGameImport } from './settings';
+import { getGameImport, getGameRoster, setGameImport, setGameRoster, type GameRosterInfo } from './settings';
 
 // Import de l'export de l'addon InnkeeperSync : met à jour niveau, métiers, dernière
 // connexion en jeu et recettes des fiches du site, en reliant les persos par leur nom
@@ -140,6 +140,8 @@ export interface ImportPlan {
 	/** Fiches du site absentes de la guilde en jeu (seulement si l'export contient le registre). */
 	notFound: { characterId: number; name: string; player: string }[];
 	rosterSize: number;
+	/** Registre de l'export, gardé à l'application pour Admin → Import du jeu. */
+	roster: GameRosterInfo['roster'];
 }
 
 export interface Homonym {
@@ -209,7 +211,7 @@ export function planImport(data: GameExport): ImportPlan {
 		.map((r) => ({ profession: professionBySkillLine(r.skillLine, r.name)?.id ?? r.name ?? '?', skill: r.skill ?? null, recipes: r.list }))
 		.filter((r) => r.recipes.length);
 
-	const plan: ImportPlan = { exportedAt: new Date(data.exportedAt * 1000), guild: data.player?.guild ?? null, updates: [], withoutSheet: [], ambiguous: [], outdated: [], notFound: [], rosterSize: data.roster?.length ?? 0 };
+	const plan: ImportPlan = { exportedAt: new Date(data.exportedAt * 1000), guild: data.player?.guild ?? null, updates: [], withoutSheet: [], ambiguous: [], outdated: [], notFound: [], rosterSize: data.roster?.length ?? 0, roster: (data.roster ?? []).map((m) => ({ name: m.name, level: m.level, class: m.class ?? null, rank: m.rank ?? null })) };
 
 	// Chaque nom du jeu une seule fois : registre, onglet des métiers, perso qui exporte.
 	const people = new Map<string, { name: string; member?: NonNullable<GameExport['roster']>[number] }>();
@@ -304,8 +306,8 @@ function addRecipes(current: KnownRecipes[] | null, older: KnownRecipes[]) {
 	return added ? result : null;
 }
 
-/** Applique le plan ; renvoie le nombre de persos modifiés. */
-export function applyImport(plan: ImportPlan) {
+/** Applique le plan ; renvoie le nombre de persos modifiés. `by` : qui a envoyé le fichier, et comment. */
+export function applyImport(plan: ImportPlan, by: Pick<GameRosterInfo, 'by' | 'via'> = { by: null, via: 'manual' }) {
 	let changed = 0;
 	// À la seconde : les dates sont stockées en secondes, la comparaison doit tomber juste.
 	const now = new Date(Math.floor(Date.now() / 1000) * 1000);
@@ -328,6 +330,30 @@ export function applyImport(plan: ImportPlan) {
 	// et pas pour un registre plus ancien que celui déjà retenu.
 	const reference = getGameImport();
 	const older = reference && Math.floor(plan.exportedAt.getTime() / 1000) < reference.exportedAt;
-	if (plan.rosterSize > 0 && !older) setGameImport({ appliedAt: now.getTime() / 1000, exportedAt: Math.floor(plan.exportedAt.getTime() / 1000), rosterSize: plan.rosterSize });
+	if (plan.rosterSize > 0 && !older) {
+		const dates = { appliedAt: now.getTime() / 1000, exportedAt: Math.floor(plan.exportedAt.getTime() / 1000) };
+		setGameImport({ ...dates, rosterSize: plan.rosterSize });
+		setGameRoster({ ...dates, ...by, roster: plan.roster });
+	}
 	return changed;
+}
+
+/**
+ * Dernier registre de guilde reçu, comparé aux fiches d'aujourd'hui : une fiche corrigée sort
+ * des listes sans attendre le prochain envoi. Null avant le premier registre.
+ */
+export function rosterReport() {
+	const last = getGameRoster();
+	if (!last) return null;
+	const plan = planImport({ format: 1, exportedAt: last.exportedAt, roster: last.roster });
+	return {
+		appliedAt: new Date(last.appliedAt * 1000),
+		by: last.by,
+		via: last.via,
+		rosterSize: last.roster.length,
+		linked: plan.updates.length,
+		withoutSheet: plan.withoutSheet,
+		notFound: plan.notFound,
+		ambiguous: plan.ambiguous
+	};
 }

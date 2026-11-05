@@ -188,6 +188,17 @@ export interface GameImportInfo {
 export const getGameImport = () => read<GameImportInfo>('gameImport') ?? null;
 export const setGameImport = (info: GameImportInfo) => write('gameImport', info);
 
+/** Dernier registre de guilde appliqué (application InnkeeperSync ou dépôt manuel), pour Admin → Import du jeu. */
+export interface GameRosterInfo {
+	appliedAt: number;
+	exportedAt: number;
+	by: string | null;
+	via: 'sync' | 'manual';
+	roster: { name: string; level: number; class: string | null; rank: string | null }[];
+}
+export const getGameRoster = () => read<GameRosterInfo>('gameRoster') ?? null;
+export const setGameRoster = (info: GameRosterInfo) => write('gameRoster', info);
+
 // Base créée par le mode démo (INNKEEPER_DEMO=1) : sans cette marque, le mode démo refuse de démarrer.
 export const getDemoMarker = () => read<{ seededAt: number }>('demo') ?? null;
 export const setDemoMarker = () => write('demo', { seededAt: Date.now() });
