@@ -81,6 +81,8 @@ export const load: PageServerLoad = ({ locals, url }) => {
 		playerId: users.discordId,
 		mainName: main.name,
 		gameSyncedAt: characters.gameSyncedAt,
+		armoryStatus: characters.armoryStatus,
+		declaredNew: characters.declaredNew,
 		createdAt: characters.createdAt
 	};
 	let rows = db()

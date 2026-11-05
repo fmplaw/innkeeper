@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { keepValues } from '$lib/forms';
+	import { armoryUrl } from '$lib/armory';
 	import CharacterTitle from '$lib/components/CharacterTitle.svelte';
 	import Glyph from '$lib/components/Glyph.svelte';
 	import InterestBadges from '$lib/components/InterestBadges.svelte';
@@ -52,7 +53,7 @@
 <div class="layout">
 	<section class="card">
 		<p class="eyebrow">Le perso présenté</p>
-		<CharacterTitle {cfg} character={{ name: c.name, surname: c.surname ?? null, class: c.class, spec: c.spec ?? null, role: c.role, race: c.race ?? null, level: Number(c.level ?? 1) }} big />
+		<CharacterTitle {cfg} character={{ name: c.name, surname: c.surname ?? null, class: c.class, spec: c.spec ?? null, role: c.role, race: c.race ?? null, level: Number(c.level ?? 1) }} big armoryHref={data.armory?.status === 'found' && cfg.armoryRegion ? armoryUrl(cfg.armoryRegion, c.name, c.surname) : null} />
 		{#if data.armory?.status === 'found'}
 			{@const a = data.armory}
 			{@const otherClass = a.classId && a.classId !== c.class}

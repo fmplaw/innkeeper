@@ -1,5 +1,6 @@
 import { asc, eq, inArray, isNull, ne, or } from 'drizzle-orm';
 import { z } from 'zod';
+import { characterSlug } from '$lib/armory';
 import { PROFESSIONS } from '$lib/game/forever';
 import { audit } from './audit';
 import { db, schema } from './db';
@@ -206,15 +207,6 @@ export type ArmoryLookup =
 
 const LOOKUP_TTL_MS = 10 * 60_000;
 const lookups = new Map<string, { at: number; result: ArmoryLookup }>();
-
-/** Adresse d'un perso dans l'Armurerie : « Vinshal Haal » → « vinshal-haal ». */
-export const characterSlug = (name: string, surname: string | null | undefined) =>
-	[name, surname]
-		.map((v) => v?.trim())
-		.filter(Boolean)
-		.join('-')
-		.toLocaleLowerCase('fr')
-		.replace(/\s+/g, '-');
 
 const professionsOf = (raw: unknown): ProfessionEntry[] => {
 	const p = professionsSchema.safeParse(raw ?? {});

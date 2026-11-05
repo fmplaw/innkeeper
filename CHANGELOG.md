@@ -6,6 +6,8 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ### Ajouté
 
+- **Lien vers l'Armurerie** : une petite icône à côté du nom d'un perso ouvre sa page dans l'Armurerie de Blizzard (équipement, talents, métiers), dans un nouvel onglet. Elle apparaît dans Mes persos, sur les fiches des joueurs, dans le roster, sur la page Artisans et sur la page d'une candidature. Seulement pour les persos trouvés dans l'Armurerie, avec Battle.net connecté.
+
 - **Vérification des persos dans l'Armurerie** (avec Battle.net) : à la saisie d'un perso (Mes persos, candidature), le site le cherche dès que le prénom et le nom de famille sont tapés, et propose de remplir race, classe, niveau et métiers. Il signale une saisie qui ne correspond pas au jeu. Pour un perso introuvable, le joueur peut indiquer qu'il n'est pas encore créé. Badges **✔ existe en jeu**, **nouveau perso, pas encore créé** et **⚠ autre classe en jeu** ; la vérification se refait à chaque synchronisation. La page d'une candidature montre le perso tel que l'Armurerie le connaît. Rien n'est bloquant.
 
 - **Synchronisation Battle.net** (Admin → Import du jeu) : avec un client de l'API Battle.net, le site lit l'Armurerie de Forever toutes les 3 heures, et sur demande. Il récupère le registre de la guilde avec les noms complets, ainsi que le niveau, les métiers (avec leurs points) et la dernière connexion de chaque perso, sans addon. Les métiers de Battle.net sont complets : un métier abandonné quitte la fiche. Un export de l'addon fait depuis la dernière déconnexion reste prioritaire. Les noms des rangs sont appris du registre de l'addon. Les recettes restent l'affaire de l'addon. Battle.net est simulé en mode démo.
