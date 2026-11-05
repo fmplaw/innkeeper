@@ -209,10 +209,74 @@ describe('fiches du même nom', () => {
 		const alone = sheet('h1', 'Zalazane', { isMain: false });
 
 		const found = homonyms([mine.id, alone.id]);
-		expect(found[mine.id]).toEqual([{ characterId: other.id, name: other.name, userId: 'h2', player: 'Joueur h2' }]);
+		expect(found[mine.id]).toEqual([{ characterId: other.id, name: other.name, surname: 'Haal', userId: 'h2', player: 'Joueur h2' }]);
 		expect(found[alone.id]).toBeUndefined();
+		// Même prénom, autre nom de famille : deux persos distincts dans Forever.
+		const cousin = sheet('h1', 'Zalazane', { surname: 'Prime', isMain: false });
+		expect(homonyms([alone.id, cousin.id])).toEqual({});
 		// Même règle que l'import : les deux fiches restent sans mise à jour.
 		expect(planImport({ format: 1, exportedAt: 1793600000, roster: [{ name: 'Rokhan', level: 20, class: 'SHAMAN', rank: 'Membre', offline: { days: 0 } }] }).ambiguous).toEqual(['Rokhan']);
 		expect(homonyms([])).toEqual({});
+	});
+});
+
+describe('noms complets du registre de Forever', () => {
+	// Le registre donne « Prénom Nom » ; le perso qui exporte n'a que son prénom.
+	const member = (name: string, level: number, cls: string) => ({ name, level, class: cls, rank: 'Novice', online: true });
+
+	it('relie les fiches par prénom et nom de famille, même quand deux joueurs ont le même prénom', () => {
+		createUser('n1');
+		createUser('n2');
+		const prime = sheet('n1', 'Rexxar', { surname: 'Prime', class: 'hunter', spec: 'beast-mastery', role: 'ranged' });
+		const bank = sheet('n2', 'Rexxar', { surname: 'Bank', class: 'warrior', spec: 'arms', role: 'melee' });
+		const plan = planImport({
+			format: 1,
+			exportedAt: 1793840000,
+			roster: [member('Rexxar Prime', 6, 'HUNTER'), member('Rexxar Bank', 2, 'WARRIOR'), member('Rexxar Ailleurs', 3, 'MAGE')]
+		});
+		expect(plan.ambiguous).toEqual([]);
+		expect(plan.updates.find((u) => u.characterId === prime.id)?.level).toEqual({ from: 1, to: 6 });
+		expect(plan.updates.find((u) => u.characterId === bank.id)?.level).toEqual({ from: 1, to: 2 });
+		expect(plan.withoutSheet.map((m) => m.name)).toContain('Rexxar Ailleurs');
+		expect(homonyms([prime.id, bank.id])).toEqual({});
+	});
+
+	it('retrouve le perso qui exporte grâce au registre, et range ses métiers et recettes sur sa fiche', () => {
+		createUser('n3');
+		createUser('n4');
+		const mine = sheet('n3', 'Garona', { surname: 'Halforcen' });
+		const other = sheet('n4', 'Garona', { surname: 'Autre', isMain: true });
+		const plan = planImport({
+			format: 1,
+			exportedAt: 1793840000,
+			player: { name: 'Garona', level: 7, class: 'SHAMAN' },
+			roster: [member('Garona Halforcen', 7, 'SHAMAN')],
+			guildProfessions: [{ skillLine: 182, name: 'Herboristerie', members: [{ name: 'Garona Halforcen', skill: 1 }] }],
+			professions: [{ skillLine: 182, name: 'Herboristerie', skill: 23 }],
+			recipes: { skill129: { skillLine: 129, name: 'Secourisme', skill: 3, list: [{ id: 3275, name: 'Bandage en lin' }] } }
+		});
+		const update = plan.updates.find((u) => u.characterId === mine.id)!;
+		expect(update.level).toEqual({ from: 1, to: 7 });
+		expect(update.professions?.to).toEqual([{ id: 'herbalism', level: 23 }]);
+		expect(update.recipes?.[0].recipes).toEqual([{ id: 3275, name: 'Bandage en lin' }]);
+		// L'autre Garona n'est pas dans la guilde en jeu.
+		expect(plan.updates.some((u) => u.characterId === other.id)).toBe(false);
+		expect(plan.notFound.map((n) => n.characterId)).toContain(other.id);
+		expect(plan.ambiguous).toEqual([]);
+	});
+
+	it('une fiche sans nom de famille se relie par le prénom, sauf si deux persos du jeu la réclament', () => {
+		createUser('n5');
+		const thrall = sheet('n5', 'Thrall', { surname: null });
+		const rehgar = sheet('n5', 'Rehgar', { surname: null, isMain: false });
+		const plan = planImport({
+			format: 1,
+			exportedAt: 1793840000,
+			roster: [member('Thrall Durotan', 9, 'SHAMAN'), member('Rehgar Terremine', 4, 'SHAMAN'), member('Rehgar Prime', 5, 'SHAMAN')]
+		});
+		expect(plan.updates.find((u) => u.characterId === thrall.id)?.level).toEqual({ from: 1, to: 9 });
+		expect(plan.updates.some((u) => u.characterId === rehgar.id)).toBe(false);
+		expect(plan.ambiguous.sort()).toEqual(['Rehgar Prime', 'Rehgar Terremine']);
+		expect(plan.notFound.map((n) => n.characterId)).not.toContain(rehgar.id);
 	});
 });

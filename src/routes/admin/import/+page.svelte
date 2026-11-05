@@ -106,7 +106,7 @@
 		{/if}
 
 		{#if plan.ambiguous.length}
-			<p class="warn">Plusieurs fiches portent ces noms, elles ne sont pas mises à jour : {plan.ambiguous.join(', ')}.</p>
+			<p class="warn">Impossible de savoir quelle fiche correspond à ces persos (même nom, ou fiche sans nom de famille), elles ne sont pas mises à jour : {plan.ambiguous.join(', ')}.</p>
 		{/if}
 		{#if plan.outdated.length}
 			<p class="warn">Ces fiches ont déjà des données d'un export plus récent, elles ne sont pas remplacées : {plan.outdated.join(', ')}.</p>

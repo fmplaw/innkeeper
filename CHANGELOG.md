@@ -17,6 +17,7 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ### Corrigé
 
+- **Import du jeu : seule la fiche de celui qui exporte était mise à jour.** Dans Forever, le registre de guilde donne le nom complet (« Prénom Nom ») et le site comparait le prénom seul : aucun autre membre n'était reconnu. Les fiches sont maintenant reliées par prénom et nom de famille ; le perso qui exporte, dont le jeu ne donne que le prénom, est retrouvé dans le registre. Une fiche sans nom de famille se relie encore par le prénom, sauf si plusieurs persos du jeu portent ce prénom. Deux persos du même prénom avec des noms de famille différents ne sont plus signalés en double (badge « nom en double », seulement pour un même nom complet ou un nom de famille manquant).
 - Roster : avec de vraies fiches, le tableau débordait de la page et la colonne Métiers sortait du cadre (cinq métiers dont les secondaires, badge « pas trouvé en jeu », pseudo comme « Artémis/christcosmik/néfélion », race « Skyborne (Windshaper) »). Le texte des cellules passe maintenant à la ligne, les pseudos se coupent après les barres obliques, et seuls les métiers principaux s'affichent en clair : les secondaires sont résumés (« + 3 secondaires », détail au survol).
 
 ## [0.15.0] - 2026-11-02

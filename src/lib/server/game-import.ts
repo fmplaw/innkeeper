@@ -16,7 +16,7 @@ const count = z.number().int().min(0).max(10_000);
 const exportSchema = z.object({
 	format: z.number().int(),
 	exportedAt: z.number().int().positive(),
-	player: z.object({ name, level: z.number().int().optional(), guild: z.string().nullish() }).optional(),
+	player: z.object({ name, level: z.number().int().optional(), class: z.string().nullish(), guild: z.string().nullish() }).optional(),
 	roster: z
 		.array(
 			z.object({
@@ -77,6 +77,33 @@ export function readExport(source: string): GameExport {
 /** Nom de perso comparable : sans royaume, en minuscules, forme Unicode stable. */
 export const nameKey = (n: string) => n.replace(/-.*$/, '').normalize('NFC').toLocaleLowerCase('fr');
 
+// Le registre de guilde de Forever donne le nom complet, « Prénom Nom » (seul ce couple est unique) ;
+// le perso qui exporte n'a que son prénom (UnitName). Les deux côtés passent par nameKey, qui coupe
+// au premier tiret : l'addon fait de même (ancien royaume), quelle que soit sa version.
+const firstNameKey = (n: string) => nameKey(n.trim().split(/\s+/)[0]);
+const hasSurname = (n: string) => /\S\s+\S/.test(n.trim());
+const sheetKey = (c: { name: string; surname: string | null }) => nameKey(c.surname?.trim() ? `${c.name} ${c.surname.trim()}` : c.name);
+
+/**
+ * Fiches qui correspondent à un nom du jeu. Avec le nom de famille : celles qui ont le même nom
+ * complet, sinon celles du même prénom encore sans nom de famille (fiches d'avant son ajout).
+ * Sans nom de famille : toutes celles du même prénom.
+ */
+function sheetsFor<T extends { c: { name: string; surname: string | null } }>(chars: T[], who: string): T[] {
+	const samePrenom = chars.filter((r) => nameKey(r.c.name) === firstNameKey(who));
+	if (!hasSurname(who)) return samePrenom;
+	const exact = samePrenom.filter((r) => r.c.surname?.trim() && sheetKey(r.c) === nameKey(who.trim().replace(/\s+/g, ' ')));
+	return exact.length ? exact : samePrenom.filter((r) => !r.c.surname?.trim());
+}
+
+/** Nom complet du perso qui exporte, d'après le registre : seul de ce prénom, ou seul de ce prénom et de sa classe. */
+function fullName(player: NonNullable<GameExport['player']>, roster: NonNullable<GameExport['roster']>) {
+	if (hasSurname(player.name)) return player.name;
+	const same = roster.filter((m) => firstNameKey(m.name) === firstNameKey(player.name) && hasSurname(m.name));
+	const candidates = same.length > 1 && player.class ? same.filter((m) => m.class === player.class) : same;
+	return candidates.length === 1 ? candidates[0].name : player.name;
+}
+
 const professionBySkillLine = (skillLine: number | null | undefined, label: string | null | undefined) =>
 	PROFESSIONS.find((p) => p.skillLine === skillLine) ?? PROFESSIONS.find((p) => label && nameKey(p.name) === nameKey(label));
 
@@ -118,26 +145,29 @@ export interface ImportPlan {
 export interface Homonym {
 	characterId: number;
 	name: string;
+	surname: string | null;
 	userId: string;
 	player: string;
 }
 
 /**
- * Autres fiches qui portent le même nom que chacun de ces persos, d'après la comparaison de
- * l'import : l'import n'en met à jour aucune (voir `ambiguous`). Clé : id du perso.
+ * Autres fiches que l'import ne sait pas distinguer de chacun de ces persos : même nom complet,
+ * ou même prénom quand l'une n'a pas de nom de famille. L'import n'en met à jour aucune
+ * (voir `ambiguous`). Clé : id du perso.
  */
 export function homonyms(characterIds: number[]): Record<number, Homonym[]> {
 	if (!characterIds.length) return {};
 	const all = db()
-		.select({ characterId: schema.characters.id, name: schema.characters.name, userId: schema.characters.userId, player: schema.users.displayName })
+		.select({ characterId: schema.characters.id, name: schema.characters.name, surname: schema.characters.surname, userId: schema.characters.userId, player: schema.users.displayName })
 		.from(schema.characters)
 		.innerJoin(schema.users, eq(schema.users.discordId, schema.characters.userId))
 		.all();
 	const byName = Map.groupBy(all, (c) => nameKey(c.name));
+	const confused = (a: Homonym, b: Homonym) => !a.surname?.trim() || !b.surname?.trim() || sheetKey(a) === sheetKey(b);
 	const result: Record<number, Homonym[]> = {};
 	for (const c of all) {
 		if (!characterIds.includes(c.characterId)) continue;
-		const others = (byName.get(nameKey(c.name)) ?? []).filter((o) => o.characterId !== c.characterId);
+		const others = (byName.get(nameKey(c.name)) ?? []).filter((o) => o.characterId !== c.characterId && confused(c, o));
 		if (others.length) result[c.characterId] = others;
 	}
 	return result;
@@ -154,22 +184,26 @@ export function planImport(data: GameExport): ImportPlan {
 		.from(schema.characters)
 		.innerJoin(schema.users, eq(schema.users.discordId, schema.characters.userId))
 		.all();
-	const byName = Map.groupBy(chars, (r) => nameKey(r.c.name));
+
+	// Le perso qui exporte n'a que son prénom : son nom complet vient du registre, s'il y est seul
+	// avec ce prénom (ou seul de sa classe), pour ne pas le confondre avec un homonyme.
+	const exporter = data.player && { ...data.player, name: fullName(data.player, data.roster ?? []) };
+	const isExporter = (key: string) => Boolean(exporter) && nameKey(exporter!.name) === key;
 
 	// Métiers par perso : onglet de guilde, complété par les métiers du joueur qui exporte.
-	const professions = new Map<string, ProfessionEntry[]>();
+	const professions = new Map<string, { name: string; list: ProfessionEntry[] }>();
 	const addProfession = (who: string, skillLine: number | null | undefined, label: string | null | undefined, skill: number | null | undefined) => {
 		const p = professionBySkillLine(skillLine, label);
 		if (!p) return;
-		const list = professions.get(nameKey(who)) ?? [];
+		const entry = professions.get(nameKey(who)) ?? { name: who, list: [] };
 		const level = skill == null ? null : Math.min(Math.max(skill, 1), MAX_PROFESSION_LEVEL);
-		const existing = list.find((e) => e.id === p.id);
+		const existing = entry.list.find((e) => e.id === p.id);
 		if (existing) existing.level = Math.max(existing.level ?? 0, level ?? 0) || null;
-		else list.push({ id: p.id, level });
-		professions.set(nameKey(who), list);
+		else entry.list.push({ id: p.id, level });
+		professions.set(nameKey(who), entry);
 	};
 	for (const group of data.guildProfessions ?? []) for (const m of group.members) addProfession(m.name, group.skillLine, group.name, m.skill);
-	if (data.player) for (const p of data.professions ?? []) addProfession(data.player.name, p.skillLine, p.name, p.skill);
+	if (exporter) for (const p of data.professions ?? []) addProfession(exporter.name, p.skillLine, p.name, p.skill);
 
 	const recipes: KnownRecipes[] = Object.values(data.recipes ?? {})
 		.map((r) => ({ profession: professionBySkillLine(r.skillLine, r.name)?.id ?? r.name ?? '?', skill: r.skill ?? null, recipes: r.list }))
@@ -177,17 +211,23 @@ export function planImport(data: GameExport): ImportPlan {
 
 	const plan: ImportPlan = { exportedAt: new Date(data.exportedAt * 1000), guild: data.player?.guild ?? null, updates: [], withoutSheet: [], ambiguous: [], outdated: [], notFound: [], rosterSize: data.roster?.length ?? 0 };
 
-	const seen = new Set<string>();
-	const people = [...(data.roster ?? []).map((m) => ({ name: m.name, member: m })), ...[...professions.keys()].map((n) => ({ name: n, member: undefined }))];
-	if (data.player && !people.some((p) => nameKey(p.name) === nameKey(data.player!.name))) people.push({ name: data.player.name, member: undefined });
+	// Chaque nom du jeu une seule fois : registre, onglet des métiers, perso qui exporte.
+	const people = new Map<string, { name: string; member?: NonNullable<GameExport['roster']>[number] }>();
+	for (const m of data.roster ?? []) if (!people.has(nameKey(m.name))) people.set(nameKey(m.name), { name: m.name, member: m });
+	for (const [key, { name }] of professions) if (!people.has(key)) people.set(key, { name });
+	if (exporter && !people.has(nameKey(exporter.name))) people.set(nameKey(exporter.name), { name: exporter.name });
 
-	for (const { name: who, member } of people) {
-		const key = nameKey(who);
-		if (seen.has(key)) continue;
-		seen.add(key);
-		const matches = byName.get(key) ?? [];
-		if (matches.length > 1) {
+	// Une fiche visée par deux persos du jeu (fiche sans nom de famille, deux homonymes en jeu) :
+	// impossible de savoir lequel c'est, aucun des deux ne la met à jour.
+	const matched = [...people].map(([key, p]) => ({ key, ...p, matches: sheetsFor(chars, p.name) }));
+	const claims = new Map<number, number>();
+	for (const p of matched) for (const { c } of p.matches) claims.set(c.id, (claims.get(c.id) ?? 0) + 1);
+	const ambiguousIds = new Set<number>();
+
+	for (const { key, name: who, member, matches } of matched) {
+		if (matches.length > 1 || (matches.length === 1 && claims.get(matches[0].c.id)! > 1)) {
 			plan.ambiguous.push(who);
+			for (const { c } of matches) ambiguousIds.add(c.id);
 			continue;
 		}
 		if (matches.length === 0) {
@@ -202,16 +242,16 @@ export function planImport(data: GameExport): ImportPlan {
 		// de guilde, qui n'en contient pas, et une recette apprise ne se perd pas.
 		if (c.gameExportedAt && c.gameExportedAt.getTime() >= plan.exportedAt.getTime()) {
 			plan.outdated.push(c.name);
-			const added = data.player && nameKey(data.player.name) === key ? addRecipes(c.knownRecipes, recipes) : null;
+			const added = isExporter(key) ? addRecipes(c.knownRecipes, recipes) : null;
 			plan.updates.push({ ...update, outdated: true, ...(added && { recipes: added }) });
 			continue;
 		}
-		const level = member?.level ?? (data.player && nameKey(data.player.name) === key ? data.player.level : undefined);
+		const level = member?.level ?? (isExporter(key) ? exporter!.level : undefined);
 		if (level && level !== c.level) update.level = { from: c.level, to: level };
-		const profs = professions.get(key);
+		const profs = professions.get(key)?.list;
 		const merged = profs && mergeProfessions(c.professions, profs);
 		if (merged && !sameProfessions(c.professions, merged)) update.professions = { from: c.professions, to: merged };
-		if (data.player && nameKey(data.player.name) === key && recipes.length) update.recipes = mergeRecipes(c.knownRecipes, recipes);
+		if (isExporter(key) && recipes.length) update.recipes = mergeRecipes(c.knownRecipes, recipes);
 		if (member) update.lastOnlineAt = lastOnline(data.exportedAt, member);
 		plan.updates.push(update);
 	}
@@ -219,11 +259,10 @@ export function planImport(data: GameExport): ImportPlan {
 	// Sans registre (export d'un perso hors guilde…), on ne peut rien dire des absents.
 	if (data.roster?.length) {
 		const found = new Set(plan.updates.map((u) => u.characterId));
-		const ambiguous = new Set(plan.ambiguous.map(nameKey));
 		plan.notFound = chars
-			.filter(({ c }) => !found.has(c.id) && !ambiguous.has(nameKey(c.name)))
+			.filter(({ c }) => !found.has(c.id) && !ambiguousIds.has(c.id))
 			.map(({ c, player }) => ({ characterId: c.id, name: c.name, player }))
-			.sort((a, b) => a.player.localeCompare(b.player) || a.name.localeCompare(b.name));
+		.sort((a, b) => a.player.localeCompare(b.player) || a.name.localeCompare(b.name));
 	}
 	return plan;
 }
