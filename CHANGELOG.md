@@ -8,6 +8,10 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 - **Page Artisans** (menu) : les persos de la guilde regroupés par métier, du plus haut niveau au plus bas, avec leurs recettes connues, et une recherche de recette (« qui connaît… ? », sans tenir compte des accents). **Recettes connues dans Mes persos**, repliées par métier. Chaque recette renvoie vers sa page Wowhead (base de Forever, en français, bulles comprises). **Bulles Wowhead** au survol, à activer dans Admin → Guilde (désactivées par défaut : le script vient de Wowhead, la page Confidentialité le mentionne quand elles sont activées).
 
+### Modifié
+
+- **Import du jeu : changement de métier.** Les métiers du perso qui exporte suivent ceux du jeu : un métier abandonné quitte sa fiche, avec ses recettes. Pour les autres membres (onglet des métiers de guilde, peut-être incomplet), l'import ajoute et met à jour sans rien retirer. Un export sans liste de métiers (pas encore chargée à la connexion) ne retire rien.
+
 ### Corrigé
 
 - Addon Innkeeper Sync 1.2.2 (zip du site) : le message « N recettes enregistrées » ne se répète plus à chaque fabrication, fenêtre de métier ouverte ; il n'apparaît que si le nombre de recettes connues change.

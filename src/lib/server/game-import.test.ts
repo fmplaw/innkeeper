@@ -72,10 +72,10 @@ describe('import des données du jeu', () => {
 		const plan = planImport(readExport(fixture));
 		const v = plan.updates.find((u) => u.characterId === drektar.id)!;
 		expect(v.level).toEqual({ from: 1, to: 42 });
-		// Forge (guilde + perso) et Pêche (perso) ajoutées ; Herboristerie gardée (2 principaux au plus).
+		// Drektar exporte lui-même : ses métiers sont ceux du jeu, Forge et Pêche ; l'Herboristerie
+		// de sa fiche, qu'il n'a pas en jeu, est retirée.
 		expect(v.professions?.to).toEqual([
 			{ id: 'blacksmithing', level: 150 },
-			{ id: 'herbalism', level: 10 },
 			{ id: 'fishing', level: 80 }
 		]);
 		expect(v.recipes).toEqual([{ profession: 'blacksmithing', skill: 150, recipes: [{ id: 2662, name: 'Ceinture en cuivre' }, { id: 2663, name: 'Bracelets en cuivre' }] }]);
@@ -305,5 +305,55 @@ describe('dernière synchronisation', () => {
 		const before = rosterReport();
 		applyImport(planImport({ format: 1, exportedAt: 1793950000, player: { name: 'Mokvar', level: 13 } }), { by: 'Autre', via: 'sync' });
 		expect(rosterReport()?.by).toBe(before?.by);
+	});
+});
+
+describe('changement de métier', () => {
+	const exportOf = (professions: { skillLine: number; skill: number }[], recipes = {}) => ({
+		format: 1,
+		exportedAt: 1794000000,
+		player: { name: 'Gazlowe', level: 20, class: 'WARRIOR' },
+		professions,
+		recipes
+	});
+
+	it('le perso qui exporte perd les métiers qu’il n’a plus en jeu, et leurs recettes', () => {
+		createUser('m1');
+		const gaz = sheet('m1', 'Gazlowe', {
+			class: 'warrior',
+			spec: 'arms',
+			role: 'melee',
+			professions: [{ id: 'alchemy', level: 40 }, { id: 'herbalism', level: 60 }, { id: 'cooking', level: 20 }]
+		});
+		applyImport(planImport(exportOf([{ skillLine: 182, skill: 60 }, { skillLine: 171, skill: 40 }], { skill171: { skillLine: 171, skill: 40, list: [{ id: 2330, name: 'Potion de soins mineure' }] } })));
+		expect(getCharacter(gaz.id)!.knownRecipes?.map((r) => r.profession)).toEqual(['alchemy']);
+
+		// Alchimie oubliée pour la Forge, Cuisine jamais apprise en jeu.
+		const plan = planImport({ ...exportOf([{ skillLine: 182, skill: 65 }, { skillLine: 164, skill: 5 }]), exportedAt: 1794100000 });
+		const update = plan.updates.find((u) => u.characterId === gaz.id)!;
+		expect(update.professions?.to).toEqual([
+			{ id: 'blacksmithing', level: 5 },
+			{ id: 'herbalism', level: 65 }
+		]);
+		expect(update.recipes).toEqual([]);
+		applyImport(plan);
+		expect(getCharacter(gaz.id)).toMatchObject({ professions: update.professions!.to, knownRecipes: [] });
+	});
+
+	it('sans liste de métiers dans l’export, ou pour les autres membres, rien n’est retiré', () => {
+		createUser('m2');
+		const rokk = sheet('m2', 'Rokk', { professions: [{ id: 'alchemy', level: 40 }] });
+		// Export sans métiers du perso (liste pas encore chargée) : la fiche garde les siens.
+		expect(planImport({ format: 1, exportedAt: 1794200000, player: { name: 'Rokk', level: 21 } }).updates.find((u) => u.characterId === rokk.id)?.professions).toBeUndefined();
+		// Rokk dans l'onglet de guilde d'un autre : métier ajouté, Alchimie gardée.
+		const plan = planImport({
+			format: 1,
+			exportedAt: 1794300000,
+			guildProfessions: [{ skillLine: 182, name: 'Herboristerie', members: [{ name: 'Rokk', skill: 10 }] }]
+		});
+		expect(plan.updates.find((u) => u.characterId === rokk.id)?.professions?.to).toEqual([
+			{ id: 'alchemy', level: 40 },
+			{ id: 'herbalism', level: 10 }
+		]);
 	});
 });
