@@ -210,6 +210,11 @@ export function planImport(data: GameExport): ImportPlan {
 	const recipes: KnownRecipes[] = Object.values(data.recipes ?? {})
 		.map((r) => ({ profession: professionBySkillLine(r.skillLine, r.name)?.id ?? r.name ?? '?', skill: r.skill ?? null, recipes: r.list }))
 		.filter((r) => r.recipes.length);
+	// Métiers du perso qui exporte, d'après le jeu (null si l'export n'en donne aucun : liste pas
+	// encore chargée à la connexion, on ne retire rien sur cette base). Un métier dont l'export
+	// contient des recettes compte aussi.
+	const ownIds = (data.professions ?? []).map((p) => professionBySkillLine(p.skillLine, p.name)?.id).filter((id) => id !== undefined);
+	const ownProfessions = exporter && ownIds.length ? new Set<string>([...ownIds, ...recipes.map((r) => r.profession)]) : null;
 
 	const plan: ImportPlan = { exportedAt: new Date(data.exportedAt * 1000), guild: data.player?.guild ?? null, updates: [], withoutSheet: [], ambiguous: [], outdated: [], notFound: [], rosterSize: data.roster?.length ?? 0, roster: (data.roster ?? []).map((m) => ({ name: m.name, level: m.level, class: m.class ?? null, rank: m.rank ?? null })) };
 
@@ -251,9 +256,15 @@ export function planImport(data: GameExport): ImportPlan {
 		const level = member?.level ?? (isExporter(key) ? exporter!.level : undefined);
 		if (level && level !== c.level) update.level = { from: c.level, to: level };
 		const profs = professions.get(key)?.list;
-		const merged = profs && mergeProfessions(c.professions, profs);
+		// Le perso qui exporte : le jeu donne la liste complète de ses métiers, ceux qu'il a
+		// abandonnés quittent la fiche, avec leurs recettes. Les autres : l'onglet de guilde
+		// n'affiche peut-être pas tout, on ajoute sans retirer.
+		const learned = isExporter(key) ? ownProfessions : null;
+		const merged = profs && (learned ? sortProfessions(profs.filter((e) => learned.has(e.id))) : mergeProfessions(c.professions, profs));
 		if (merged && !sameProfessions(c.professions, merged)) update.professions = { from: c.professions, to: merged };
 		if (isExporter(key) && recipes.length) update.recipes = mergeRecipes(c.knownRecipes, recipes);
+		const dropped = learned && (update.recipes ?? c.knownRecipes ?? []).filter((r) => isProfession(r.profession) && !learned.has(r.profession));
+		if (dropped?.length) update.recipes = (update.recipes ?? c.knownRecipes ?? []).filter((r) => !dropped.includes(r));
 		if (member) update.lastOnlineAt = lastOnline(data.exportedAt, member);
 		plan.updates.push(update);
 	}
@@ -277,6 +288,7 @@ function mergeProfessions(current: ProfessionEntry[], fromGame: ProfessionEntry[
 	return sortProfessions([...kept, ...fromGame]);
 }
 
+const isProfession = (id: string) => PROFESSIONS.some((p) => p.id === id);
 const sortProfessions = (list: ProfessionEntry[]) => [...list].sort((a, b) => PROFESSIONS.findIndex((p) => p.id === a.id) - PROFESSIONS.findIndex((p) => p.id === b.id));
 const sameProfessions = (a: ProfessionEntry[], b: ProfessionEntry[]) => JSON.stringify(sortProfessions(a)) === JSON.stringify(sortProfessions(b));
 
