@@ -63,6 +63,8 @@ Rien n'est bloqué : c'est une aide à la saisie, et un repère pour les officie
 - **⚠ pas trouvé en jeu** : aucun perso de ce nom dans la guilde. Vérifie l'orthographe du nom sur ta fiche ;
 - **« pas encore vérifié »** : la fiche a été créée après le dernier import.
 
+Survoler un badge (ou le toucher sur téléphone) affiche une infobulle qui l'explique.
+
 Avec Battle.net, un perso qui n'est pas (encore) dans la guilde peut aussi afficher **✔ existe en jeu** (trouvé dans l'Armurerie), **nouveau perso, pas encore créé** (case cochée par le joueur) ou **⚠ autre classe en jeu** (la classe de la fiche n'est pas celle du jeu).
 
 **Nom en double** : dans Forever, seul le nom complet (prénom et nom de famille) est unique ; plusieurs persos peuvent porter le même prénom. L'import du jeu relie les fiches par le nom complet : écris ton nom de famille **exactement comme en jeu**. Si deux fiches ont le même prénom et le même nom de famille, ou le même prénom et pas de nom de famille, l'import ne sait pas laquelle mettre à jour et n'en met à jour aucune. Un encadré l'explique sous le perso concerné ; corrige le nom de famille de ta fiche, ou préviens un officier si quelqu'un a créé une fiche à ton nom (les officiers voient un badge « nom en double » dans Admin → Joueurs).
