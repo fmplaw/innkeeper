@@ -146,13 +146,19 @@ local function readRecipes()
 	end
 	-- Rangées par métier : rouvrir une fenêtre remplace la liste au lieu de la doubler.
 	InnkeeperSyncDB.recipes = InnkeeperSyncDB.recipes or {}
-	InnkeeperSyncDB.recipes["skill" .. base.professionID] = {
+	local key = "skill" .. base.professionID
+	local previous = InnkeeperSyncDB.recipes[key]
+	InnkeeperSyncDB.recipes[key] = {
 		skillLine = base.professionID,
 		name = base.professionName,
 		skill = base.skillLevel,
 		list = learned,
 	}
-	log(("%d recettes de %s enregistrées."):format(#learned, base.professionName or "?"))
+	-- Le jeu relance TRADE_SKILL_LIST_UPDATE à chaque fabrication ou point de compétence, fenêtre
+	-- ouverte : on ne prévient que si le nombre de recettes connues change.
+	if not previous or #previous.list ~= #learned then
+		log(("%d recettes de %s enregistrées."):format(#learned, base.professionName or "?"))
+	end
 end
 
 local frame = CreateFrame("Frame")
