@@ -319,7 +319,7 @@ Le client de WoW Forever est un client de type Retail (interface `16001`) avec u
 | Métiers du perso connecté | `GetProfessions`, `GetProfessionInfo` |
 | Recettes connues | `C_TradeSkillUI` |
 
-L'addon n'envoie rien sur Internet (c'est l'application ci-dessous qui s'en charge, si le joueur l'installe). Le site lit le fichier **sans l'exécuter** (analyseur dédié au format des SavedVariables), relie les persos par leur nom (Forever n'a pas de royaumes) et les métiers par leur identifiant de compétence, indépendant de la langue. Un aperçu liste les changements, les membres sans fiche et les fiches introuvables en jeu avant toute application.
+L'addon n'envoie rien sur Internet (c'est l'application ci-dessous qui s'en charge, si le joueur l'installe). Le site lit le fichier **sans l'exécuter** (analyseur dédié au format des SavedVariables), relie les persos par leur nom complet, prénom et nom de famille (Forever n'a pas de royaumes : le registre de guilde donne « Prénom Nom », le perso qui exporte est retrouvé dans le registre ; une fiche sans nom de famille se relie par le prénom) et les métiers par leur identifiant de compétence, indépendant de la langue. Un aperçu liste les changements, les membres sans fiche et les fiches introuvables en jeu avant toute application.
 
 ### Publication de l'addon (CurseForge, Wago, WoWInterface)
 

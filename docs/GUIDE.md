@@ -54,7 +54,7 @@ Menu **Mes persos** → **Ajouter un perso**.
 - **⚠ pas trouvé en jeu** : aucun perso de ce nom dans la guilde. Vérifie l'orthographe du nom sur ta fiche ;
 - **« pas encore vérifié »** : la fiche a été créée après le dernier import.
 
-**Prénom en double** : dans Forever, plusieurs persos peuvent porter le même prénom ; seul le nom complet (prénom et nom de famille) est unique. L'import du jeu relie encore les fiches par le prénom seul : tant que deux fiches ont le même prénom, il n'en met à jour aucune. Un encadré l'explique sous le perso concerné. S'il s'agit de plusieurs de tes propres persos, rien à corriger. Sinon, vérifie que le nom de famille de ta fiche est celui du jeu, et préviens un officier si quelqu'un a créé une fiche à ton nom (les officiers voient un badge « prénom en double » dans Admin → Joueurs, sauf quand les fiches sont toutes au même joueur).
+**Nom en double** : dans Forever, seul le nom complet (prénom et nom de famille) est unique ; plusieurs persos peuvent porter le même prénom. L'import du jeu relie les fiches par le nom complet : écris ton nom de famille **exactement comme en jeu**. Si deux fiches ont le même prénom et le même nom de famille, ou le même prénom et pas de nom de famille, l'import ne sait pas laquelle mettre à jour et n'en met à jour aucune. Un encadré l'explique sous le perso concerné ; corrige le nom de famille de ta fiche, ou préviens un officier si quelqu'un a créé une fiche à ton nom (les officiers voient un badge « nom en double » dans Admin → Joueurs).
 
 ### Synchronisation automatique (application pour PC)
 
@@ -187,7 +187,7 @@ Admin → **Import du jeu**, à faire par un officier de temps en temps (une foi
 4. Vérifie l'**aperçu** :
    - niveaux et métiers qui changent ;
    - **membres de la guilde sans fiche** (à relancer) ;
-   - **fiches introuvables en jeu** (nom mal écrit ?) ;
+   - **fiches introuvables en jeu** (prénom ou nom de famille différent de celui du jeu ?) ;
    - fiches déjà à jour d'après un **export plus récent** : un vieux fichier ne fait pas revenir un perso en arrière (seules ses recettes encore inconnues s'ajoutent).
 5. **Appliquer l'import**.
 
