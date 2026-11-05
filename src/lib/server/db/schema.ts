@@ -11,6 +11,9 @@ export interface ProfessionEntry {
 }
 
 /** Recettes connues pour un métier, telles qu'exportées par l'addon. */
+export const ARMORY_STATUSES = ['found', 'mismatch', 'missing'] as const;
+export type ArmoryStatus = (typeof ARMORY_STATUSES)[number];
+
 export interface KnownRecipes {
 	profession: string;
 	skill: number | null;
@@ -80,6 +83,12 @@ export const characters = sqliteTable(
 		gameSyncedAt: integer('game_synced_at', { mode: 'timestamp' }),
 		// Date de l'export (côté jeu) qui a fourni ces données : un export plus ancien ne les remplace pas.
 		gameExportedAt: integer('game_exported_at', { mode: 'timestamp' }),
+		// Vérification dans l'Armurerie de Blizzard (API Battle.net) : trouvé, trouvé avec une autre
+		// classe, ou introuvable ; null tant que rien n'a été vérifié.
+		armoryStatus: text('armory_status', { enum: ARMORY_STATUSES }),
+		armoryCheckedAt: integer('armory_checked_at', { mode: 'timestamp' }),
+		// Le joueur déclare un perso pas encore créé en jeu : introuvable, c'est normal.
+		declaredNew: integer('declared_new', { mode: 'boolean' }).notNull().default(false),
 		createdAt: timestamp('created_at'),
 		updatedAt: timestamp('updated_at')
 	},
@@ -195,7 +204,7 @@ export const outings = sqliteTable(
 // Perso visé par une candidature : mêmes champs qu'une fiche, copiés tels quels.
 export type CharacterDraft = Pick<
 	typeof characters.$inferInsert,
-	'name' | 'surname' | 'race' | 'class' | 'spec' | 'role' | 'spec2' | 'role2' | 'level' | 'professions' | 'recipes' | 'pve' | 'pvp' | 'notes'
+	'name' | 'surname' | 'race' | 'class' | 'spec' | 'role' | 'spec2' | 'role2' | 'level' | 'professions' | 'recipes' | 'pve' | 'pvp' | 'notes' | 'declaredNew'
 >;
 
 export const APPLICATION_STATUSES = ['pending', 'accepted', 'refused', 'withdrawn'] as const;

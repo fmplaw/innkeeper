@@ -162,6 +162,9 @@ function raidHelper(path: string, method: string, body: Record<string, unknown>)
 // Battle.net simulé : l'Armurerie connaît les persos de la démo (sauf les candidats), un peu
 // plus avancés que leur fiche, comme s'ils avaient joué depuis.
 const CLASS_IDS: Record<string, number> = { warrior: 1, paladin: 2, hunter: 3, rogue: 4, priest: 5, shaman: 7, mage: 8, warlock: 9, druid: 11 };
+const RACE_NUMS: Record<string, number> = { human: 1, orc: 2, dwarf: 3, 'night-elf': 4, undead: 5, tauren: 6, gnome: 7, troll: 8 };
+// Hors de la guilde : le perso d'Aelith (candidate) existe déjà en jeu ; celui de Gorvan, non.
+const OUTSIDE = [{ id: -1, name: 'Aelith', surname: 'Chantorée', race: 'night-elf', class: 'priest', level: 23, professions: [{ id: 'first-aid', level: 90 }] }];
 const slug = (c: { name: string; surname: string | null }) => [c.name, c.surname].filter(Boolean).join('-').toLocaleLowerCase('fr').replace(/\s+/g, '-');
 
 function battlenet(path: string) {
@@ -180,9 +183,19 @@ function battlenet(path: string) {
 			}))
 		});
 	const m = path.match(/^\/profile\/wow\/character\/([^/]+)(\/professions)?$/);
-	const c = m && chars.find((x) => slug(x) === m[1]);
+	const inGuild = m && chars.find((x) => slug(x) === m[1]);
+	const c = inGuild ?? (m && OUTSIDE.find((x) => slug(x) === m[1]));
 	if (!c) return json({ code: 404 }, 404);
-	if (!m![2]) return json({ last_login_timestamp: Date.now() - (c.id % 5) * 7 * 3_600_000 });
+	if (!m![2])
+		return json({
+			name: c.name,
+			surname: c.surname,
+			level: c.level,
+			character_class: { id: CLASS_IDS[c.class] ?? 1 },
+			race: { id: RACE_NUMS[c.race ?? ''] ?? 1 },
+			...(inGuild && { guild: { name: 'Les Gardiens de l’Aube' } }),
+			last_login_timestamp: Date.now() - (Math.abs(c.id) % 5) * 7 * 3_600_000
+		});
 	const list = c.professions.map((p) => ({ profession: { id: PROFESSIONS.find((x) => x.id === p.id)?.skillLine ?? 0 }, tiers: [{ skill_points: (p.level ?? 1) + 3 }] }));
 	return json({ primaries: list.filter((_, i) => !PROFESSIONS.find((x) => x.id === c.professions[i].id)?.secondary), secondaries: list.filter((_, i) => PROFESSIONS.find((x) => x.id === c.professions[i].id)?.secondary) });
 }

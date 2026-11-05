@@ -6,6 +6,7 @@ import {
 	guildSchema,
 	recruitmentSchema,
 	setAccess,
+	setBattlenet,
 	setCharter,
 	setDemoMarker,
 	setDiscord,
@@ -174,6 +175,8 @@ export function seedDemo(now = Date.now()): DemoEvent[] {
 	const synced = { appliedAt: Math.floor((now - 2 * 3_600_000) / 1000), exportedAt: Math.floor((now - 3 * 3_600_000) / 1000) };
 	setGameImport({ ...synced, rosterSize: gameRoster.length });
 	setGameRoster({ ...synced, by: 'Aldren', via: 'sync', roster: gameRoster });
+	// Battle.net simulé (voir mock.ts) : la vérification des persos dans l'Armurerie marche en démo.
+	setBattlenet({ clientId: 'demo'.repeat(8), clientSecret: 'demo'.repeat(8), region: 'eu', guildSlug: 'les-gardiens-de-laube' });
 	setCharter({ text: CHARTER, updatedAt: now, updatedBy: 'Aldren' });
 
 	for (const [id, name, permission, position] of [

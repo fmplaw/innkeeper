@@ -163,7 +163,7 @@ describe('ordre des exports', () => {
 		// Fichier de la veille, renvoyé après coup (second compte WoW, export d'un autre joueur…).
 		const old = planImport(exportAt(1793500000, 20));
 		expect(old.outdated).toEqual(['Zuljin']);
-		expect(old.updates.find((u) => u.characterId === zuljin.id)).toEqual({ characterId: zuljin.id, name: 'Zuljin', player: 'Joueur u6', outdated: true });
+		expect(old.updates.find((u) => u.characterId === zuljin.id)).toEqual({ characterId: zuljin.id, name: 'Zuljin', gameName: 'Zuljin', player: 'Joueur u6', outdated: true });
 		expect(applyImport(old)).toBe(0);
 		expect(getCharacter(zuljin.id)).toMatchObject({ level: 42, lastOnlineAt: lastOnline });
 

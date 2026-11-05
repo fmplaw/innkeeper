@@ -104,6 +104,7 @@ const ENDPOINTS: Record<string, string> = {
 	'/addon/GuildSiteSync.zip': 'téléchargement public de l’addon',
 	'/addon/InnkeeperSync.zip': 'téléchargement public de l’addon',
 	'/api/sync': 'clé de synchronisation iks_ (sync.test.ts)',
+	'/api/armurerie': 'personne connectée (joueur, candidat ou admin), 30 recherches par minute',
 	'/banniere': 'image publique de la guilde',
 	'/candidature/rejoindre': 'retour OAuth du candidat, contrôle du compte',
 	'/healthz': 'sonde de santé',

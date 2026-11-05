@@ -53,6 +53,22 @@
 	<section class="card">
 		<p class="eyebrow">Le perso présenté</p>
 		<CharacterTitle {cfg} character={{ name: c.name, surname: c.surname ?? null, class: c.class, spec: c.spec ?? null, role: c.role, race: c.race ?? null, level: Number(c.level ?? 1) }} big />
+		{#if data.armory?.status === 'found'}
+			{@const a = data.armory}
+			{@const otherClass = a.classId && a.classId !== c.class}
+			<p class="armory" class:warn={otherClass}>
+				{otherClass ? '⚠' : '✔'} Dans l'Armurerie : {cfg.races.find((r) => r.id === a.raceId)?.name ?? '?'} ·
+				{cfg.classes.find((k) => k.id === a.classId)?.name ?? '?'} · niveau {a.level}{a.guild ? ` · guilde ${a.guild}` : ' · sans guilde'}{otherClass
+					? ' : pas la classe indiquée'
+					: ''}
+			</p>
+		{:else if data.armory?.status === 'missing'}
+			<p class="armory warn">
+				{c.declaredNew
+					? 'Perso pas encore créé en jeu, d’après le candidat : introuvable dans l’Armurerie, c’est normal.'
+					: '⚠ Introuvable dans l’Armurerie : nom mal orthographié, ou perso pas reconnecté au jeu depuis longtemps.'}
+			</p>
+		{/if}
 		{#if c.spec2 || c.role2}<p class="muted">Spé secondaire : {specRole(cfg, c.class, c.spec2 ?? null, c.role2 ?? null)}</p>{/if}
 		{#if c.pve || c.pvp}<p><InterestBadges pve={c.pve ?? null} pvp={c.pvp ?? null} /></p>{/if}
 		{#if c.professions?.length}<p class="muted">{professionNames(cfg, c.professions)}</p>{/if}
@@ -152,6 +168,14 @@
 </div>
 
 <style>
+	.armory {
+		margin: 0;
+		color: var(--good);
+		font-size: 0.9375rem;
+	}
+	.armory.warn {
+		color: var(--warn);
+	}
 	.back {
 		display: inline-flex;
 		align-items: center;

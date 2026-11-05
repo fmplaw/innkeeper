@@ -59,7 +59,9 @@ function characterSchema() {
 			recipes: optionalText(500),
 			pve: z.preprocess((v) => v || null, z.enum(INTEREST_LEVELS).nullable()),
 			pvp: z.preprocess((v) => v || null, z.enum(INTEREST_LEVELS).nullable()),
-			notes: optionalText(500)
+			notes: optionalText(500),
+			// Perso pas encore créé en jeu : introuvable dans l'Armurerie, c'est normal.
+			declaredNew: z.boolean().optional()
 		})
 		.superRefine((c, ctx) => {
 			const race = RACES.find((r) => r.id === c.race);
@@ -119,7 +121,8 @@ export function parseCharacterForm(form: FormData) {
 		recipes: str('recipes'),
 		pve: str('pve'),
 		pvp: str('pvp'),
-		notes: str('notes')
+		notes: str('notes'),
+		declaredNew: form.get('declaredNew') === 'on'
 	};
 	const result = characterSchema().safeParse(raw);
 	if (result.success) return { data: result.data } as const;
@@ -183,6 +186,8 @@ export function updateCharacter(existing: Character, input: CharacterInput) {
 	const promote = input.isMain && !existing.isMain;
 	// La date des intérêts ne bouge que s'ils changent : elle dit aux officiers s'ils sont à jour.
 	const interestsChanged = input.pve !== existing.pve || input.pvp !== existing.pvp;
+	// Nom ou classe changés : la vérification dans l'Armurerie est à refaire.
+	const identityChanged = input.name !== existing.name || input.surname !== existing.surname || input.class !== existing.class;
 	db().transaction((tx) => {
 		if (promote) demoteMain(tx, existing.userId);
 		tx.update(characters)
@@ -190,7 +195,8 @@ export function updateCharacter(existing: Character, input: CharacterInput) {
 				...input,
 				isMain: existing.isMain || promote,
 				updatedAt: sql`(unixepoch())`,
-				...(interestsChanged && { interestsUpdatedAt: new Date() })
+				...(interestsChanged && { interestsUpdatedAt: new Date() }),
+				...(identityChanged && { armoryStatus: null, armoryCheckedAt: null })
 			})
 			.where(eq(characters.id, existing.id))
 			.run();

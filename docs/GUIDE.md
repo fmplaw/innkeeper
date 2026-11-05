@@ -46,6 +46,13 @@ Menu **Mes persos** → **Ajouter un perso**.
 | Intérêts | PvE et PvP : pas intéressé, détente ou compétitif. |
 | Notes | Visibles seulement par toi et les officiers. |
 
+**Vérification dans l'Armurerie** (si la guilde a connecté Battle.net) : dès que tu as tapé le prénom et le nom de famille, le site cherche ton perso dans l'Armurerie de Blizzard.
+
+- **Trouvé** : race, classe, niveau et guilde s'affichent. **« Remplir avec ces infos »** recopie la race, la classe, le niveau et les métiers. Si ta saisie ne correspond pas au jeu (autre classe, autre race), un message te le signale.
+- **Introuvable** : vérifie l'orthographe exacte. L'Armurerie ne connaît que les persos qui se sont déconnectés du jeu récemment. Si le perso n'existe pas encore, coche **« Ce perso n'existe pas encore en jeu »** : la fiche s'enregistre normalement, et la vérification se refait toute seule à chaque synchronisation.
+
+Rien n'est bloqué : c'est une aide à la saisie, et un repère pour les officiers.
+
 **Main et rerolls** : ton premier perso devient ton **main**. Les suivants sont des rerolls rattachés à ton main. Pour changer de main, clique sur **« Définir comme main »** sous le reroll concerné, dans Mes persos. Un main qui a encore des rerolls ne peut pas être supprimé.
 
 **Le badge « en jeu »** : après chaque import du registre de guilde par un officier, tes persos affichent :
@@ -53,6 +60,8 @@ Menu **Mes persos** → **Ajouter un perso**.
 - **✔ en jeu** : le perso a été trouvé dans la guilde en jeu ;
 - **⚠ pas trouvé en jeu** : aucun perso de ce nom dans la guilde. Vérifie l'orthographe du nom sur ta fiche ;
 - **« pas encore vérifié »** : la fiche a été créée après le dernier import.
+
+Avec Battle.net, un perso qui n'est pas (encore) dans la guilde peut aussi afficher **✔ existe en jeu** (trouvé dans l'Armurerie), **nouveau perso, pas encore créé** (case cochée par le joueur) ou **⚠ autre classe en jeu** (la classe de la fiche n'est pas celle du jeu).
 
 **Nom en double** : dans Forever, seul le nom complet (prénom et nom de famille) est unique ; plusieurs persos peuvent porter le même prénom. L'import du jeu relie les fiches par le nom complet : écris ton nom de famille **exactement comme en jeu**. Si deux fiches ont le même prénom et le même nom de famille, ou le même prénom et pas de nom de famille, l'import ne sait pas laquelle mettre à jour et n'en met à jour aucune. Un encadré l'explique sous le perso concerné ; corrige le nom de famille de ta fiche, ou préviens un officier si quelqu'un a créé une fiche à ton nom (les officiers voient un badge « nom en double » dans Admin → Joueurs).
 
@@ -136,7 +145,8 @@ Admin → **Candidatures** :
 
 - donne ton avis **+1 ou −1** (un −1 doit être justifié) ; chaque officier a un avis, modifiable ;
 - **n'importe quel officier peut accepter ou refuser**, avec un message facultatif au candidat. Accepter malgré des avis défavorables demande une confirmation ;
-- à l'acceptation, le perso de la candidature devient le main de la recrue, et le bot lui donne le rôle d'arrivée.
+- à l'acceptation, le perso de la candidature devient le main de la recrue, et le bot lui donne le rôle d'arrivée ;
+- avec Battle.net, la candidature indique ce que l'Armurerie sait du perso présenté : **✔** race, classe, niveau et guilde actuelle (en orange si la classe diffère), ou **introuvable** (normal si le candidat a indiqué un perso pas encore créé).
 
 ### Progression des nouveaux membres
 
