@@ -6,7 +6,7 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ### Ajouté
 
-- **Page Artisans** (menu) : les persos de la guilde regroupés par métier, du plus haut niveau au plus bas, avec leurs recettes connues, et une recherche de recette (« qui connaît… ? », sans tenir compte des accents). **Recettes connues dans Mes persos**, repliées par métier. Chaque recette renvoie vers sa page Wowhead (base de Forever, en français). **Bulles Wowhead** au survol, à activer dans Admin → Guilde (désactivées par défaut : le script vient de Wowhead, la page Confidentialité le mentionne quand elles sont activées).
+- **Page Artisans** (menu) : les persos de la guilde regroupés par métier, du plus haut niveau au plus bas, avec leurs recettes connues, et une recherche de recette (« qui connaît… ? », sans tenir compte des accents). **Recettes connues dans Mes persos**, repliées par métier. Chaque recette renvoie vers sa page Wowhead (base de Forever, en français, bulles comprises). **Bulles Wowhead** au survol, à activer dans Admin → Guilde (désactivées par défaut : le script vient de Wowhead, la page Confidentialité le mentionne quand elles sont activées).
 
 ### Corrigé
 
