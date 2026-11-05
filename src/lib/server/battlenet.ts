@@ -51,7 +51,19 @@ const characterSchema = z.object({
 	last_login_timestamp: z.number().nullish()
 });
 // Races de l'API (playable_race.id) → identifiants du site.
-const RACE_IDS: Record<number, string> = { 1: 'human', 2: 'orc', 3: 'dwarf', 4: 'night-elf', 5: 'undead', 6: 'tauren', 7: 'gnome', 8: 'troll' };
+const RACE_IDS: Record<number, string> = {
+	1: 'human',
+	2: 'orc',
+	3: 'dwarf',
+	4: 'night-elf',
+	5: 'undead',
+	6: 'tauren',
+	7: 'gnome',
+	8: 'troll',
+	// Skyborne (Éolides), propres à Forever.
+	95: 'skyborne-alliance',
+	96: 'skyborne-horde'
+};
 const tierSchema = z.object({ skill_points: z.number().int().nullish() });
 const professionsSchema = z.object({
 	primaries: z.array(z.object({ profession: z.object({ id: z.number().int(), name: z.string().nullish() }), tiers: z.array(tierSchema).default([]) })).default([]),

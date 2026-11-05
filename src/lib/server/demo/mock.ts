@@ -162,7 +162,7 @@ function raidHelper(path: string, method: string, body: Record<string, unknown>)
 // Battle.net simulé : l'Armurerie connaît les persos de la démo (sauf les candidats), un peu
 // plus avancés que leur fiche, comme s'ils avaient joué depuis.
 const CLASS_IDS: Record<string, number> = { warrior: 1, paladin: 2, hunter: 3, rogue: 4, priest: 5, shaman: 7, mage: 8, warlock: 9, druid: 11 };
-const RACE_NUMS: Record<string, number> = { human: 1, orc: 2, dwarf: 3, 'night-elf': 4, undead: 5, tauren: 6, gnome: 7, troll: 8 };
+const RACE_NUMS: Record<string, number> = { human: 1, orc: 2, dwarf: 3, 'night-elf': 4, undead: 5, tauren: 6, gnome: 7, troll: 8, 'skyborne-alliance': 95, 'skyborne-horde': 96 };
 // Hors de la guilde : le perso d'Aelith (candidate) existe déjà en jeu ; celui de Gorvan, non.
 const OUTSIDE = [{ id: -1, name: 'Aelith', surname: 'Chantorée', race: 'night-elf', class: 'priest', level: 23, professions: [{ id: 'first-aid', level: 90 }] }];
 const slug = (c: { name: string; surname: string | null }) => [c.name, c.surname].filter(Boolean).join('-').toLocaleLowerCase('fr').replace(/\s+/g, '-');
