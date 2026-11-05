@@ -90,6 +90,15 @@ export const characters = sqliteTable(
 	]
 );
 
+// Noms français des recettes, par numéro de sort : les exports d'un jeu en anglais sont
+// traduits avec ceux-ci. Viennent d'un export en français, sinon de Wowhead.
+export const recipeNames = sqliteTable('recipe_names', {
+	id: integer('id').primaryKey(),
+	name: text('name').notNull(),
+	source: text('source', { enum: ['game', 'wowhead'] }).notNull(),
+	updatedAt: timestamp('updated_at')
+});
+
 // Réglages de l'instance (profil de guilde, Discord, accès…), un document JSON par clé.
 export const settings = sqliteTable('settings', {
 	key: text('key').primaryKey(),

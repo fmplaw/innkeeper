@@ -38,7 +38,8 @@
 	</ul>
 	<p>
 		Les données restent sur le serveur de la guilde, avec des sauvegardes gardées 60 jours au plus. Elles ne sont ni
-		vendues ni partagées.
+		vendues ni partagées. Seule exception, sans rien sur toi : pour afficher en français les recettes exportées d'un jeu
+		en anglais, le serveur demande leur nom à Wowhead, en n'envoyant que le numéro de la recette.
 	</p>
 
 	{#if data.config.wowheadTooltips}

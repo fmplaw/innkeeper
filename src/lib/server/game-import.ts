@@ -4,6 +4,7 @@ import { CLASSES, MAX_PRIMARY_PROFESSIONS, MAX_PROFESSION_LEVEL, PROFESSIONS } f
 import { db, schema } from './db';
 import type { Character, KnownRecipes, ProfessionEntry } from './db/schema';
 import { parseSavedVariables, toPlain } from './lua-saved-variables';
+import { isFrench, learnFrenchNames, scheduleTranslation, translateRecipes } from './recipe-names';
 import { getGameImport, getGameRoster, setGameImport, setGameRoster, type GameRosterInfo } from './settings';
 
 // Import de l'export de l'addon InnkeeperSync : met à jour niveau, métiers, dernière
@@ -16,6 +17,7 @@ const count = z.number().int().min(0).max(10_000);
 const exportSchema = z.object({
 	format: z.number().int(),
 	exportedAt: z.number().int().positive(),
+	locale: z.string().max(10).nullish(),
 	player: z.object({ name, level: z.number().int().optional(), class: z.string().nullish(), guild: z.string().nullish() }).optional(),
 	roster: z
 		.array(
@@ -142,6 +144,8 @@ export interface ImportPlan {
 	rosterSize: number;
 	/** Registre de l'export, gardé à l'application pour Admin → Import du jeu. */
 	roster: GameRosterInfo['roster'];
+	/** Recettes exportées par un jeu en français : leurs noms servent à traduire les autres. */
+	frenchRecipes: KnownRecipes[];
 }
 
 export interface Homonym {
@@ -216,7 +220,7 @@ export function planImport(data: GameExport): ImportPlan {
 	const ownIds = (data.professions ?? []).map((p) => professionBySkillLine(p.skillLine, p.name)?.id).filter((id) => id !== undefined);
 	const ownProfessions = exporter && ownIds.length ? new Set<string>([...ownIds, ...recipes.map((r) => r.profession)]) : null;
 
-	const plan: ImportPlan = { exportedAt: new Date(data.exportedAt * 1000), guild: data.player?.guild ?? null, updates: [], withoutSheet: [], ambiguous: [], outdated: [], notFound: [], rosterSize: data.roster?.length ?? 0, roster: (data.roster ?? []).map((m) => ({ name: m.name, level: m.level, class: m.class ?? null, rank: m.rank ?? null })) };
+	const plan: ImportPlan = { exportedAt: new Date(data.exportedAt * 1000), guild: data.player?.guild ?? null, updates: [], withoutSheet: [], ambiguous: [], outdated: [], notFound: [], rosterSize: data.roster?.length ?? 0, roster: (data.roster ?? []).map((m) => ({ name: m.name, level: m.level, class: m.class ?? null, rank: m.rank ?? null })), frenchRecipes: isFrench(data.locale) ? recipes : [] };
 
 	// Chaque nom du jeu une seule fois : registre, onglet des métiers, perso qui exporte.
 	const people = new Map<string, { name: string; member?: NonNullable<GameExport['roster']>[number] }>();
@@ -323,13 +327,14 @@ export function applyImport(plan: ImportPlan, by: Pick<GameRosterInfo, 'by' | 'v
 	let changed = 0;
 	// À la seconde : les dates sont stockées en secondes, la comparaison doit tomber juste.
 	const now = new Date(Math.floor(Date.now() / 1000) * 1000);
+	if (plan.frenchRecipes.length) learnFrenchNames(plan.frenchRecipes);
 	db().transaction((tx) => {
 		for (const u of plan.updates) {
 			const values: Partial<Character> = { gameSyncedAt: now };
 			if (!u.outdated) values.gameExportedAt = plan.exportedAt;
 			if (u.level) values.level = u.level.to;
 			if (u.professions) values.professions = u.professions.to;
-			if (u.recipes) values.knownRecipes = u.recipes;
+			if (u.recipes) values.knownRecipes = translateRecipes(u.recipes);
 			if (u.lastOnlineAt) values.lastOnlineAt = u.lastOnlineAt;
 			if (u.level || u.professions || u.recipes) {
 				values.updatedAt = now;
@@ -347,6 +352,8 @@ export function applyImport(plan: ImportPlan, by: Pick<GameRosterInfo, 'by' | 'v
 		setGameImport({ ...dates, rosterSize: plan.rosterSize });
 		setGameRoster({ ...dates, ...by, roster: plan.roster });
 	}
+	// Noms français manquants (jeu en anglais…) : demandés à Wowhead en arrière-plan.
+	if (plan.updates.some((u) => u.recipes)) scheduleTranslation();
 	return changed;
 }
 

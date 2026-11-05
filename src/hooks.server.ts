@@ -5,6 +5,7 @@ import { env } from '$env/dynamic/private';
 import { handle as authHandle } from './auth';
 import { db, schema } from '$lib/server/db';
 import { purgeAuditLog } from '$lib/server/audit';
+import { scheduleTranslation } from '$lib/server/recipe-names';
 import { demoEnabled, demoSessionUser, initDemo } from '$lib/server/demo';
 import { hasLocalAdmin, mustChangePasswordFirst, sessionAdmin, setupCode } from '$lib/server/local-admin';
 import { refreshMembership, sitePermission } from '$lib/server/permissions';
@@ -13,6 +14,8 @@ import { getDiscord, isSetupComplete } from '$lib/server/settings';
 
 export const init: ServerInit = () => {
 	if (demoEnabled()) initDemo();
+	// Recettes déjà importées avec des noms anglais : traduites au démarrage.
+	else scheduleTranslation();
 	// Journal d'audit : purge des entrées de plus de 12 mois, au démarrage puis chaque jour.
 	purgeAuditLog();
 	setInterval(purgeAuditLog, 86_400_000).unref();

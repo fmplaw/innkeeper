@@ -1,6 +1,7 @@
 <script lang="ts">
 	import ClassEmblem from '$lib/components/ClassEmblem.svelte';
 	import Glyph from '$lib/components/Glyph.svelte';
+	import RecipeList from '$lib/components/RecipeList.svelte';
 	import { classColor } from '$lib/labels';
 	import type { Role } from '$lib/roles';
 	import { recipeUrl } from '$lib/wowhead';
@@ -49,11 +50,7 @@
 		{#if showRecipes && a.recipes.length}
 			<details class="recipes">
 				<summary>{a.recipes.length} recette{a.recipes.length > 1 ? 's' : ''}</summary>
-				<ul>
-					{#each a.recipes.toSorted((x, y) => x.name.localeCompare(y.name, 'fr')) as r (r.id)}
-						<li><a href={recipeUrl(r.id)} target="_blank" rel="noopener">{r.name}</a></li>
-					{/each}
-				</ul>
+				<RecipeList recipes={a.recipes} />
 			</details>
 		{/if}
 	</li>
@@ -208,19 +205,9 @@
 		cursor: pointer;
 		color: var(--muted);
 	}
-	.recipes ul {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
-		gap: 0.25rem 1rem;
-		margin: 0.375rem 0 0.25rem;
-		padding: 0;
-		list-style: none;
-	}
-	.recipes a,
 	.result h3 a {
 		color: var(--text);
 	}
-	.recipes a:hover,
 	.result h3 a:hover {
 		color: var(--accent-ink);
 	}

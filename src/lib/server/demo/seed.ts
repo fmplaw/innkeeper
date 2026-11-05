@@ -45,7 +45,20 @@ const R = (id: number, name: string) => ({ id, name });
 const DEMO_RECIPES: Record<string, { profession: string; skill: number; recipes: { id: number; name: string }[] }[]> = {
 	Aldren: [{ profession: 'blacksmithing', skill: 182, recipes: [R(2660, 'Pierre à aiguiser brute'), R(2663, 'Brassards en cuivre')] }],
 	Ysolde: [{ profession: 'alchemy', skill: 168, recipes: [R(2330, 'Potion de soins mineure'), R(2329, 'Élixir de force du lion')] }],
-	Lysandre: [{ profession: 'tailoring', skill: 170, recipes: [R(2963, 'Rouleau d’étoffe de lin'), R(2387, 'Cape en lin')] }],
+	Lysandre: [
+		{ profession: 'tailoring', skill: 170, recipes: [R(2963, 'Rouleau d’étoffe de lin'), R(2387, 'Cape en lin')] },
+		// Liste longue : montre le cadre qui défile et le filtre.
+		{
+			profession: 'enchanting',
+			skill: 158,
+			recipes: [
+			R(7418, 'Enchantement de brassards (Endurance médiocre)'), R(7420, 'Enchantement de plastron (Endurance médiocre)'), R(7421, 'Bâtonnet runique en cuivre'), R(7426, 'Ench. de plastron (Absorption mineure)'), R(7428, 'Ench. de bracelets (Déviation mineure)'), R(7443, 'Enchantement de plastron (Intelligence mineure)'), R(7454, 'Ench. de cape (Résistance mineure)'), R(7457, 'Ench. de bracelets (Endurance mineure)'), R(7745, 'Ench. d’arme 2M (impact mineur)'), R(7748, 'Enchantement de plastron (Endurance inférieure)'),
+			R(7766, 'Ench. de bracelets (Esprit mineur)'), R(7771, 'Ench. de cape (Protection mineure)'), R(7776, 'Enchantement de plastron (Intelligence inférieure)'), R(7779, 'Ench. de bracelets (Agilité mineure)'), R(7782, 'Ench. de bracelets (Force mineure)'), R(7786, 'Ench. d’arme (Tueur de bête mineur)'), R(7788, 'Ench. d’arme (Frappe mineure)'), R(7793, 'Ench. d’arme 2M (Intelligence inférieure)'), R(13378, 'Ench. de bouclier (Endurance mineure)'), R(13380, 'Ench. d’arme 2M (Esprit inférieur)'),
+			R(13419, 'Ench. de cape (Agilité mineure)'), R(13421, 'Ench. de cape (Protection inférieure)'), R(13464, 'Ench. de bouclier (Protection inférieure)'), R(13485, 'Ench. de bouclier (Esprit inférieur)'), R(13501, 'Ench. de bracelets (Endurance inférieure)'), R(13503, 'Ench. d’arme (Frappe inférieure)'), R(13522, 'Ench. de cape (Résistance à l’Ombre inf.)'), R(13536, 'Ench. de bracelets (Force inférieure)'), R(13538, 'Ench. de plastron (Absorption inférieure)'), R(13607, 'Enchantement de plastron (Intelligence)'),
+			R(13612, 'Ench. de gants (Minage)'), R(13617, 'Ench. de gants (Herboristerie)'), R(13620, 'Ench. de gants (Pêche)'), R(13622, 'Ench. de bracelets (Intelligence inférieure)'), R(13626, 'Ench. de plastron (Caract. mineures)'), R(13628, 'Bâtonnet runique en or')
+			]
+		}
+	],
 	Eodric: [{ profession: 'leatherworking', skill: 171, recipes: [R(2881, 'Cuir léger'), R(2149, 'Bottes en cuir cousues main')] }],
 	Brunhild: [
 		{ profession: 'first-aid', skill: 150, recipes: [R(3275, 'Bandage en lin'), R(3276, 'Bandage épais en lin'), R(3277, 'Bandage en laine'), R(7934, 'Anti-venin')] },
