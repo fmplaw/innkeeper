@@ -4,6 +4,12 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ## [Non publié]
 
+## [0.16.0] - 2026-11-05
+
+### Publication
+
+- InnkeeperSync reste en **0.14.0** (application inchangée) : la release reprend son installateur, pas de mise à jour à faire. L'addon **Innkeeper Sync 1.2.1** est publié sur CurseForge et Wago (registre sans les notes ni la zone).
+
 ### Sécurité
 
 - **HSTS** : un site servi en HTTPS (`ORIGIN` en `https://`) demande au navigateur de n'utiliser que HTTPS pendant un an.
@@ -192,7 +198,8 @@ Première version publique.
 - **Apparence** : palettes Horde, Alliance et multi-faction, logo, bannière et couleur d'accent de la guilde, affichage adapté aux téléphones.
 - **Exploitation** : image Docker multi-architecture publiée par la CI, sauvegardes de la base, point de contrôle `/healthz`.
 
-[Non publié]: https://github.com/fmplaw/innkeeper/compare/v0.15.0...HEAD
+[Non publié]: https://github.com/fmplaw/innkeeper/compare/v0.16.0...HEAD
+[0.16.0]: https://github.com/fmplaw/innkeeper/compare/v0.15.0...v0.16.0
 [0.15.0]: https://github.com/fmplaw/innkeeper/compare/v0.14.0...v0.15.0
 [0.14.0]: https://github.com/fmplaw/innkeeper/compare/v0.13.1...v0.14.0
 [0.13.1]: https://github.com/fmplaw/innkeeper/compare/v0.13.0...v0.13.1
