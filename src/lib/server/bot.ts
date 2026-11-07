@@ -61,12 +61,21 @@ export async function guildMember(userId: string) {
 }
 
 /** Donne un rôle à un membre. Le rôle doit être placé sous celui du bot dans la hiérarchie. */
-export async function addRole(userId: string, roleId: string) {
+export async function addRole(userId: string, roleId: string, reason = 'Candidature acceptée sur le portail de la guilde (Innkeeper)') {
 	const res = await call(`/guilds/${config().guildId}/members/${userId}/roles/${roleId}`, {
 		method: 'PUT',
-		headers: { 'X-Audit-Log-Reason': 'Candidature acceptée sur le portail de la guilde (Innkeeper)' }
+		headers: { 'X-Audit-Log-Reason': encodeURIComponent(reason) }
 	});
 	if (!res.ok) throw new BotError(`Impossible d'attribuer le rôle (Discord a répondu ${res.status}). Vérifie que le rôle du bot est au-dessus.`);
+}
+
+/** Retire un rôle à un membre. Même règle : le rôle doit être sous celui du bot. */
+export async function removeRole(userId: string, roleId: string, reason: string) {
+	const res = await call(`/guilds/${config().guildId}/members/${userId}/roles/${roleId}`, {
+		method: 'DELETE',
+		headers: { 'X-Audit-Log-Reason': encodeURIComponent(reason) }
+	});
+	if (!res.ok) throw new BotError(`Impossible de retirer le rôle (Discord a répondu ${res.status}).`);
 }
 
 /**

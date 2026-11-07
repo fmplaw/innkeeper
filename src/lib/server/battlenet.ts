@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { characterSlug } from '$lib/armory';
 import { PROFESSIONS } from '$lib/game/forever';
 import { audit } from './audit';
+import { detectDepartures } from './departures';
 import { db, schema } from './db';
 import type { ArmoryStatus, ProfessionEntry } from './db/schema';
 import { applyImport, nameKey, planImport, type GameExport } from './game-import';
@@ -168,7 +169,14 @@ async function run(by: App.Locals | null, fetchFn: Fetch) {
 		const plan = planImport(data, { completeProfessions: complete, dataAt });
 		const changed = applyImport(plan, { by: 'Battle.net', via: 'battlenet' });
 		await markVerified(data.roster ?? [], plan.updates, fetchFn);
-		const message = `${plan.rosterSize} membres en jeu, ${plan.updates.length} persos reconnus, ${changed} fiche${changed > 1 ? 's' : ''} mise${changed > 1 ? 's' : ''} à jour.`;
+		const departures = await detectDepartures(new Set(plan.updates.map((u) => u.characterId)), plan.rosterSize, (name, surname) => lookupCharacter(name, surname, fetchFn));
+		const message = [
+			`${plan.rosterSize} membres en jeu, ${plan.updates.length} persos reconnus, ${changed} fiche${changed > 1 ? 's' : ''} mise${changed > 1 ? 's' : ''} à jour.`,
+			departures.left.length ? `Départ de la guilde : ${departures.left.join(', ')}.` : '',
+			departures.returned.length ? `De retour : ${departures.returned.join(', ')}.` : ''
+		]
+			.filter(Boolean)
+			.join(' ');
 		setBattlenetStatus({ at: Date.now(), ok: true, message });
 		if (by || changed) {
 			const locals = by ?? ({ user: null, candidate: null, admin: null } as unknown as App.Locals);

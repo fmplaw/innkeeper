@@ -1,4 +1,4 @@
-import { count, eq } from 'drizzle-orm';
+import { and, count, eq, isNull } from 'drizzle-orm';
 import { CLASSES, MAX_LEVEL, PROFESSIONS, racesFor } from '$lib/game/forever';
 import { gameStatus } from '$lib/game-status';
 import { ROLES, type Role } from '$lib/roles';
@@ -9,16 +9,20 @@ import { getGameImport, getGuild } from './settings';
 /** Chiffres anonymes de la guilde pour l'accueil public : aucun nom, seulement des comptes. */
 export function publicStats() {
 	const players = db()
-		.select({ roles: schema.users.roles, inGuild: schema.users.inGuild })
+		.select({ roles: schema.users.roles, inGuild: schema.users.inGuild, leftAt: schema.users.leftAt })
 		.from(schema.users)
 		.all()
 		.filter((u) => permissionFor(u)).length;
-	const characters = db().select({ n: count() }).from(schema.characters).get()?.n ?? 0;
+	// Les persos des anciens membres ne comptent plus.
+	const current = isNull(schema.users.leftAt);
+	const characters =
+		db().select({ n: count() }).from(schema.characters).innerJoin(schema.users, eq(schema.users.discordId, schema.characters.userId)).where(current).get()?.n ?? 0;
 	// Répartition sur les mains : un joueur compte une fois.
 	const mains = db()
 		.select({ class: schema.characters.class, role: schema.characters.role })
 		.from(schema.characters)
-		.where(eq(schema.characters.isMain, true))
+		.innerJoin(schema.users, eq(schema.users.discordId, schema.characters.userId))
+		.where(and(eq(schema.characters.isMain, true), current))
 		.all();
 
 	const byRole = Object.fromEntries(ROLES.map((r) => [r, 0])) as Record<Role, number>;

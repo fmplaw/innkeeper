@@ -24,6 +24,12 @@
 				Arrivé le {dateFormat.format(p.officerInfo.joinedAt)}{p.officerInfo.joinedKnown ? '' : ' (première connexion)'}
 				· dernière connexion le {dateFormat.format(p.officerInfo.lastLogin)}
 			</p>
+			{#if p.officerInfo.leftAt}
+				<p class="notice warn small">
+					Ancien membre : parti le {dateFormat.format(p.officerInfo.leftAt)}{p.officerInfo.leftComment ? ` (« ${p.officerInfo.leftComment} »)` : ''}. Voir
+					<a href="/admin/anciens">Anciens membres</a>.
+				</p>
+			{/if}
 		{/if}
 	</div>
 	{#if data.isMe}<a class="button secondary" href="/persos">Gérer mes persos</a>{/if}

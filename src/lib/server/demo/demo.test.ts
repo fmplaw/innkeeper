@@ -31,14 +31,14 @@ describe('mode démo', () => {
 		expect(db().select().from(schema.applications).all()).toHaveLength(2);
 		// Une seconde initialisation (redémarrage) ne remplit pas deux fois.
 		initDemo();
-		expect(db().select().from(schema.users).all()).toHaveLength(16);
+		expect(db().select().from(schema.users).all()).toHaveLength(18);
 	});
 
 	it('simule Discord à partir de la base de démo', async () => {
 		expect((await guildMember(demoUserId('Pipwick')))?.roles).toContain('700000000000000002');
 		// Un candidat n'est pas sur le serveur.
 		expect(await guildMember(demoUserId('Aelith'))).toBeNull();
-		expect((await listMembers()).length).toBe(14);
+		expect((await listMembers()).length).toBe(16);
 	});
 
 	it('simule Raid-Helper : sorties lues, créées et corrigées', async () => {

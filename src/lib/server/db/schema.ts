@@ -46,7 +46,21 @@ export const users = sqliteTable('users', {
 	joinedAt: integer('joined_at', { mode: 'timestamp' }),
 	// Dernière revue de progression par un officier (« on garde le rôle de nouveau membre pour l'instant »).
 	reviewedAt: integer('reviewed_at', { mode: 'timestamp' }),
-	reviewNote: text('review_note')
+	reviewNote: text('review_note'),
+	// Départ de la guilde. `absentSince` : aucun de ses persos dans le registre de la guilde en jeu
+	// depuis cette date (départ soupçonné, pas encore confirmé). `leftAt` : départ confirmé, par
+	// Battle.net (perso dans une autre guilde ou sans guilde) ou par un officier (`leftBy`). Un ancien
+	// membre n'a plus accès au site et disparaît des pages des membres ; ses fiches sont gardées.
+	absentSince: integer('absent_since', { mode: 'timestamp' }),
+	leftAt: integer('left_at', { mode: 'timestamp' }),
+	leftBy: text('left_by'),
+	// Guilde rejointe d'après l'Armurerie (null : sans guilde, ou départ noté à la main).
+	leftForGuild: text('left_for_guild'),
+	// Ce qu'a fait le bot sur Discord (rôles retirés, échecs), et le commentaire des officiers.
+	leftDiscord: text('left_discord'),
+	leftComment: text('left_comment'),
+	// Un officier a pris connaissance du départ (compteur du menu).
+	leftSeenAt: integer('left_seen_at', { mode: 'timestamp' })
 });
 
 export const characters = sqliteTable(

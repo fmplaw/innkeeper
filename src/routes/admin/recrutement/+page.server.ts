@@ -38,6 +38,8 @@ export const actions: Actions = {
 			inviteChannelId: form.get('inviteChannelId') ?? '',
 			reapplyDays: form.get('reapplyDays'),
 			reviewDays: form.get('reviewDays'),
+			demoteFormer: form.get('demoteFormer') === 'on',
+			formerRoleId: form.get('formerRoleId') ?? '',
 			questions: String(form.get('questions') ?? '')
 				.split('\n')
 				.map((q) => q.trim())

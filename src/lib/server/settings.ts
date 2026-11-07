@@ -95,6 +95,9 @@ export const recruitmentSchema = z.object({
 	reapplyDays: z.coerce.number().int().min(0).max(365).default(30),
 	// Ancienneté dans le rôle d'arrivée au-delà de laquelle les officiers sont invités à revoir le membre.
 	reviewDays: z.coerce.number().int().min(7).max(730).default(90),
+	// Départ de la guilde : le bot retire les rôles de membre (si coché) et donne ce rôle (facultatif).
+	demoteFormer: z.boolean().default(false),
+	formerRoleId: discordId.default(null),
 	questions: z.array(z.string().trim().min(3).max(200)).max(15).default(DEFAULT_QUESTIONS)
 });
 export type RecruitmentSettings = z.output<typeof recruitmentSchema>;

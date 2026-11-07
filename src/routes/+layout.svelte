@@ -16,7 +16,7 @@
 	const server = $derived(guild.serverType ? SERVER_TYPE_INFO[guild.serverType] : null);
 	const isHome = $derived(page.url.pathname === '/');
 	const inSetup = $derived(page.url.pathname.startsWith('/installation'));
-	const adminCount = $derived(data.pendingApplications + data.dueReviews);
+	const adminCount = $derived(data.pendingApplications + data.dueReviews + data.unseenDepartures);
 
 	const links = $derived<{ href: string; label: string; icon: GlyphName; badge?: number }[]>([
 		{ href: '/', label: 'Accueil', icon: 'home' },

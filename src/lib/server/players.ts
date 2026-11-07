@@ -9,7 +9,7 @@ import { listRoles, permissionFor } from './permissions';
  */
 export function getPlayer(id: string, officer: boolean) {
 	const user = db().select().from(schema.users).where(eq(schema.users.discordId, id)).get();
-	if (!user) return null;
+	if (!user || (user.leftAt && !officer)) return null;
 	const characters = listCharacters(id);
 	if (!permissionFor(user) && characters.length === 0) return null;
 
@@ -44,6 +44,8 @@ export function getPlayer(id: string, officer: boolean) {
 			rosters: memberships.filter((m) => m.characterId === c.id).map((m) => ({ id: m.id, name: m.name }))
 		})),
 		// Informations de suivi, réservées aux officiers.
-		officerInfo: officer ? { joinedAt: user.joinedAt ?? user.createdAt, joinedKnown: Boolean(user.joinedAt), lastLogin: user.lastLogin } : null
+		officerInfo: officer
+			? { joinedAt: user.joinedAt ?? user.createdAt, joinedKnown: Boolean(user.joinedAt), lastLogin: user.lastLogin, leftAt: user.leftAt, leftComment: user.leftComment }
+			: null
 	};
 }

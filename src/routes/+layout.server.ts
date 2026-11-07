@@ -1,4 +1,5 @@
 import { publicConfig } from '$lib/server/config';
+import { unseenDepartures } from '$lib/server/departures';
 import { dueReviewCount } from '$lib/server/progression';
 import { pendingCount } from '$lib/server/recruitment';
 import { getGameImport } from '$lib/server/settings';
@@ -19,6 +20,8 @@ export const load: LayoutServerLoad = ({ locals, url }) => {
 		config: publicConfig(),
 		pendingApplications: officer ? pendingCount() : 0,
 		dueReviews: officer ? dueReviewCount() : 0,
+		// Départs de la guilde que personne n'a encore vus.
+		unseenDepartures: officer ? unseenDepartures() : 0,
 		// Dernier import du registre de guilde, pour les badges « vu en jeu ».
 		gameImportAt: gameImport ? new Date(gameImport.appliedAt * 1000) : null
 	};
