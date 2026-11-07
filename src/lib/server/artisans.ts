@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm';
+import { eq, isNull } from 'drizzle-orm';
 import { PROFESSIONS } from '$lib/game/forever';
 import { db, schema } from './db';
 import type { ArmoryStatus } from './db/schema';
@@ -27,6 +27,8 @@ export function artisansByProfession() {
 		.select({ c: schema.characters, player: schema.users.displayName })
 		.from(schema.characters)
 		.innerJoin(schema.users, eq(schema.users.discordId, schema.characters.userId))
+		// Les anciens membres ne craftent plus pour la guilde.
+		.where(isNull(schema.users.leftAt))
 		.all();
 	const byProfession = new Map<string, Artisan[]>();
 	for (const { c, player } of rows) {

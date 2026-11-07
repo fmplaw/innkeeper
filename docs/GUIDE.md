@@ -163,6 +163,17 @@ Admin → **Joueurs** :
 - tous les joueurs connectés au moins une fois, avec leurs persos ;
 - **« Sur Discord, sans compte sur le site »** : les membres du serveur qui ont accès au site mais ne s'y sont jamais connectés. Le bouton **« Copier les mentions »** prépare un message de relance à coller sur Discord.
 
+### Anciens membres
+
+Admin → **Anciens membres** (un compteur s'affiche dans le menu tant qu'un départ n'a pas été vu) :
+
+- un ancien membre n'a plus accès au site, et ses persos n'apparaissent plus dans le roster, la page Artisans, les rosters ni les statistiques. Ses fiches sont gardées : **« Réintégrer »** le fait revenir ;
+- **départ repéré tout seul** (avec Battle.net) : quand aucun de ses persos n'est plus dans le registre de la guilde en jeu, il passe d'abord dans « Plus dans la guilde en jeu ». Au moins 5 heures plus tard, si l'Armurerie montre un de ses persos dans une autre guilde ou sans guilde, le départ est confirmé. Un officier, ou un perso introuvable (renommé, par exemple), reste à confirmer à la main avec **« Confirmer le départ »** ;
+- **« Noter un départ »** : pour un membre parti sans que le jeu le montre encore ;
+- **commentaire des officiers** : la raison du départ (« rejoint des amis », « pause »…). L'enregistrer, ou cliquer sur **« Vu »**, retire le départ du compteur ;
+- chaque départ est annoncé dans le salon des officiers (celui des candidatures) et noté dans le journal ;
+- **rôles Discord** : dans Admin → Recrutement, « Le bot retire ses rôles de membre » retire au partant les rôles qui donnent la permission Membre, ainsi que le rôle d'arrivée. Le bot peut aussi lui donner un autre rôle, par exemple celui des invités. Le rôle du bot doit être placé au-dessus de ces rôles sur Discord ; sinon, la page indique les rôles qu'il n'a pas pu retirer. Les rôles d'officier ne sont jamais retirés. Si le joueur revient dans la guilde en jeu, le site le réintègre, et ses rôles se rendent sur Discord.
+
 ### Statistiques
 
 Admin → **Statistiques** : une vue d'ensemble pour repérer les manques. Seuls les joueurs qui ont encore accès au site sont comptés.
@@ -225,7 +236,7 @@ L'addon n'envoie rien sur Internet ; il écrit seulement ce fichier. Il n'export
 
 ### Recrutement et rôles
 
-- Admin → **Recrutement** : rôle d'arrivée, salons des annonces et des invitations, questions aux candidats, délais.
+- Admin → **Recrutement** : rôle d'arrivée, salons des annonces et des invitations, questions aux candidats, délais, et ce que fait le bot au départ d'un membre (voir Anciens membres).
 - Admin → **Rôles Discord** (admins de l'instance seulement) : permission de chaque rôle (Officier, Membre, Aucune) et mode d'accès au site. Un officier ne peut donc ni nommer d'autres officiers ni ouvrir le site : pour un nouveau rang, demande à un admin de l'instance.
 - Admin → **Charte** : la charte et le règlement de la guilde, avec un aperçu en direct. Mise en forme : `# Titre`, `## Sous-titre`, `- élément de liste`, `**gras**`, `*italique*`, ligne vide entre les paragraphes. Sur la page, chaque `## Sous-titre` devient un encadré : regroupe par exemple les valeurs de la guilde sous un `# Titre`, une valeur par `##`. Une dernière ligne entièrement en gras, comme une devise, s'affiche en bandeau tout en bas. Une fois publiée, elle apparaît dans le menu de tous et les candidats doivent l'accepter pour postuler ; la candidature l'indique par une pastille verte « ✔ Charte acceptée le … » (orange si la charte a été modifiée depuis). La laisser vide la retire. Chaque modification est notée dans le journal.
 - Admin → **Addons** : la liste des addons conseillés, publiée sur la page Addons (visible de tous, même sans connexion ; le lien apparaît dans le menu dès qu'il y a un addon). Pour chacun : importance (Indispensable, Recommandé en raid, Recommandé, Utile, Confort), usage, public visé (classes, rôles ; rien de coché = tout le monde), une phrase sur ce qu'il fait et pourquoi la guilde le conseille, liens CurseForge, Wago ou autre. ▲▼ pour l'ordre dans chaque niveau. Un bouton ajoute **Innkeeper Sync** en un clic. Gardez peu d'indispensables : un nouveau doit voir l'essentiel d'un coup d'œil.

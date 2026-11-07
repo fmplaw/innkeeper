@@ -23,8 +23,9 @@ function permissionsByRole() {
  * Permission sur le site d'après les rôles Discord du membre. `null` = pas d'accès.
  * Un compte absent du serveur de guilde n'a jamais accès : ses rôles en cache ne comptent plus.
  */
-export function permissionFor({ roles, inGuild }: { roles: string[]; inGuild: boolean }): Permission | null {
-	if (!inGuild) return null;
+export function permissionFor({ roles, inGuild, leftAt }: { roles: string[]; inGuild: boolean; leftAt?: Date | null }): Permission | null {
+	// Ancien membre (départ confirmé) : plus d'accès, même si le bot n'a pas pu retirer ses rôles.
+	if (!inGuild || leftAt) return null;
 	const map = permissionsByRole();
 	if (roles.some((r) => map.get(r) === 'officer')) return 'officer';
 	if (roles.some((r) => map.get(r) === 'member')) return 'member';
@@ -32,7 +33,7 @@ export function permissionFor({ roles, inGuild }: { roles: string[]; inGuild: bo
 }
 
 /** Permission sur le site d'un compte : un admin de l'instance a tous les droits d'un officier, quels que soient ses rôles. */
-export const sitePermission = (user: { roles: string[]; inGuild: boolean; instanceAdmin: boolean }): Permission | null =>
+export const sitePermission = (user: { roles: string[]; inGuild: boolean; leftAt?: Date | null; instanceAdmin: boolean }): Permission | null =>
 	user.instanceAdmin ? 'officer' : permissionFor(user);
 
 /**

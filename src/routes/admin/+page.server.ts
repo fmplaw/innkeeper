@@ -25,10 +25,12 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 			avatar: u.avatar,
 			permission: permissionFor(u),
 			lastLogin: u.lastLogin,
+			left: Boolean(u.leftAt),
 			characters: characters.filter((c) => c.userId === u.discordId)
 		}))
-		// Les candidats (connectés sans être membres) se gèrent dans Candidatures.
-		.filter((p) => p.permission || p.characters.length);
+		// Les candidats (connectés sans être membres) se gèrent dans Candidatures, les anciens
+		// membres dans Anciens membres.
+		.filter((p) => !p.left && (p.permission || p.characters.length));
 
 	// Membres du serveur avec accès au site mais sans compte : demande le bot.
 	let missing: MissingAccount[] | null = null;

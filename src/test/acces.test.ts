@@ -73,6 +73,7 @@ const PAGES: Record<string, Record<string, Rule>> = {
 	'/admin/import': { load: 'officier', preview: 'officier', apply: 'officier', battlenet: 'officier', battlenetSync: 'officier', battlenetOff: 'officier' },
 	'/admin/journal': { load: 'adminInstance' },
 	'/admin/progression': { load: 'officier', review: 'officier', joined: 'officier' },
+	'/admin/anciens': { load: 'officier', leave: 'officier', comment: 'officier', seen: 'officier', reinstate: 'officier' },
 	'/admin/recrutement': { load: 'officier', save: 'officier', test: 'officier' },
 	'/admin/roles': { load: 'adminInstance', save: 'adminInstance', sync: 'adminInstance' },
 	'/admin/rosters': { load: 'officier', create: 'officier', update: 'officier', delete: 'officier' },

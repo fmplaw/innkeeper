@@ -1,5 +1,5 @@
 import { error, fail } from '@sveltejs/kit';
-import { and, asc, desc, eq, inArray, type SQL } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, isNull, type SQL } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/sqlite-core';
 import { audit } from '$lib/server/audit';
 import { characterTarget, getCharacter } from '$lib/server/characters';
@@ -47,7 +47,8 @@ export const load: PageServerLoad = ({ locals, url }) => {
 	if (filters.equipe && !roster) error(404, 'Roster introuvable');
 	const memberIds = roster ? rosterCharacterIds(roster.id) : [];
 
-	const where: SQL[] = [];
+	// Les anciens membres n'apparaissent plus (Admin → Anciens membres).
+	const where: SQL[] = [isNull(users.leftAt)];
 	if (roster) where.push(inArray(characters.id, memberIds));
 	// Classe et rôle sont filtrés après la requête : chaque compteur ignore son propre filtre,
 	// pour qu'on voie combien de persos donnerait un autre choix.
@@ -120,6 +121,7 @@ export const load: PageServerLoad = ({ locals, url }) => {
 					.select({ id: characters.id, name: characters.name, class: characters.class, isMain: characters.isMain, player: users.displayName })
 					.from(characters)
 					.innerJoin(users, eq(users.discordId, characters.userId))
+					.where(isNull(users.leftAt))
 					.orderBy(asc(users.displayName), desc(characters.isMain), asc(characters.name))
 					.all()
 					.filter((c) => !memberIds.includes(c.id))

@@ -69,6 +69,25 @@
 	</fieldset>
 
 	<fieldset>
+		<legend>Départ d'un membre</legend>
+		<p class="hint muted intro">
+			Quand un membre quitte la guilde en jeu (vu par la synchronisation Battle.net) ou qu'un officier note son départ, il n'a plus accès au site et
+			disparaît du roster. Les officiers sont prévenus dans le salon des annonces ; ils le retrouvent dans <a href="/admin/anciens">Anciens membres</a>.
+		</p>
+		<label class="check"><input type="checkbox" name="demoteFormer" checked={s.demoteFormer} /> Le bot retire ses rôles de membre sur Discord</label>
+		<div class="grid">
+			<div>
+				<label for="formerRoleId">Rôle donné à la place (facultatif)</label>
+				<select id="formerRoleId" name="formerRoleId" value={s.formerRoleId ?? ''}>
+					<option value="">— Aucun —</option>
+					{#each data.roles as r (r.id)}<option value={r.id}>{r.name}</option>{/each}
+				</select>
+				<p class="hint muted">Par exemple le rôle des invités, pour qu'il reste sur le serveur. Le rôle du bot doit être placé au-dessus des rôles de membre sur Discord.</p>
+			</div>
+		</div>
+	</fieldset>
+
+	<fieldset>
 		<legend>Candidatures</legend>
 		<div>
 			<label for="questions">Questions posées aux candidats (une par ligne)</label>

@@ -250,6 +250,7 @@ Ce que fait le bot :
 - annoncer les candidatures dans le salon des officiers ;
 - faire entrer une recrue acceptée sur le serveur, rôle d'arrivée compris, puis lui envoyer la décision en message privé ;
 - lister les membres du serveur sans compte sur le site (Admin → Joueurs) ;
+- au départ d'un membre, si la guilde l'a choisi (Admin → Recrutement), lui retirer ses rôles de membre et lui donner un autre rôle. Il ne peut retirer que des rôles placés sous le sien : pour un membre ancien, place donc le rôle du bot au-dessus de tous les rôles de membre ;
 - repérer les sorties Raid-Helper dans les salons quand aucune clé API n'est configurée.
 
 ### 3. Rôles et accès
@@ -317,7 +318,8 @@ L'API officielle de Blizzard couvre WoW Forever : l'espace de noms `profile-fore
 - **Liens vers l'Armurerie** : `$lib/armory.ts` construit l'adresse de la page d'un perso (`worldofwarcraft.blizzard.com/fr-fr/forever/<région>/armory/character/prenom-nom`), affichée en icône à côté du nom seulement pour un perso trouvé (`armory_status` `found` ou `mismatch`).
 - **Recettes** : l'API les donne, mais en anglais et avec des numéros de recette qui ne sont pas ceux des sorts (Wowhead). Elles restent l'affaire de l'addon.
 - **Synchronisation** : au démarrage (après 1 minute) puis toutes les 3 heures, et sur demande (« Synchroniser maintenant »). Le résultat du dernier passage est affiché ; le journal d'audit note les passages qui modifient des fiches.
-- **Mode démo** : Battle.net est simulé à partir des persos de la démo.
+- **Départs** (`departures.ts`) : après chaque synchronisation, un joueur déjà vu dans la guilde dont aucun perso n'est dans le registre est soupçonné (`users.absent_since`). Au moins 5 h plus tard, si l'Armurerie montre un de ses persos dans une autre guilde ou sans guilde, le départ est confirmé (`left_at`, `left_by = 'Battle.net'`, `left_for_guild`). Jamais automatique pour un officier ni un admin de l'instance. Un registre vide ne compte pas. Un ancien membre n'a plus de permission (`permissionFor`) et ses persos sont exclus du roster, des artisans, des rosters et des statistiques. S'il revient dans le registre, un départ détecté par Battle.net est annulé ; un départ noté par un officier, non. Rétrogradation Discord facultative (`recruitment.demoteFormer`, `formerRoleId`) : le bot retire les rôles de permission Membre et le rôle d'arrivée, puis donne le rôle choisi.
+- **Mode démo** : Battle.net est simulé à partir des persos de la démo. Corwen a quitté la guilde, et Maelis n'est plus dans le registre.
 
 ---
 

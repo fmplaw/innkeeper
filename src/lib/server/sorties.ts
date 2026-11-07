@@ -1,4 +1,4 @@
-import { eq, inArray } from 'drizzle-orm';
+import { and, eq, inArray, isNull } from 'drizzle-orm';
 import { ROLES, type Role } from '$lib/roles';
 import { RAID_HELPER, roleOfRaidHelperSpec } from '$lib/game/forever';
 import { db, schema } from './db';
@@ -136,7 +136,7 @@ export function compareWithRoster(event: RaidHelperEvent, composition: Compositi
 		.from(schema.rosterMembers)
 		.innerJoin(schema.characters, eq(schema.characters.id, schema.rosterMembers.characterId))
 		.innerJoin(schema.users, eq(schema.users.discordId, schema.characters.userId))
-		.where(eq(schema.rosterMembers.rosterId, rosterId))
+		.where(and(eq(schema.rosterMembers.rosterId, rosterId), isNull(schema.users.leftAt)))
 		.all();
 
 	const present = ROLES.flatMap((r) => composition.byRole[r]);

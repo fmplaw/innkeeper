@@ -14,6 +14,7 @@
 				{ href: '/admin', label: 'Joueurs', icon: 'users' },
 				{ href: '/admin/candidatures', label: 'Candidatures', icon: 'inbox', badge: data.pendingApplications },
 				{ href: '/admin/progression', label: 'Progression', icon: 'sparkles', badge: data.dueReviews },
+				{ href: '/admin/anciens', label: 'Anciens membres', icon: 'logout', badge: data.unseenDepartures },
 				{ href: '/admin/statistiques', label: 'Statistiques', icon: 'chart' }
 			]
 		},

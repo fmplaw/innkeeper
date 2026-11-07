@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm';
+import { and, eq, isNull } from 'drizzle-orm';
 import { db, schema } from '../db';
 import { PROFESSIONS } from '$lib/game/forever';
 import { getDemoEvents, setDemoEvents } from '../settings';
@@ -172,7 +172,8 @@ function battlenet(path: string) {
 		.select({ c: schema.characters })
 		.from(schema.characters)
 		.innerJoin(schema.users, eq(schema.users.discordId, schema.characters.userId))
-		.where(eq(schema.users.inGuild, true))
+		// Les départs de la démo ne sont plus dans le registre.
+		.where(and(eq(schema.users.inGuild, true), isNull(schema.users.leftAt), isNull(schema.users.absentSince)))
 		.all()
 		.map((r) => r.c);
 	if (/^\/data\/wow\/guild\/[^/]+\/roster$/.test(path))

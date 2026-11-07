@@ -23,7 +23,7 @@ function newcomersFromCache() {
 		.select()
 		.from(users)
 		.all()
-		.filter((u) => u.roles.includes(arrivalRoleId));
+		.filter((u) => u.roles.includes(arrivalRoleId) && !u.leftAt);
 }
 
 /** Nombre de membres à revoir, pour le compteur du menu (sans appel à Discord). */

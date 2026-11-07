@@ -1,4 +1,5 @@
 import { randomBytes } from 'node:crypto';
+import { eq } from 'drizzle-orm';
 import { db, schema } from '../db';
 import type { ProfessionEntry } from '../db/schema';
 import { createLocalAdmin } from '../local-admin';
@@ -82,7 +83,10 @@ const PLAYERS: [string, string[], Char[]][] = [
 	['Fennick', [R_MEM], [['Fennick', 'Étincelle', 'gnome', 'mage', 'fire', 'ranged', 26, [['engineering', 130], ['mining', 140]]]]],
 	['Kerrin', [R_MEM], [['Kerrin', 'Sentebois', 'night-elf', 'hunter', 'survival', 'ranged', 25, [['herbalism', 120]]]]],
 	['Tamsin', [R_NEW], [['Tamsin', 'Noirsceau', 'human', 'warlock', 'demonology', 'ranged', 19, [['tailoring', 80]]]]],
-	['Quillon', [R_NEW], [['Quillon', 'Furtif', 'gnome', 'rogue', 'subtlety', 'melee', 16, []]]]
+	['Quillon', [R_NEW], [['Quillon', 'Furtif', 'gnome', 'rogue', 'subtlety', 'melee', 16, []]]],
+	// Départs : Corwen a rejoint une autre guilde (Admin → Anciens membres), Maelis n'est plus dans le registre.
+	['Corwen', [R_MEM], [['Corwen', 'Brisevent', 'human', 'hunter', 'beast-mastery', 'ranged', 30, [['skinning', 160], ['leatherworking', 150]]]]],
+	['Maelis', [R_MEM], [['Maelis', 'Ombrelune', 'night-elf', 'rogue', 'assassination', 'melee', 24, [['herbalism', 110]]]]]
 ];
 
 // Candidats (pas encore sur le serveur) : [pseudo, perso visé, réponses, avis des officiers]
@@ -124,7 +128,9 @@ const SPECS: Record<string, string> = {
 	'mage:fire': 'Fire',
 	'hunter:survival': 'Survival',
 	'warlock:demonology': 'Demonology',
-	'rogue:subtlety': 'Subtlety'
+	'rogue:subtlety': 'Subtlety',
+	'hunter:beast-mastery': 'Beastmastery',
+	'rogue:assassination': 'Assassination'
 };
 const RH_ROLE = { tank: 'Tank', melee: 'Melee', ranged: 'Ranged', healer: 'Healer' };
 
@@ -229,6 +235,19 @@ export function seedDemo(now = Date.now()): DemoEvent[] {
 				.run();
 		});
 	});
+
+	db()
+		.update(schema.users)
+		.set({
+			roles: [],
+			leftAt: new Date(now - 2 * DAY),
+			leftBy: 'Battle.net',
+			leftForGuild: 'Les Lames du Nord',
+			leftDiscord: 'Rôles retirés par le bot : Membre.'
+		})
+		.where(eq(schema.users.discordId, demoUserId('Corwen')))
+		.run();
+	db().update(schema.users).set({ absentSince: new Date(now - 3 * 3_600_000) }).where(eq(schema.users.discordId, demoUserId('Maelis'))).run();
 
 	APPLICANTS.forEach(([pseudo, [name, surname, race, cls, spec, role, level], answers, votes], i) => {
 		const userId = demoUserId(pseudo);
