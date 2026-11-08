@@ -43,13 +43,10 @@ export const sitePermission = (user: { roles: string[]; inGuild: boolean; leftAt
 export function recordDiscordLogin(
 	discordId: string,
 	profile: { username: string; name: string | null | undefined; image: string | null | undefined },
-	member: GuildMember | null,
-	// BattleTag du compte Battle.net relié à Discord, null si aucun ; undefined : inconnu (on garde l'ancien).
-	battleTag?: string | null
+	member: GuildMember | null
 ) {
 	if (member) recordSeenRoles(member.roles);
 	const values = {
-		...(battleTag !== undefined && { battleTag, battlenetCheckedAt: new Date() }),
 		discordUsername: profile.username,
 		displayName: member?.nick ?? profile.name ?? profile.username,
 		avatar: profile.image ?? null,

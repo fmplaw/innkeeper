@@ -20,9 +20,7 @@
 		</li>
 		<li>
 			Discord nous transmet seulement ton identifiant, ton pseudo et ton avatar, ainsi que tes rôles sur le serveur de
-			la guilde, pour savoir si tu es membre ou officier. Il nous dit aussi si ton compte Battle.net est relié à ton compte
-			Discord, avec ton BattleTag (visible des officiers seulement) : Blizzard ne relaie le chat de guilde sur Discord que pour
-			les comptes reliés, et les officiers peuvent ainsi rappeler à chacun de le faire.
+			la guilde, pour savoir si tu es membre ou officier.
 		</li>
 		<li>
 			Si ta candidature est acceptée et que tu choisis « Rejoindre le serveur », Discord te demande en plus
