@@ -21,7 +21,7 @@
 {#if form && 'error' in form && form.error}<p class="notice bad">{form.error}</p>{/if}
 {#if data.channelsError}<p class="notice warn">{data.channelsError}</p>{/if}
 
-<form method="POST" use:enhance={keepValues} class="card form">
+<form method="POST" action="?/save" use:enhance={keepValues} class="card form">
 	<div>
 		<label for="channelId">Salon des commandes</label>
 		<select id="channelId" name="channelId" value={data.channelId ?? ''}>

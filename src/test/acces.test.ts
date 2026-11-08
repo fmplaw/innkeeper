@@ -77,7 +77,7 @@ const PAGES: Record<string, Record<string, Rule>> = {
 	'/admin/recrutement': { load: 'officier', save: 'officier', test: 'officier' },
 	'/admin/roles': { load: 'adminInstance', save: 'adminInstance', sync: 'adminInstance' },
 	'/admin/rosters': { load: 'officier', create: 'officier', update: 'officier', delete: 'officier' },
-	'/admin/commandes': { load: 'officier', default: 'officier', prices: 'officier' },
+	'/admin/commandes': { load: 'officier', save: 'officier', prices: 'officier' },
 	'/admin/sorties': { load: 'officier', connection: 'officier', create: 'officier', update: 'officier', image: 'officier', delete: 'officier' },
 	'/admin/statistiques': { load: 'officier' },
 	'/artisans': { load: 'connecte' },
@@ -205,6 +205,14 @@ describe('matrice d’accès', () => {
 		const actual = Object.entries(found).flatMap(([route, handlers]) => Object.keys(handlers).map((h) => `${route} ${h}`)).sort();
 		const declared = Object.entries(PAGES).flatMap(([route, rules]) => Object.keys(rules).map((h) => `${route} ${h}`)).sort();
 		expect(actual).toEqual(declared);
+	});
+
+	// SvelteKit refuse une action « default » à côté d'actions nommées : erreur 500 à l'envoi du formulaire.
+	it('aucune page ne mélange l’action par défaut et des actions nommées', () => {
+		const mixed = Object.entries(PAGES)
+			.filter(([, rules]) => 'default' in rules && Object.keys(rules).some((k) => !['default', 'load', 'layout'].includes(k)))
+			.map(([route]) => route);
+		expect(mixed).toEqual([]);
 	});
 
 	it('chaque point d’accès hors pages est déclaré', () => {

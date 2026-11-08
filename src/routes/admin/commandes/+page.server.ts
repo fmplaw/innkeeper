@@ -44,8 +44,9 @@ export const load: PageServerLoad = async ({ locals }) => {
 	};
 };
 
+// Actions nommées seulement : SvelteKit refuse « default » à côté d'une action nommée (erreur 500).
 export const actions: Actions = {
-	default: async ({ locals, request }) => {
+	save: async ({ locals, request }) => {
 		requireOfficer(locals);
 		const form = await request.formData();
 		const [ruleset, house] = String(form.get('auction') ?? '').split(':');
