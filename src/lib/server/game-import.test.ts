@@ -78,7 +78,7 @@ describe('import des données du jeu', () => {
 			{ id: 'blacksmithing', level: 150 },
 			{ id: 'fishing', level: 80 }
 		]);
-		expect(v.recipes).toEqual([{ profession: 'blacksmithing', skill: 150, recipes: [{ id: 2662, name: 'Ceinture en cuivre', category: 'Ceintures' }, { id: 2663, name: 'Bracelets en cuivre' }] }]);
+		expect(v.recipes).toEqual([{ profession: 'blacksmithing', skill: 150, recipes: [{ id: 2663, name: 'Bracelets en cuivre', category: 'Bracelets' }, { id: 2662, name: 'Ceinture en cuivre', category: 'Ceintures' }] }]);
 		// En ligne au moment de l'export.
 		expect(v.lastOnlineAt?.getTime()).toBe(1793500000 * 1000);
 
