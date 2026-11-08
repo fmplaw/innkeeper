@@ -29,6 +29,8 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ### Corrigé
 
+- **Nom de la guilde coupé dans le menu** (« Le Pac… ») depuis l'onglet Commandes : l'en-tête s'élargit sur grand écran, le nom n'est plus jamais coupé. Sur un écran moyen, seul le blason reste (il ramène à l'accueil) ; jusqu'à 1000 px de large, le menu passe dans la barre d'onglets du bas.
+
 - **Races Skyborne** : l'Armurerie (Battle.net) les reconnaît maintenant ; un druide Éolide n'apparaît plus avec la race déjà choisie sur la fiche. Elles prennent leurs noms français officiels : **Éolide de l’Ordre suprême** (Alliance) et **Éolide sculpte-vents** (Horde).
 - Addon Innkeeper Sync 1.2.2 (zip du site) : le message « N recettes enregistrées » ne se répète plus à chaque fabrication, fenêtre de métier ouverte ; il n'apparaît que si le nombre de recettes connues change.
 
