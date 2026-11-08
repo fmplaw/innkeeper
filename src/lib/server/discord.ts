@@ -19,6 +19,23 @@ export async function fetchGuildMember(accessToken: string, guildId: string) {
 	return (await res.json()) as GuildMember;
 }
 
+/**
+ * Compte Battle.net relié au compte Discord (scope `connections`) : son BattleTag, ou `null` si
+ * aucun n'est relié. `undefined` si Discord ne répond pas ou si le joueur n'a pas accordé le scope.
+ * Sert au relais du canal guilde (Blizzard ne transmet que les messages des comptes reliés).
+ */
+export async function fetchBattlenetConnection(accessToken: string): Promise<string | null | undefined> {
+	try {
+		const res = await fetch(`${API}/users/@me/connections`, { headers: { Authorization: `Bearer ${accessToken}` }, signal: AbortSignal.timeout(10_000) });
+		if (!res.ok) return undefined;
+		const list = (await res.json()) as { type: string; name: string; revoked?: boolean }[];
+		const bnet = list.find((c) => c.type === 'battlenet' && !c.revoked);
+		return bnet ? bnet.name : null;
+	} catch {
+		return undefined;
+	}
+}
+
 /** Échange un code OAuth contre un jeton d'accès (flux « authorization code »). */
 export async function exchangeCode(clientId: string, clientSecret: string, code: string, redirectUri: string) {
 	const res = await fetch(`${API}/oauth2/token`, {

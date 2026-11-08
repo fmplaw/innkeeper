@@ -60,7 +60,12 @@ export const users = sqliteTable('users', {
 	leftDiscord: text('left_discord'),
 	leftComment: text('left_comment'),
 	// Un officier a pris connaissance du départ (compteur du menu).
-	leftSeenAt: integer('left_seen_at', { mode: 'timestamp' })
+	leftSeenAt: integer('left_seen_at', { mode: 'timestamp' }),
+	// Compte Battle.net relié au compte Discord (lu à la connexion, scope `connections`) : BattleTag,
+	// ou null. `battlenetCheckedAt` null = jamais vérifié (pas reconnecté depuis). Blizzard ne relaie
+	// sur Discord que le chat de guilde des joueurs qui ont relié leurs comptes.
+	battleTag: text('battle_tag'),
+	battlenetCheckedAt: integer('battlenet_checked_at', { mode: 'timestamp' })
 });
 
 export const characters = sqliteTable(

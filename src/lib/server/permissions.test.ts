@@ -62,6 +62,15 @@ describe('permissions selon les rôles Discord', () => {
 		// Il quitte le serveur puis se reconnecte : plus d'accès.
 		recordDiscordLogin('900000000000000102', { username: 'nouveau', name: 'Nouveau', image: null }, null);
 		expect(permissionFor(stored('900000000000000102'))).toBeNull();
+
+		// Battle.net relié : enregistré ; inconnu (undefined) : l'ancienne valeur reste.
+		recordDiscordLogin('900000000000000102', { username: 'nouveau', name: 'Nouveau', image: null }, null, 'Nouveau#1234');
+		expect(stored('900000000000000102').battleTag).toBe('Nouveau#1234');
+		recordDiscordLogin('900000000000000102', { username: 'nouveau', name: 'Nouveau', image: null }, null);
+		expect(stored('900000000000000102').battleTag).toBe('Nouveau#1234');
+		recordDiscordLogin('900000000000000102', { username: 'nouveau', name: 'Nouveau', image: null }, null, null);
+		expect(stored('900000000000000102')).toMatchObject({ battleTag: null });
+		expect(stored('900000000000000102').battlenetCheckedAt).not.toBeNull();
 	});
 
 	it('compte les joueurs du site qui portent chaque rôle', () => {

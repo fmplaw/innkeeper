@@ -28,6 +28,26 @@
 	</div>
 </div>
 
+{#if data.battlenet && !data.demo}
+	<div class="notice bnet">
+		<p>
+			{#if data.battlenet === 'no'}
+				<strong>Relie ton compte Battle.net à Discord</strong> pour que tes messages du canal guilde arrivent sur le Discord de la guilde :
+			{:else}
+				<strong>Ton compte Battle.net est-il relié à Discord ?</strong> Sans ça, tes messages du canal guilde n'arrivent pas sur le Discord de la guilde.
+				Pour le relier :
+			{/if}
+			Discord → Paramètres utilisateur → Connexions → Battle.net. Une seule fois.
+		</p>
+		<!-- Reconnexion par Discord (immédiate si déjà autorisé) : le site relit les comptes reliés. -->
+		<form method="POST" action="/connexion">
+			<input type="hidden" name="providerId" value="discord" />
+			<input type="hidden" name="redirectTo" value="/persos" />
+			<button class="secondary small">{data.battlenet === 'no' ? 'C’est fait, vérifier' : 'Vérifier'}</button>
+		</form>
+	</div>
+{/if}
+
 {#if form?.message}<p class="notice bad"><Glyph name="warning" /> {form.message}</p>{/if}
 
 {#snippet card(c: (typeof data.characters)[number])}
@@ -178,5 +198,16 @@
 	}
 	.empty-state .serif {
 		font-size: 1.75rem;
+	}
+	.bnet {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.5rem 1rem;
+	}
+	.bnet p {
+		margin: 0;
+		max-width: 70ch;
 	}
 </style>

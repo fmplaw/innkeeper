@@ -26,7 +26,9 @@ Ce guide explique comment utiliser au quotidien le site de ta guilde, propulsé 
 
 Sur téléphone, les pages du site sont dans la barre d'onglets en bas de l'écran ; **Plus** donne le reste des pages, ton nom et le bouton de déconnexion.
 
-Le site ne voit jamais ton mot de passe. Discord lui transmet seulement ton identifiant, ton pseudo, ton avatar et tes rôles sur le serveur de la guilde. Ce sont ces rôles qui déterminent ce que tu vois : membre ou officier.
+Le site ne voit jamais ton mot de passe. Discord lui transmet seulement ton identifiant, ton pseudo, ton avatar et tes rôles sur le serveur de la guilde. Ce sont ces rôles qui déterminent ce que tu vois : membre ou officier. Discord lui dit aussi si ton compte Battle.net est relié à Discord (avec ton BattleTag, que seuls les officiers voient).
+
+> **Chat de guilde sur Discord.** Si la guilde a relié son canal guilde à un salon Discord, Blizzard n'y fait passer tes messages que si ton compte Battle.net est relié à Discord : Discord → Paramètres utilisateur → **Connexions** → **Battle.net**. Tant que ce n'est pas fait, Mes persos te le rappelle ; après l'avoir fait, clique sur **« C'est fait, vérifier »**.
 
 > **Pas reconnu comme membre ?** Ton navigateur est probablement connecté à un autre compte Discord que celui de ton appli. Voir [En cas de problème](#en-cas-de-problème).
 
@@ -161,6 +163,7 @@ Admin → **Progression** : les porteurs du rôle d'arrivée, du plus ancien au 
 Admin → **Joueurs** :
 
 - tous les joueurs connectés au moins une fois, avec leurs persos ;
+- **« Battle.net relié à Discord »** : combien de membres ont relié leur compte Battle.net (nécessaire pour que leur chat de guilde arrive sur Discord), les BattleTags, et **« Copier les mentions »** pour relancer les autres. Vérifié à chaque connexion au site : un membre qui ne s'est pas reconnecté depuis n'est pas encore compté ;
 - **« Sur Discord, sans compte sur le site »** : les membres du serveur qui ont accès au site mais ne s'y sont jamais connectés. Le bouton **« Copier les mentions »** prépare un message de relance à coller sur Discord.
 
 ### Anciens membres

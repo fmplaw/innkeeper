@@ -26,6 +26,8 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 			permission: permissionFor(u),
 			lastLogin: u.lastLogin,
 			left: Boolean(u.leftAt),
+			// Battle.net relié à Discord : BattleTag, null = non relié, undefined = pas vérifié.
+			battleTag: u.battlenetCheckedAt ? u.battleTag : undefined,
 			characters: characters.filter((c) => c.userId === u.discordId)
 		}))
 		// Les candidats (connectés sans être membres) se gèrent dans Candidatures, les anciens
