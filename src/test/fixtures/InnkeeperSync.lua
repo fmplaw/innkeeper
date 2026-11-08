@@ -62,13 +62,14 @@ InnkeeperSyncDB = {
 		["skill164"] = {
 			["list"] = {
 				{
-					["id"] = 2662,
-					["name"] = "Ceinture en cuivre",
-					["category"] = "Ceintures",
-				}, -- [1]
-				{
+					["category"] = "Bracelets",
 					["id"] = 2663,
 					["name"] = "Bracelets en cuivre",
+				}, -- [1]
+				{
+					["category"] = "Ceintures",
+					["id"] = 2662,
+					["name"] = "Ceinture en cuivre",
 				}, -- [2]
 			},
 			["name"] = "Forge",

@@ -53,7 +53,12 @@ C_TradeSkillUI = {
 	GetAllRecipeIDs = function() return { 2662, 2663, 3491 } end,
 	GetRecipeInfo = function(id)
 		local names = { [2662] = "Ceinture en cuivre", [2663] = "Bracelets en cuivre", [3491] = "Grande hache en bronze" }
-		return { name = names[id], learned = id ~= 3491 }
+		local categories = { [2662] = 2, [2663] = 1, [3491] = 1 }
+		return { name = names[id], learned = id ~= 3491, categoryID = categories[id] }
+	end,
+	GetCategoryInfo = function(id)
+		if id == 1 then return { name = "Bracelets", uiOrder = 1 } end
+		return { name = "Ceintures", uiOrder = 2 }
 	end,
 }
 SlashCmdList = {}

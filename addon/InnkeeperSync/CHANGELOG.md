@@ -4,6 +4,11 @@ Exports your guild roster, professions and recipes from World of Warcraft: Forev
 
 Exporte le registre de guilde, les métiers et les recettes pour Innkeeper, le portail de la guilde. L'addon n'envoie rien : le jeu écrit l'export dans `SavedVariables/InnkeeperSync.lua`, que l'application InnkeeperSync (ou un officier) envoie au site de la guilde.
 
+## 1.3.0
+
+- Recipes are exported with their section of the profession window ("Bandages", "Remedies"…), in the game's order, so the guild site can list them the same way. Open each profession window once to send them.
+- Les recettes sont exportées avec leur sous-section de la fenêtre du métier (« Bandages », « Remèdes »…), dans l'ordre du jeu, pour que le site de la guilde les range de la même façon. Ouvre une fois chaque fenêtre de métier pour les envoyer.
+
 ## 1.2.2
 
 - No more repeated "N recipes saved" message while crafting: it now appears only when the number of known recipes changes.

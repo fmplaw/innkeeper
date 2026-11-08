@@ -137,13 +137,30 @@ local function readRecipes()
 	if try(C_TradeSkillUI.IsTradeSkillLinked) or try(C_TradeSkillUI.IsTradeSkillGuild) then return end
 	local base = try(C_TradeSkillUI.GetBaseProfessionInfo)
 	if not base or not base.professionID then return end
+	-- Sous-section de la fenêtre du métier (« Bandages », « Remèdes »…), pour que le site range
+	-- les recettes comme le jeu. Rangées dans l'ordre du jeu (uiOrder), sinon dans celui de la liste.
+	local categories = {}
+	local function category(categoryID)
+		if not categoryID then return nil end
+		if categories[categoryID] == nil then
+			local c = try(C_TradeSkillUI.GetCategoryInfo, categoryID)
+			categories[categoryID] = (c and c.name) and { name = c.name, order = c.uiOrder } or false
+		end
+		return categories[categoryID] or nil
+	end
 	local learned = {}
-	for _, recipeID in ipairs(try(C_TradeSkillUI.GetAllRecipeIDs) or {}) do
+	for index, recipeID in ipairs(try(C_TradeSkillUI.GetAllRecipeIDs) or {}) do
 		local info = try(C_TradeSkillUI.GetRecipeInfo, recipeID)
 		if info and info.learned then
-			learned[#learned + 1] = { id = recipeID, name = info.name }
+			local c = category(info.categoryID)
+			learned[#learned + 1] = { id = recipeID, name = info.name, category = c and c.name, order = c and c.order or 100000, index = index }
 		end
 	end
+	table.sort(learned, function(a, b)
+		if a.order ~= b.order then return a.order < b.order end
+		return a.index < b.index
+	end)
+	for _, r in ipairs(learned) do r.order, r.index = nil, nil end
 	-- Rangées par métier : rouvrir une fenêtre remplace la liste au lieu de la doubler.
 	InnkeeperSyncDB.recipes = InnkeeperSyncDB.recipes or {}
 	local key = "skill" .. base.professionID
