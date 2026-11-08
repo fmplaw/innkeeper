@@ -12,6 +12,19 @@
 	const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'short', timeStyle: 'short' });
 	const dayFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium' });
 	let copied = $state(false);
+	let copiedBnet = $state(false);
+
+	// Relais du canal guilde : Blizzard ne transmet que les messages des comptes Battle.net reliés à Discord.
+	const members = $derived(data.players.filter((p) => p.permission));
+	const notLinked = $derived(members.filter((p) => p.battleTag === null));
+	const linked = $derived(members.filter((p) => p.battleTag).length);
+	const unknown = $derived(members.filter((p) => p.battleTag === undefined).length);
+
+	async function copyNotLinked() {
+		await navigator.clipboard.writeText(notLinked.map((p) => `<@${p.id}>`).join(' '));
+		copiedBnet = true;
+		setTimeout(() => (copiedBnet = false), 2500);
+	}
 
 	// Mentions Discord (<@id>) à coller dans un message pour relancer tout le monde d'un coup.
 	async function copyMentions() {
@@ -44,6 +57,25 @@
 		<p class="sub">{data.players.length} joueurs connectés au moins une fois · {withoutCharacter} sans perso renseigné</p>
 	</div>
 </div>
+
+{#if linked || notLinked.length}
+	<details class="card missing bnet">
+		<summary>
+			<strong>Battle.net relié à Discord</strong>
+			<span class="muted">({linked} sur {members.length}{notLinked.length ? `, ${notLinked.length} à relancer` : ''})</span>
+		</summary>
+		<p class="muted small">
+			Le canal guilde du jeu est relayé sur Discord seulement pour les joueurs qui ont relié leur compte Battle.net (Discord → Paramètres →
+			Connexions → Battle.net). Vérifié à chaque connexion au site{unknown ? ` ; ${unknown} membre${unknown > 1 ? 's ne se sont pas' : ' ne s’est pas'} reconnecté${unknown > 1 ? 's' : ''} depuis` : ''}.
+		</p>
+		{#if notLinked.length}
+			<div class="row">
+				<button class="secondary" onclick={copyNotLinked}>{copiedBnet ? 'Mentions copiées ✔' : 'Copier les mentions'}</button>
+				<span class="muted small">Pas encore relié : {notLinked.map((p) => p.displayName).join(', ')}.</span>
+			</div>
+		{/if}
+	</details>
+{/if}
 
 {#if data.missingError}<p class="notice warn">{data.missingError}</p>{/if}
 {#if data.missing?.length}
@@ -84,6 +116,7 @@
 					<a href="/joueurs/{p.id}"><strong>{p.displayName}</strong></a>
 					<span class="muted small">@{p.username} · vu le {dateFormat.format(p.lastLogin)}</span>
 				</div>
+				{#if p.battleTag}<span class="badge plain" title="Battle.net relié à Discord">{p.battleTag}</span>{:else if p.battleTag === null && p.permission}<span class="badge plain warn-badge" title="Battle.net pas relié à Discord : son chat de guilde n'arrive pas sur Discord">Battle.net non relié</span>{/if}
 				<span class="badge" class:main={p.permission === 'officer'} class:plain={!p.permission}>{p.permission ? PERMISSION_LABELS[p.permission] : 'Sans accès'}</span>
 				<a class="button secondary small" href="/persos/nouveau?pour={p.id}"><Glyph name="plus" size={15} /> Perso</a>
 			</div>
@@ -116,6 +149,9 @@
 		display: grid;
 		gap: 0.6rem;
 		margin-bottom: 1rem;
+	}
+	.warn-badge {
+		color: var(--warn);
 	}
 	.missing summary {
 		cursor: pointer;

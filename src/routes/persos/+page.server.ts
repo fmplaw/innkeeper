@@ -2,13 +2,20 @@ import { error, fail } from '@sveltejs/kit';
 import { audit } from '$lib/server/audit';
 import { canEdit, characterTarget, deleteCharacter, getCharacter, listCharacters, setMain } from '$lib/server/characters';
 import { homonyms } from '$lib/server/game-import';
+import { eq } from 'drizzle-orm';
+import { db, schema } from '$lib/server/db';
+import { demoEnabled } from '$lib/server/demo';
 import { requireUser } from '$lib/server/guards';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = ({ locals }) => {
 	const user = requireUser(locals);
 	const characters = listCharacters(user.id);
-	return { characters, homonyms: homonyms(characters.map((c) => c.id)) };
+	const me = db().select({ battleTag: schema.users.battleTag, checkedAt: schema.users.battlenetCheckedAt }).from(schema.users).where(eq(schema.users.discordId, user.id)).get();
+	// Rappel tant que le compte Battle.net n'est pas relié à Discord (vérifié à la connexion) :
+	// 'no' = pas relié, 'unknown' = pas vérifié (connecté avant que le site le demande).
+	const battlenet = !me || me.battleTag ? null : me.checkedAt ? ('no' as const) : ('unknown' as const);
+	return { characters, homonyms: homonyms(characters.map((c) => c.id)), battlenet, demo: demoEnabled() };
 };
 
 async function editableFromForm(locals: App.Locals, request: Request) {

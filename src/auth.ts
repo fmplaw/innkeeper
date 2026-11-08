@@ -1,6 +1,6 @@
 import { SvelteKitAuth } from '@auth/sveltekit';
 import Discord from '@auth/sveltekit/providers/discord';
-import { fetchGuildMember } from '$lib/server/discord';
+import { fetchBattlenetConnection, fetchGuildMember } from '$lib/server/discord';
 import { recordDiscordLogin } from '$lib/server/permissions';
 import { getAuthSecret, getDiscord } from '$lib/server/settings';
 
@@ -22,7 +22,8 @@ export const { handle, signIn, signOut } = SvelteKitAuth(async () => {
 						// Discord renvoie désormais `iss` au callback ; sans issuer déclaré,
 						// Auth.js le compare à sa valeur par défaut (https://authjs.dev) et rejette.
 						issuer: 'https://discord.com',
-						authorization: { params: { scope: 'identify guilds.members.read' } }
+						// `connections` : savoir si le compte Battle.net est relié (relais du canal guilde en jeu).
+						authorization: { params: { scope: 'identify guilds.members.read connections' } }
 					})
 				]
 			: [],
@@ -33,8 +34,8 @@ export const { handle, signIn, signOut } = SvelteKitAuth(async () => {
 
 				// Tout compte Discord peut se connecter : les membres accèdent au site, les
 				// autres (pas sur le serveur, ou sans rôle autorisé) seulement à leur candidature.
-				const member = await fetchGuildMember(account.access_token, discord.guildId);
-				recordDiscordLogin(account.providerAccountId, { username: String(profile.username), name: user.name, image: user.image }, member);
+				const [member, battleTag] = await Promise.all([fetchGuildMember(account.access_token, discord.guildId), fetchBattlenetConnection(account.access_token)]);
+				recordDiscordLogin(account.providerAccountId, { username: String(profile.username), name: user.name, image: user.image }, member, battleTag);
 				return true;
 			},
 			jwt({ token, account }) {
