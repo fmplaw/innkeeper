@@ -6,6 +6,7 @@ import { handle as authHandle } from './auth';
 import { db, schema } from '$lib/server/db';
 import { purgeAuditLog } from '$lib/server/audit';
 import { scheduleTranslation } from '$lib/server/recipe-names';
+import { startAuctionSchedule } from '$lib/server/auction';
 import { startBattlenetSchedule } from '$lib/server/battlenet';
 import { demoEnabled, demoSessionUser, initDemo } from '$lib/server/demo';
 import { hasLocalAdmin, mustChangePasswordFirst, sessionAdmin, setupCode } from '$lib/server/local-admin';
@@ -19,6 +20,8 @@ export const init: ServerInit = () => {
 	else scheduleTranslation();
 	// Registre de guilde par Battle.net, toutes les 3 heures (si la guilde l'a configuré).
 	if (!demoEnabled()) startBattlenetSchedule();
+	// Prix de l'hôtel des ventes (commandes de craft), toutes les heures.
+	if (!demoEnabled()) startAuctionSchedule();
 	// Journal d'audit : purge des entrées de plus de 12 mois, au démarrage puis chaque jour.
 	purgeAuditLog();
 	setInterval(purgeAuditLog, 86_400_000).unref();

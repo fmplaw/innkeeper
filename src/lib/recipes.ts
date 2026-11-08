@@ -25,3 +25,36 @@ export function groupRecipes<R extends { name: string; category?: string | null 
 
 /** Ancre d'un métier d'un perso sur sa fiche joueur (lien depuis la page Artisans). */
 export const recipesAnchor = (characterId: number, profession: string) => `recettes-${characterId}-${profession}`;
+
+// ── Composants et coût ────────────────────────────────────────────────────────
+
+export interface ReagentLike {
+	id: number;
+	name?: string | null;
+	count: number;
+}
+
+/** Nombre de fabrications pour obtenir `quantity` objets (une recette peut en donner plusieurs). */
+export const craftsFor = (quantity: number, made: number | null | undefined) => Math.ceil(quantity / Math.max(made ?? 1, 1));
+
+export const reagentName = (r: ReagentLike) => r.name || `objet ${r.id}`;
+
+/** « 6 Feuillargent, 3 Fiole vide » pour `crafts` fabrications. */
+export const reagentList = (reagents: ReagentLike[], crafts = 1) => reagents.map((r) => `${r.count * crafts} ${reagentName(r)}`).join(', ');
+
+/**
+ * Coût des composants à l'hôtel des ventes (pc) pour `crafts` fabrications. `missing` : composants
+ * sans prix (vendus par un marchand, ou absents de l'HV), l'estimation est alors partielle.
+ * null si aucun composant n'a de prix.
+ */
+export function reagentCost(reagents: ReagentLike[] | null | undefined, crafts: number, prices: Record<number, number>) {
+	if (!reagents?.length) return null;
+	let total = 0;
+	const missing: string[] = [];
+	for (const r of reagents) {
+		const price = prices[r.id];
+		if (price === undefined) missing.push(reagentName(r));
+		else total += price * r.count * crafts;
+	}
+	return missing.length === reagents.length ? null : { total, missing };
+}

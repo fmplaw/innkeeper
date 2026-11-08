@@ -49,7 +49,22 @@ const exportSchema = z.object({
 				skillLine: z.number().int().nullish(),
 				name: z.string().nullish(),
 				skill: z.number().int().nullish(),
-				list: z.array(z.object({ id: z.number().int(), name: z.string(), category: z.string().trim().min(1).max(80).nullish().catch(null) })).default([])
+				list: z
+					.array(
+						z.object({
+							id: z.number().int(),
+							name: z.string(),
+							category: z.string().trim().min(1).max(80).nullish().catch(null),
+							// Composants d'une fabrication (addon 1.4) ; une liste illisible est ignorée, pas la recette.
+							reagents: z
+								.array(z.object({ id: z.number().int().positive(), name: z.string().max(120).nullish(), count: z.number().int().min(1).max(1000) }))
+								.max(20)
+								.nullish()
+								.catch(null),
+							made: z.number().int().min(1).max(1000).nullish().catch(null)
+						})
+					)
+					.default([])
 			})
 		)
 		.optional()

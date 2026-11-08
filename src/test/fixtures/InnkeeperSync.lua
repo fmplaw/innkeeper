@@ -65,11 +65,25 @@ InnkeeperSyncDB = {
 					["category"] = "Bracelets",
 					["id"] = 2663,
 					["name"] = "Bracelets en cuivre",
+					["reagents"] = {
+						{
+							["count"] = 5,
+							["id"] = 2840,
+							["name"] = "Barre de cuivre",
+						}, -- [1]
+					},
 				}, -- [1]
 				{
 					["category"] = "Ceintures",
 					["id"] = 2662,
 					["name"] = "Ceinture en cuivre",
+					["reagents"] = {
+						{
+							["count"] = 6,
+							["id"] = 2840,
+							["name"] = "Barre de cuivre",
+						}, -- [1]
+					},
 				}, -- [2]
 			},
 			["name"] = "Forge",

@@ -1,6 +1,7 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { z } from 'zod';
 import { readMoney } from '$lib/money';
+import { priceTable } from '$lib/server/auction';
 import { createOrder, MAX_ACTIVE, recipeChoice } from '$lib/server/crafts';
 import { requireUser } from '$lib/server/guards';
 import { getCrafts } from '$lib/server/settings';
@@ -9,7 +10,7 @@ import type { Actions, PageServerLoad } from './$types';
 export const load: PageServerLoad = ({ locals, url }) => {
 	requireUser(locals);
 	const recipe = recipeChoice(Number(url.searchParams.get('recette')));
-	return { recipe, artisan: url.searchParams.get('artisan'), max: MAX_ACTIVE, announced: Boolean(getCrafts().channelId) };
+	return { recipe, artisan: url.searchParams.get('artisan'), max: MAX_ACTIVE, announced: Boolean(getCrafts().channelId), ...priceTable((recipe?.reagents ?? []).map((r) => r.id)) };
 };
 
 const orderSchema = z.object({

@@ -148,12 +148,42 @@ local function readRecipes()
 		end
 		return categories[categoryID] or nil
 	end
+	-- Composants d'une fabrication (objet, quantité), pour que le site estime leur coût à l'hôtel
+	-- des ventes. API récente (GetRecipeSchematic), sinon l'ancienne (GetRecipeReagentInfo).
+	local function itemName(itemID)
+		return (try(C_Item and C_Item.GetItemNameByID, itemID)) or (try(GetItemInfo, itemID))
+	end
+	local function reagents(recipeID)
+		local list = {}
+		local schematic = try(C_TradeSkillUI.GetRecipeSchematic, recipeID, false)
+		if schematic and schematic.reagentSlotSchematics then
+			for _, slot in ipairs(schematic.reagentSlotSchematics) do
+				local first = slot.reagents and slot.reagents[1]
+				-- Les emplacements facultatifs (améliorations) ne comptent pas.
+				if first and first.itemID and slot.required ~= false then
+					list[#list + 1] = { id = first.itemID, name = itemName(first.itemID), count = slot.quantityRequired or 1 }
+				end
+			end
+			if #list > 0 then
+				local made = schematic.quantityMin
+				return list, (made and made > 1) and made or nil
+			end
+		end
+		for i = 1, (try(C_TradeSkillUI.GetRecipeNumReagents, recipeID) or 0) do
+			local name, _, count = try(C_TradeSkillUI.GetRecipeReagentInfo, recipeID, i)
+			local link = try(C_TradeSkillUI.GetRecipeReagentItemLink, recipeID, i)
+			local itemID = link and tonumber(link:match("item:(%d+)"))
+			if itemID then list[#list + 1] = { id = itemID, name = name, count = count or 1 } end
+		end
+		return (#list > 0) and list or nil, nil
+	end
 	local learned = {}
 	for index, recipeID in ipairs(try(C_TradeSkillUI.GetAllRecipeIDs) or {}) do
 		local info = try(C_TradeSkillUI.GetRecipeInfo, recipeID)
 		if info and info.learned then
 			local c = category(info.categoryID)
-			learned[#learned + 1] = { id = recipeID, name = info.name, category = c and c.name, order = c and c.order or 100000, index = index }
+			local parts, made = reagents(recipeID)
+			learned[#learned + 1] = { id = recipeID, name = info.name, category = c and c.name, reagents = parts, made = made, order = c and c.order or 100000, index = index }
 		end
 	end
 	table.sort(learned, function(a, b)

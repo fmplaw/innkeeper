@@ -25,6 +25,16 @@ export interface Recipe {
 	id: number;
 	name: string;
 	category?: string | null;
+	/** Composants d'une fabrication (objets du jeu), exportés par l'addon 1.4. */
+	reagents?: Reagent[] | null;
+	/** Objets obtenus par fabrication, quand il y en a plus d'un. */
+	made?: number | null;
+}
+
+export interface Reagent {
+	id: number;
+	name?: string | null;
+	count: number;
 }
 
 const timestamp = (name: string) =>
@@ -384,3 +394,14 @@ export const craftOrders = sqliteTable(
 	(t) => [index('craft_orders_status_idx').on(t.status), index('craft_orders_requester_idx').on(t.requesterId)]
 );
 export type CraftOrder = typeof craftOrders.$inferSelect;
+
+// Prix de l'hôtel des ventes choisi (Admin → Commandes de craft), lus sur Battle.net toutes les
+// heures : prix unitaire moyen des 20 objets les moins chers (en pièces de cuivre), pour estimer
+// le coût des composants d'une commande.
+export const auctionPrices = sqliteTable('auction_prices', {
+	itemId: integer('item_id').primaryKey(),
+	unitPrice: integer('unit_price').notNull(),
+	minPrice: integer('min_price').notNull(),
+	quantity: integer('quantity').notNull(),
+	updatedAt: timestamp('updated_at')
+});

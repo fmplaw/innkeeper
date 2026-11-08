@@ -83,6 +83,12 @@
 			{o.materials ? 'fournis par le demandeur' : 'à trouver par l’artisan'}
 			{#if o.artisan}· <strong>Artisan souhaité :</strong> {o.artisan}{/if}
 		</p>
+		{#if o.reagents && o.status !== 'delivered' && o.status !== 'cancelled'}
+			<p class="small">
+				<strong>À réunir :</strong>
+				{o.reagents}{#if o.cost}<span class="muted">{` · ≈ ${formatMoney(o.cost.total)} à l'hôtel des ventes${o.cost.missing.length ? ` (sans ${o.cost.missing.join(', ')})` : ''}`}</span>{/if}
+			</p>
+		{/if}
 		{#if o.commission || o.budget || o.price}
 			<p class="money small">
 				{#if o.commission}<span><strong>Commission offerte :</strong> {formatMoney(o.commission)}</span>{/if}
@@ -111,7 +117,7 @@
 				<summary>Proposer un prix</summary>
 				<form method="POST" action="?/quote" use:enhance class="quote-fields">
 					<input type="hidden" name="id" value={o.id} />
-					<MoneyInput name="price" label="Ton prix, composants et commission compris" hint={o.budget ? `Dans le budget (${formatMoney(o.budget)} au plus), la commande est à toi tout de suite ; au-delà, le demandeur doit accepter.` : 'Le demandeur doit accepter ton prix.'} />
+					<MoneyInput name="price" label="Ton prix, composants et commission compris" hint={`${o.cost ? `Composants ≈ ${formatMoney(o.cost.total)} à l'HV. ` : ''}${o.budget ? `Dans le budget (${formatMoney(o.budget)} au plus), la commande est à toi tout de suite ; au-delà, le demandeur doit accepter.` : 'Le demandeur doit accepter ton prix.'}`} />
 					<button>Proposer</button>
 				</form>
 			</details>

@@ -77,7 +77,7 @@ const PAGES: Record<string, Record<string, Rule>> = {
 	'/admin/recrutement': { load: 'officier', save: 'officier', test: 'officier' },
 	'/admin/roles': { load: 'adminInstance', save: 'adminInstance', sync: 'adminInstance' },
 	'/admin/rosters': { load: 'officier', create: 'officier', update: 'officier', delete: 'officier' },
-	'/admin/commandes': { load: 'officier', default: 'officier' },
+	'/admin/commandes': { load: 'officier', default: 'officier', prices: 'officier' },
 	'/admin/sorties': { load: 'officier', connection: 'officier', create: 'officier', update: 'officier', image: 'officier', delete: 'officier' },
 	'/admin/statistiques': { load: 'officier' },
 	'/artisans': { load: 'connecte' },

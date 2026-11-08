@@ -46,7 +46,17 @@ const { officer: R_OFF, member: R_MEM, newcomer: R_NEW } = DEMO_ROLES;
 const R = (id: number, name: string, category?: string) => ({ id, name, ...(category && { category }) });
 const DEMO_RECIPES: Record<string, KnownRecipes[]> = {
 	Aldren: [{ profession: 'blacksmithing', skill: 182, recipes: [R(2660, 'Pierre à aiguiser brute'), R(2663, 'Brassards en cuivre')] }],
-	Ysolde: [{ profession: 'alchemy', skill: 168, recipes: [R(2330, 'Potion de soins mineure'), R(2329, 'Élixir de force du lion')] }],
+	Ysolde: [
+		{
+			profession: 'alchemy',
+			skill: 168,
+			recipes: [
+				// Composants exportés par l'addon 1.4 ; la Fiole vide n'a pas de prix à l'HV de démo (estimation partielle).
+				{ ...R(2330, 'Potion de soins mineure'), reagents: [{ id: 2447, name: 'Pacifique', count: 1 }, { id: 765, name: 'Feuillargent', count: 1 }, { id: 3371, name: 'Fiole vide', count: 1 }] },
+				R(2329, 'Élixir de force du lion')
+			]
+		}
+	],
 	Lysandre: [
 		{ profession: 'tailoring', skill: 170, recipes: [R(2963, 'Rouleau d’étoffe de lin'), R(2387, 'Cape en lin')] },
 		// Liste longue : montre le cadre qui défile et le filtre.
@@ -64,7 +74,7 @@ const DEMO_RECIPES: Record<string, KnownRecipes[]> = {
 	Eodric: [{ profession: 'leatherworking', skill: 171, recipes: [R(2881, 'Cuir léger'), R(2149, 'Bottes en cuir cousues main')] }],
 	Brunhild: [
 		// Exportées par l'addon 0.17 : rangées par sous-section, comme dans la fenêtre du métier.
-		{ profession: 'first-aid', skill: 150, recipes: [R(3275, 'Bandage en lin', 'Bandages'), R(3276, 'Bandage épais en lin', 'Bandages'), R(3277, 'Bandage en laine', 'Bandages'), R(7934, 'Anti-venin', 'Remèdes')] },
+		{ profession: 'first-aid', skill: 150, recipes: [{ ...R(3275, 'Bandage en lin', 'Bandages'), reagents: [{ id: 2589, name: 'Étoffe de lin', count: 1 }] }, { ...R(3276, 'Bandage épais en lin', 'Bandages'), reagents: [{ id: 2589, name: 'Étoffe de lin', count: 2 }] }, { ...R(3277, 'Bandage en laine', 'Bandages'), reagents: [{ id: 2592, name: 'Étoffe de laine', count: 1 }] }, R(7934, 'Anti-venin', 'Remèdes')] },
 		{ profession: 'cooking', skill: 120, recipes: [R(2538, 'Viande de loup grillée', 'Plats courants'), R(8604, 'Œufs aux herbes', 'Nourriture modifiant l’Endurance'), R(2540, 'Viande de sanglier rôtie', 'Nourriture modifiant la Force')] }
 	]
 };
@@ -249,6 +259,10 @@ export function seedDemo(now = Date.now()): DemoEvent[] {
 		.where(eq(schema.users.discordId, demoUserId('Corwen')))
 		.run();
 	db().update(schema.users).set({ absentSince: new Date(now - 3 * 3_600_000) }).where(eq(schema.users.discordId, demoUserId('Maelis'))).run();
+
+	// Prix de l'hôtel des ventes de démo (pc), comme lus sur Battle.net.
+	for (const [itemId, unitPrice] of [[2589, 25], [2592, 110], [2447, 30], [765, 15]])
+		db().insert(schema.auctionPrices).values({ itemId, unitPrice, minPrice: unitPrice - 5, quantity: 500, updatedAt: new Date(now) }).run();
 
 	// Commandes de craft : une ouverte avec commission, un prix proposé à Aldren, une prise, une livrée.
 	const order = (requester: string, recipeId: number, recipeName: string, profession: string, extra: Partial<typeof schema.craftOrders.$inferInsert>) =>

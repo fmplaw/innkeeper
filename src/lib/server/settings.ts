@@ -117,7 +117,10 @@ export type RaidHelperSettings = z.output<typeof raidHelperSchema>;
 
 // Commandes de craft : salon où le bot les annonce (aucun : elles restent sur le site).
 export const craftSchema = z.object({
-	channelId: discordId.default(null)
+	channelId: discordId.default(null),
+	// Hôtel des ventes dont Battle.net donne les prix : type de règles (JcE, JcJ…) et numéro de l'HV.
+	auctionRuleset: z.coerce.number().int().positive().nullable().default(null),
+	auctionHouse: z.coerce.number().int().positive().nullable().default(null)
 });
 export type CraftSettings = z.output<typeof craftSchema>;
 
@@ -170,6 +173,15 @@ export function getCrafts(): CraftSettings {
 	return parsed.success ? parsed.data : craftSchema.parse({});
 }
 export const setCrafts = (settings: CraftSettings) => write('crafts', settings);
+
+/** Dernière lecture des prix de l'hôtel des ventes (dates en millisecondes). */
+export interface AuctionStatus {
+	at: number;
+	ok: boolean;
+	message: string;
+}
+export const getAuctionStatus = () => read<AuctionStatus>('auctionStatus') ?? null;
+export const setAuctionStatus = (status: AuctionStatus) => write('auctionStatus', status);
 
 // Charte et règlement de la guilde : page publique /charte, à accepter pour postuler.
 export const charterSchema = z.object({

@@ -45,6 +45,7 @@ function GetProfessionInfo(i)
 	return "Pêche", 0, 80, 150, 0, 0, 356
 end
 C_GuildInfo = { GuildRoster = function() end }
+C_Item = { GetItemNameByID = function(id) return id == 2840 and "Barre de cuivre" or nil end }
 C_TradeSkillUI = {
 	IsTradeSkillReady = function() return true end,
 	IsTradeSkillLinked = function() return false end,
@@ -56,6 +57,16 @@ C_TradeSkillUI = {
 		local categories = { [2662] = 2, [2663] = 1, [3491] = 1 }
 		return { name = names[id], learned = id ~= 3491, categoryID = categories[id] }
 	end,
+	GetRecipeSchematic = function(id)
+		if id == 2662 then
+			return { quantityMin = 1, reagentSlotSchematics = { { required = true, quantityRequired = 6, reagents = { { itemID = 2840 } } } } }
+		end
+		return nil
+	end,
+	-- Ancienne API, pour les recettes sans « schematic ».
+	GetRecipeNumReagents = function(id) return id == 2663 and 1 or 0 end,
+	GetRecipeReagentInfo = function() return "Barre de cuivre", 0, 5 end,
+	GetRecipeReagentItemLink = function() return "|cffffffff|Hitem:2840::::::::|h[Barre de cuivre]|h|r" end,
 	GetCategoryInfo = function(id)
 		if id == 1 then return { name = "Bracelets", uiOrder = 1 } end
 		return { name = "Ceintures", uiOrder = 2 }

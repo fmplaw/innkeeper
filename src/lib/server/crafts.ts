@@ -1,13 +1,15 @@
 import { and, desc, eq, gte, inArray, lt, or, sql } from 'drizzle-orm';
 import { env } from '$env/dynamic/private';
 import { formatMoney } from '$lib/money';
+import { craftsFor, reagentCost, reagentList } from '$lib/recipes';
 import { recipeUrl } from '$lib/wowhead';
 import { PROFESSIONS } from '$lib/game/forever';
 import { artisansByProfession, type Artisan } from './artisans';
+import { priceTable } from './auction';
 import { audit } from './audit';
 import { BotError, botReady, editMessage, postMessage, type Embed } from './bot';
 import { db, schema } from './db';
-import type { CraftOrder, CraftStatus } from './db/schema';
+import type { CraftOrder, CraftStatus, Reagent } from './db/schema';
 import { getCrafts } from './settings';
 
 // Commandes de craft. Un membre commande une recette qu'au moins un artisan de la guilde connaît ;
@@ -34,13 +36,19 @@ export interface RecipeChoice {
 	name: string;
 	profession: string;
 	artisans: Artisan[];
+	/** Composants d'une fabrication, d'après l'export d'un artisan (addon 1.4), et objets obtenus. */
+	reagents: Reagent[] | null;
+	made: number | null;
 }
 
 /** La recette et les artisans de la guilde qui la connaissent (null si personne ne la connaît). */
 export function recipeChoice(recipeId: number): RecipeChoice | null {
 	for (const p of artisansByProfession()) {
 		const artisans = p.artisans.filter((a) => a.recipes.some((r) => r.id === recipeId));
-		if (artisans.length) return { id: recipeId, name: artisans[0].recipes.find((r) => r.id === recipeId)!.name, profession: p.id, artisans };
+		if (!artisans.length) continue;
+		const known = artisans.map((a) => a.recipes.find((r) => r.id === recipeId)!);
+		const withReagents = known.find((r) => r.reagents?.length);
+		return { id: recipeId, name: known[0].name, profession: p.id, artisans, reagents: withReagents?.reagents ?? null, made: withReagents?.made ?? null };
 	}
 	return null;
 }
@@ -195,9 +203,15 @@ export async function listOrders(now = new Date()) {
 			: []
 	);
 	const knowers = new Map<number, Artisan[]>();
+	const reagentsOf = new Map<number, { reagents: Reagent[]; made: number | null }>();
 	for (const p of artisansByProfession())
 		for (const a of p.artisans)
-			for (const r of a.recipes) if (orders.some((o) => o.recipeId === r.id)) knowers.set(r.id, [...(knowers.get(r.id) ?? []), a]);
+			for (const r of a.recipes) {
+				if (!orders.some((o) => o.recipeId === r.id)) continue;
+				knowers.set(r.id, [...(knowers.get(r.id) ?? []), a]);
+				if (r.reagents?.length && !reagentsOf.has(r.id)) reagentsOf.set(r.id, { reagents: r.reagents, made: r.made ?? null });
+			}
+	const { prices, at: pricesAt } = priceTable([...reagentsOf.values()].flatMap((r) => r.reagents.map((x) => x.id)));
 	return orders.map((o) => ({
 		...o,
 		professionName: professionName(o.profession),
@@ -205,8 +219,17 @@ export async function listOrders(now = new Date()) {
 		taker: o.takenBy ? (names.get(o.takenBy) ?? 'Ancien membre') : null,
 		artisan: o.artisanId ? (names.get(o.artisanId) ?? null) : null,
 		quoter: o.quotedBy ? (names.get(o.quotedBy) ?? 'Ancien membre') : null,
-		artisans: (knowers.get(o.recipeId) ?? []).map((a) => ({ playerId: a.playerId, name: a.name, player: a.player }))
+		artisans: (knowers.get(o.recipeId) ?? []).map((a) => ({ playerId: a.playerId, name: a.name, player: a.player })),
+		...components(reagentsOf.get(o.recipeId), o.quantity, prices),
+		pricesAt
 	}));
+}
+
+/** Composants à réunir pour la commande et leur coût estimé à l'HV. */
+function components(recipe: { reagents: Reagent[]; made: number | null } | undefined, quantity: number, prices: Record<number, number>) {
+	if (!recipe) return { reagents: null, cost: null };
+	const crafts = craftsFor(quantity, recipe.made);
+	return { reagents: reagentList(recipe.reagents, crafts), cost: reagentCost(recipe.reagents, crafts, prices) };
 }
 
 /**
@@ -235,7 +258,13 @@ export function openOrdersFor(userId: string) {
 
 // ── Discord ───────────────────────────────────────────────────────────────────
 
-function embed(order: CraftOrder, people: { requester: string; taker: string | null; artisan: string | null; quoter: string | null; artisans: string[] }): Embed {
+function embed(
+	order: CraftOrder,
+	people: { requester: string; taker: string | null; artisan: string | null; quoter: string | null; artisans: string[] },
+	recipe: { reagents: Reagent[] | null; made: number | null } | null = null
+): Embed {
+	const parts = recipe?.reagents?.length ? components({ reagents: recipe.reagents, made: recipe.made }, order.quantity, priceTable(recipe.reagents.map((r) => r.id)).prices) : null;
+	const cost = parts?.cost ? `≈ ${formatMoney(parts.cost.total)} à l’hôtel des ventes${parts.cost.missing.length ? ` (sans ${parts.cost.missing.join(', ')})` : ''}` : null;
 	const state =
 		order.status === 'taken' && people.taker
 			? `Prise par ${people.taker}${order.price ? ` pour ${formatMoney(order.price)}` : ''}`
@@ -254,6 +283,7 @@ function embed(order: CraftOrder, people: { requester: string; taker: string | n
 			{ name: 'État', value: state, inline: true },
 			{ name: 'Demandée par', value: people.requester, inline: true },
 			{ name: 'Composants', value: order.materials ? 'Fournis par le demandeur' : 'À trouver par l’artisan', inline: true },
+			...(parts?.reagents && !done ? [{ name: 'À réunir', value: [parts.reagents, cost].filter(Boolean).join('\n') }] : []),
 			...(order.commission ? [{ name: 'Commission offerte', value: formatMoney(order.commission), inline: true }] : []),
 			...(order.budget && order.status === 'open' ? [{ name: 'Budget maximum', value: formatMoney(order.budget), inline: true }] : []),
 			...(people.artisan ? [{ name: 'Artisan souhaité', value: people.artisan, inline: true }] : []),
@@ -302,7 +332,7 @@ async function announce(order: CraftOrder, recipe: RecipeChoice) {
 			channelId,
 			{
 				content: mention.length ? `Nouvelle commande pour ${mention.map((id) => `<@${id}>`).join(' ')}` : undefined,
-				embeds: [embed(order, { ...peopleOf(order), artisans: recipe.artisans.map((a) => a.name) })]
+				embeds: [embed(order, { ...peopleOf(order), artisans: recipe.artisans.map((a) => a.name) }, recipe)]
 			},
 			mention
 		);
@@ -317,9 +347,9 @@ async function announce(order: CraftOrder, recipe: RecipeChoice) {
 /** Met le message Discord de la commande à jour (état, artisan qui l'a prise…). */
 async function refreshAnnouncement(order: CraftOrder) {
 	if (!order.discordChannelId || !order.discordMessageId || !botReady()) return;
-	const artisans = recipeChoice(order.recipeId)?.artisans.map((a) => a.name) ?? [];
+	const recipe = recipeChoice(order.recipeId);
 	try {
-		await editMessage(order.discordChannelId, order.discordMessageId, { embeds: [embed(order, { ...peopleOf(order), artisans })] });
+		await editMessage(order.discordChannelId, order.discordMessageId, { embeds: [embed(order, { ...peopleOf(order), artisans: recipe?.artisans.map((a) => a.name) ?? [] }, recipe)] });
 	} catch (e) {
 		console.error('Mise à jour de l’annonce de commande impossible :', e instanceof Error ? e.message : e);
 	}
