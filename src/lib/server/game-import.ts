@@ -49,7 +49,7 @@ const exportSchema = z.object({
 				skillLine: z.number().int().nullish(),
 				name: z.string().nullish(),
 				skill: z.number().int().nullish(),
-				list: z.array(z.object({ id: z.number().int(), name: z.string() })).default([])
+				list: z.array(z.object({ id: z.number().int(), name: z.string(), category: z.string().trim().min(1).max(80).nullish().catch(null) })).default([])
 			})
 		)
 		.optional()

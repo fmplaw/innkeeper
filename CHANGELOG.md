@@ -6,6 +6,8 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ### Ajouté
 
+- **Recettes rangées comme en jeu** : sur la page d'un joueur, les recettes de chaque métier sont rangées par sous-section, comme dans la fenêtre du métier (« Bandages », « Remèdes »…). La page Artisans s'allège : elle montre le nombre de recettes de chaque artisan, et un clic ouvre sa page joueur directement sur ce métier. Les recettes exportées avant la version 0.17 de l'addon restent dans « Autres » jusqu'au prochain export.
+
 - **Anciens membres** (Admin → Anciens membres) : un membre qui quitte la guilde n'a plus accès au site et disparaît du roster, de la page Artisans, des rosters et des statistiques. Ses fiches sont gardées et « Réintégrer » les rend visibles. Avec Battle.net, le départ est repéré tout seul : aucun perso du joueur dans le registre de la guilde en jeu pendant au moins 5 heures, et l'Armurerie en montre un dans une autre guilde ou sans guilde. Le départ d'un officier, ou d'un joueur dont le perso est introuvable, reste à confirmer par un officier. Un officier peut aussi noter un départ lui-même. Les officiers sont prévenus dans leur salon Discord et par un compteur dans le menu, et peuvent noter la raison du départ. En option (Admin → Recrutement), le bot retire les rôles de membre de l'ancien membre sur Discord et lui donne un autre rôle, par exemple celui des invités. Un joueur qui revient dans la guilde en jeu est réintégré sur le site, mais ses rôles Discord ne lui sont pas rendus automatiquement.
 
 - **Lien vers l'Armurerie** : une petite icône à côté du nom d'un perso ouvre sa page dans l'Armurerie de Blizzard (équipement, talents, métiers), dans un nouvel onglet. Elle apparaît dans Mes persos, sur les fiches des joueurs, dans le roster, sur la page Artisans et sur la page d'une candidature. Seulement pour les persos trouvés dans l'Armurerie, avec Battle.net connecté.
@@ -20,7 +22,7 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 - **Badges « en jeu », « existe en jeu »… : vraie infobulle** au survol, au clavier et au toucher (l'ancienne, celle du navigateur, ne s'affichait pas sur téléphone), avec des explications plus claires. « en jeu » : dans le registre de la guilde. « existe en jeu » : le perso existe, mais n'est pas dans la guilde (pas encore invité, ou parti).
 - **Recettes en français**, même exportées d'un jeu en anglais (« Enchant Bracer - Minor Stamina » devient « Ench. de bracelets (Endurance mineure) ») : le site retient les noms des exports faits en français et demande les autres à Wowhead, en arrière-plan, en n'envoyant que le numéro de la recette. Les recettes déjà importées sont traduites au démarrage. La recherche de la page Artisans trouve donc aussi leurs recettes.
-- **Longues listes de recettes** (Artisans, Mes persos, fiches des joueurs) : au-delà d'une douzaine, la liste défile dans un cadre au lieu de repousser la page ; à partir de 20, un champ permet de la filtrer.
+- **Longues listes de recettes** (Mes persos, fiches des joueurs) : à partir de 20 recettes, un champ permet de filtrer la liste.
 - **Import du jeu : changement de métier.** Les métiers du perso qui exporte suivent ceux du jeu : un métier abandonné quitte sa fiche, avec ses recettes. Pour les autres membres (onglet des métiers de guilde, peut-être incomplet), l'import ajoute et met à jour sans rien retirer. Un export sans liste de métiers (pas encore chargée à la connexion) ne retire rien.
 
 ### Corrigé

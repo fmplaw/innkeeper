@@ -1,7 +1,7 @@
 import { eq, isNull } from 'drizzle-orm';
 import { PROFESSIONS } from '$lib/game/forever';
 import { db, schema } from './db';
-import type { ArmoryStatus } from './db/schema';
+import type { ArmoryStatus, Recipe } from './db/schema';
 
 // Page Artisans : les persos de la guilde regroupés par métier, avec leur niveau (fiche ou
 // jeu) et les recettes exportées par l'addon. Un métier connu seulement par ses recettes
@@ -19,7 +19,7 @@ export interface Artisan {
 	/** Vérification dans l'Armurerie (lien vers sa page quand le perso y a été trouvé). */
 	armoryStatus: ArmoryStatus | null;
 	skill: number | null;
-	recipes: { id: number; name: string }[];
+	recipes: Recipe[];
 }
 
 export function artisansByProfession() {
