@@ -4,7 +4,8 @@
 	import ClassEmblem from '$lib/components/ClassEmblem.svelte';
 	import Glyph from '$lib/components/Glyph.svelte';
 	import { classColor } from '$lib/labels';
-	import { recipesAnchor } from '$lib/recipes';
+	import { formatMoney } from '$lib/money';
+	import { reagentCost, reagentList, recipesAnchor } from '$lib/recipes';
 	import type { Role } from '$lib/roles';
 	import { recipeUrl } from '$lib/wowhead';
 
@@ -18,12 +19,14 @@
 	const results = $derived.by(() => {
 		const q = fold(query.trim());
 		if (q.length < 2) return null;
-		const found = new Map<number, { id: number; name: string; profession: string; artisans: (typeof data.professions)[number]['artisans'] }>();
+		type Found = { id: number; name: string; profession: string; reagents: { id: number; name?: string | null; count: number }[] | null; artisans: (typeof data.professions)[number]['artisans'] };
+		const found = new Map<number, Found>();
 		for (const p of data.professions)
 			for (const a of p.artisans)
 				for (const r of a.recipes) {
 					if (!fold(r.name).includes(q)) continue;
-					const entry = found.get(r.id) ?? { id: r.id, name: r.name, profession: p.id, artisans: [] };
+					const entry = found.get(r.id) ?? { id: r.id, name: r.name, profession: p.id, reagents: null, artisans: [] };
+					entry.reagents ??= r.reagents?.length ? r.reagents : null;
 					entry.artisans.push(a);
 					found.set(r.id, entry);
 				}
@@ -80,6 +83,12 @@
 						<span class="muted small">{professionName(r.profession)}</span>
 						{#if data.canOrder}<a class="button secondary small order" href="/commandes/nouvelle?recette={r.id}">Commander</a>{/if}
 					</h3>
+					{#if r.reagents}
+						{@const cost = reagentCost(r.reagents, 1, data.prices)}
+						<p class="muted small reagents">
+							Composants : {reagentList(r.reagents)}{#if cost}{` · ≈ ${formatMoney(cost.total)} à l'hôtel des ventes${cost.missing.length ? ` (sans ${cost.missing.join(', ')})` : ''}`}{/if}
+						</p>
+					{/if}
 					<ul class="artisans">
 						{#each r.artisans as a (a.characterId)}{@render who(a, r.profession, false)}{/each}
 					</ul>
@@ -210,6 +219,9 @@
 	}
 	.result h3 a {
 		color: var(--text);
+	}
+	.reagents {
+		margin: -0.25rem 0 0.5rem;
 	}
 	.result h3 .order {
 		margin-left: auto;

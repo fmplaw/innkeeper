@@ -2,12 +2,18 @@
 	import { enhance } from '$app/forms';
 	import MoneyInput from '$lib/components/MoneyInput.svelte';
 	import { keepValues } from '$lib/forms';
+	import { formatMoney } from '$lib/money';
+	import { craftsFor, reagentCost, reagentList } from '$lib/recipes';
 	import { recipeUrl } from '$lib/wowhead';
 
 	let { data, form } = $props();
 	const cfg = $derived(data.config);
 	const professionName = (id: string) => cfg.professions.find((p) => p.id === id)?.name ?? id;
 	let materials = $state('provided');
+	let quantity = $state(1);
+	const crafts = $derived(craftsFor(Math.max(1, Number(quantity) || 1), data.recipe?.made));
+	const cost = $derived(data.recipe?.reagents ? reagentCost(data.recipe.reagents, crafts, data.prices) : null);
+	const when = new Intl.DateTimeFormat('fr-FR', { timeStyle: 'short' });
 	// Un joueur peut avoir plusieurs persos qui connaissent la recette : un seul choix par joueur.
 	const players = $derived([...new Map((data.recipe?.artisans ?? []).map((a) => [a.playerId, a])).values()]);
 </script>
@@ -32,7 +38,7 @@
 		<div class="grid">
 			<div>
 				<label for="quantity">Quantité</label>
-				<input id="quantity" name="quantity" type="number" min="1" max="200" value="1" required />
+				<input id="quantity" name="quantity" type="number" min="1" max="200" bind:value={quantity} required />
 			</div>
 			<div>
 				<label for="artisanId">Artisan</label>
@@ -47,6 +53,18 @@
 			<label class="choice"><input type="radio" name="materials" value="provided" bind:group={materials} /> Je fournis les composants</label>
 			<label class="choice"><input type="radio" name="materials" value="missing" bind:group={materials} /> Je ne les ai pas : l'artisan devra les trouver</label>
 		</fieldset>
+		{#if data.recipe.reagents}
+			<div class="reagents">
+				<p><strong>Composants{crafts > 1 ? ` pour ${crafts} fabrications` : ''} :</strong> {reagentList(data.recipe.reagents, crafts)}</p>
+				{#if cost}
+					<p class="muted small">
+						≈ <strong>{formatMoney(cost.total)}</strong> à l'hôtel des ventes{cost.missing.length ? `, sans ${cost.missing.join(', ')} (prix inconnu)` : ''}{data.at
+							? `, prix de ${when.format(data.at)}`
+							: ''}. Une estimation : l'artisan fixe son prix.
+					</p>
+				{/if}
+			</div>
+		{/if}
 		{#if materials === 'provided'}
 			<MoneyInput name="commission" label="Commission offerte (facultatif)" hint="Un petit quelque chose pour l'artisan, en plus des composants." />
 		{:else}
@@ -81,6 +99,13 @@
 	}
 	h2 a {
 		color: var(--text);
+	}
+	.reagents p {
+		margin: 0;
+	}
+	.reagents {
+		display: grid;
+		gap: 0.25rem;
 	}
 	fieldset {
 		display: grid;

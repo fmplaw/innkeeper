@@ -103,6 +103,8 @@ Pour demander un craft à un artisan de la guilde :
 
 Côté artisan, **Commandes** liste en tête les commandes des recettes que tu connais, et le menu affiche leur nombre. **Je m'en occupe** la met à ton nom (composants fournis) ; pour une commande sans composants, **Proposer un prix** ; **Je ne peux plus** (ou **Retirer mon prix**) la rend ; **Livrée** la termine (le demandeur peut aussi la marquer livrée). Le paiement se fait en jeu : envoie la commande par courrier en **contre-remboursement** du prix convenu ou de la commission, le demandeur paie en la récupérant. Le message Discord se met à jour à chaque étape. Coche **Me mentionner sur Discord** en haut de la page pour être mentionné quand quelqu'un commande une recette que tu connais.
 
+**Composants et prix** : avec l'addon Innkeeper Sync 1.4, chaque recette exportée garde ses composants. Artisans, le formulaire de commande et chaque commande affichent alors ce qu'il faut réunir et son coût estimé à l'hôtel des ventes de la guilde (moyenne des 20 moins chers en vente, prix relus toutes les heures). Les composants vendus par les marchands (fioles, fils, teintures, épices, eau de source, sel, catalyseurs, charbon, bois simple…) comptent au prix du marchand, donné par Battle.net, ou à celui de l'HV s'il est moins cher. Un composant sans aucun prix connu est signalé. Ce n'est qu'un repère, l'artisan fixe son prix.
+
 Chacun a 5 commandes en cours au plus. Le demandeur peut annuler la sienne ; une commande que personne ne prend est fermée au bout de 14 jours. Les commandes terminées restent affichées 7 jours.
 
 ### Les sorties
@@ -221,6 +223,8 @@ Admin → **Sorties** contient aussi :
 ### Commandes de craft (salon Discord)
 
 Admin → **Commandes de craft** : choisis le salon où le bot annonce les commandes. Conseillé : un salon où seul le bot écrit, les membres discutant d'une commande dans un fil sous son annonce. Le bot doit pouvoir y voir le salon, envoyer des messages, intégrer des liens et lire l'historique. Sans salon, les commandes restent sur le site. Un officier peut annuler n'importe quelle commande (noté dans le journal).
+
+Même page, **Hôtel des ventes** (avec Battle.net connecté) : choisis l'HV de la guilde. Forever en a plusieurs par faction et par type de règles (JcE, JcJ…) : prends celui du type de règles de votre serveur. Pour reconnaître le bon, compare le prix d'un objet rare en jeu avec ce qu'affiche le site. Les prix sont relus toutes les heures, et sur demande (« Relire les prix maintenant »).
 
 ### Import du jeu
 

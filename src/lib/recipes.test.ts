@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { groupRecipes, recipesAnchor } from './recipes';
+import { craftsFor, groupRecipes, reagentList, recipesAnchor } from './recipes';
 
 describe('recettes rangées comme en jeu', () => {
 	it('par sous-section dans l’ordre de l’export, triées par nom, « Autres » à la fin', () => {
@@ -24,5 +24,11 @@ describe('recettes rangées comme en jeu', () => {
 
 	it('ancre d’un métier sur la fiche', () => {
 		expect(recipesAnchor(12, 'first-aid')).toBe('recettes-12-first-aid');
+	});
+
+	it('composants pour plusieurs fabrications', () => {
+		expect(craftsFor(5, null)).toBe(5);
+		expect(craftsFor(5, 2)).toBe(3);
+		expect(reagentList([{ id: 2589, name: 'Étoffe de lin', count: 2 }, { id: 9, count: 1 }], 3)).toBe('6 Étoffe de lin, 3 objet 9');
 	});
 });

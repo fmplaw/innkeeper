@@ -183,6 +183,13 @@
       "when": 1794163204046,
       "tag": "0025_craft_orders",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "6",
+      "when": 1794164641666,
+      "tag": "0026_auction_prices",
+      "breakpoints": true
     }
   ]
 }

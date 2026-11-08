@@ -94,10 +94,16 @@ async function accessToken(s: BattlenetSettings, fetchFn: Fetch) {
 	return token.value;
 }
 
-/** GET sur l'API ; null si la ressource n'existe pas (404), erreur sinon. */
-async function get(s: BattlenetSettings, path: string, fetchFn: Fetch): Promise<unknown | null> {
-	const url = `https://${s.region}.api.blizzard.com${path}?namespace=${NAMESPACE(s.region)}&locale=fr_FR`;
-	const res = await fetchFn(url, { headers: { Authorization: `Bearer ${await accessToken(s, fetchFn)}` }, signal: AbortSignal.timeout(15_000) });
+/**
+ * GET sur l'API ; null si la ressource n'existe pas (404), erreur sinon. Espaces de noms :
+ * `profile` (persos, guilde), `dynamic` (hôtels des ventes), `static` (objets du jeu).
+ */
+async function get(s: BattlenetSettings, path: string, fetchFn: Fetch, kind: 'profile' | 'dynamic' | 'static' = 'profile'): Promise<unknown | null> {
+	const dynamic = kind === 'dynamic';
+	const namespace = kind === 'profile' ? NAMESPACE(s.region) : `${kind}-forever-${s.region}`;
+	const url = `https://${s.region}.api.blizzard.com${path}?namespace=${namespace}&locale=fr_FR`;
+	// Un hôtel des ventes pèse plusieurs Mo : plus de temps.
+	const res = await fetchFn(url, { headers: { Authorization: `Bearer ${await accessToken(s, fetchFn)}` }, signal: AbortSignal.timeout(dynamic ? 60_000 : 15_000) });
 	if (res.status === 404) return null;
 	if (!res.ok) throw new BattlenetError(`Battle.net : erreur ${res.status} sur ${path.split('/').slice(0, 5).join('/')}.`);
 	return res.json();
@@ -318,3 +324,10 @@ async function markVerified(roster: NonNullable<GameExport['roster']>, updates: 
 
 /** Pour les tests : oublie les recherches en mémoire. */
 export const resetArmoryCache = () => lookups.clear();
+
+/** Données « dynamiques » (hôtels des ventes) ou « statiques » (objets) de Forever, avec la connexion Battle.net de la guilde. */
+export function getDynamic(path: string, fetchFn: Fetch = fetch, kind: 'dynamic' | 'static' = 'dynamic') {
+	const s = getBattlenet();
+	if (!s.clientId || !s.clientSecret) throw new BattlenetError('Battle.net n’est pas connecté (Admin → Import du jeu).');
+	return get(s, path, fetchFn, kind);
+}
