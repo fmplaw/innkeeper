@@ -24,7 +24,8 @@
 			? ([
 					{ href: '/sorties', label: 'Sorties', icon: 'calendar' },
 					{ href: '/roster', label: 'Roster', icon: 'users' },
-					{ href: '/artisans', label: 'Artisans', icon: 'hammer' }
+					{ href: '/artisans', label: 'Artisans', icon: 'hammer' },
+					{ href: '/commandes', label: 'Commandes', icon: 'package', badge: data.craftOrders }
 				] as const)
 			: []),
 		...(data.user ? ([{ href: '/persos', label: 'Mes persos', icon: 'user' }] as const) : []),

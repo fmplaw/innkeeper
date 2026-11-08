@@ -250,6 +250,17 @@ export function seedDemo(now = Date.now()): DemoEvent[] {
 		.run();
 	db().update(schema.users).set({ absentSince: new Date(now - 3 * 3_600_000) }).where(eq(schema.users.discordId, demoUserId('Maelis'))).run();
 
+	// Commandes de craft : une ouverte avec commission, un prix proposé à Aldren, une prise, une livrée.
+	const order = (requester: string, recipeId: number, recipeName: string, profession: string, extra: Partial<typeof schema.craftOrders.$inferInsert>) =>
+		db()
+			.insert(schema.craftOrders)
+			.values({ requesterId: demoUserId(requester), recipeId, recipeName, profession, ...extra })
+			.run();
+	order('Thorgrim', 3277, 'Bandage en laine', 'first-aid', { quantity: 20, materials: true, commission: 2000, comment: 'Pour le raid de jeudi, je t’envoie l’étoffe.', createdAt: new Date(now - 5 * 3_600_000) });
+	order('Aldren', 8604, 'Œufs aux herbes', 'cooking', { quantity: 10, materials: false, budget: 5000, status: 'quoted', quotedBy: demoUserId('Brunhild'), price: 8000, createdAt: new Date(now - 8 * 3_600_000) });
+	order('Pipwick', 2330, 'Potion de soins mineure', 'alchemy', { quantity: 10, materials: false, price: 12_000, status: 'taken', takenBy: demoUserId('Ysolde'), createdAt: new Date(now - DAY) });
+	order('Lysandre', 2663, 'Brassards en cuivre', 'blacksmithing', { quantity: 1, materials: true, status: 'delivered', takenBy: demoUserId('Aldren'), createdAt: new Date(now - 3 * DAY), closedAt: new Date(now - 2 * DAY) });
+
 	APPLICANTS.forEach(([pseudo, [name, surname, race, cls, spec, role, level], answers, votes], i) => {
 		const userId = demoUserId(pseudo);
 		db().insert(schema.users).values({ discordId: userId, discordUsername: pseudo.toLowerCase(), displayName: pseudo, roles: [], inGuild: false }).run();

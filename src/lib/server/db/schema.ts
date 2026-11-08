@@ -67,7 +67,9 @@ export const users = sqliteTable('users', {
 	leftDiscord: text('left_discord'),
 	leftComment: text('left_comment'),
 	// Un officier a pris connaissance du départ (compteur du menu).
-	leftSeenAt: integer('left_seen_at', { mode: 'timestamp' })
+	leftSeenAt: integer('left_seen_at', { mode: 'timestamp' }),
+	// Mentionné sur Discord quand une commande de craft arrive pour une recette qu'il connaît.
+	craftAlerts: integer('craft_alerts', { mode: 'boolean' }).notNull().default(false)
 });
 
 export const characters = sqliteTable(
@@ -338,3 +340,47 @@ export type Application = typeof applications.$inferSelect;
 export type DiscordRole = typeof discordRoles.$inferSelect;
 export type Character = typeof characters.$inferSelect;
 export type NewCharacter = typeof characters.$inferInsert;
+
+// Commandes de craft : un membre demande une recette connue d'un artisan de la guilde ; le bot
+// l'annonce dans le salon des commandes et met son message à jour à chaque changement d'état.
+// « quoted » : un artisan a proposé un prix au-dessus du budget, le demandeur doit l'accepter.
+export const CRAFT_STATUSES = ['open', 'quoted', 'taken', 'delivered', 'cancelled'] as const;
+export type CraftStatus = (typeof CRAFT_STATUSES)[number];
+
+export const craftOrders = sqliteTable(
+	'craft_orders',
+	{
+		id: integer('id').primaryKey({ autoIncrement: true }),
+		requesterId: text('requester_id')
+			.notNull()
+			.references(() => users.discordId, { onDelete: 'cascade' }),
+		profession: text('profession').notNull(),
+		// Recette (numéro de sort, comme les recettes exportées) et son nom au moment de la commande.
+		recipeId: integer('recipe_id').notNull(),
+		recipeName: text('recipe_name').notNull(),
+		quantity: integer('quantity').notNull().default(1),
+		// Le demandeur fournit les composants, ou l'artisan doit les trouver.
+		materials: integer('materials', { mode: 'boolean' }).notNull().default(false),
+		comment: text('comment'),
+		// Montants en pièces de cuivre. Composants fournis : commission offerte par le demandeur
+		// (facultative). Composants à trouver : budget maximum du demandeur (facultatif), puis prix
+		// proposé par un artisan (`quotedBy`) et, une fois accepté, prix convenu.
+		commission: integer('commission'),
+		budget: integer('budget'),
+		price: integer('price'),
+		quotedBy: text('quoted_by').references(() => users.discordId, { onDelete: 'set null' }),
+		// Artisan souhaité (joueur), facultatif.
+		artisanId: text('artisan_id').references(() => users.discordId, { onDelete: 'set null' }),
+		status: text('status', { enum: CRAFT_STATUSES }).notNull().default('open'),
+		takenBy: text('taken_by').references(() => users.discordId, { onDelete: 'set null' }),
+		// Fermée sans nouvelles, ou par un officier : expliqué sur la page et sur Discord.
+		closedNote: text('closed_note'),
+		discordChannelId: text('discord_channel_id'),
+		discordMessageId: text('discord_message_id'),
+		createdAt: timestamp('created_at'),
+		updatedAt: timestamp('updated_at'),
+		closedAt: integer('closed_at', { mode: 'timestamp' })
+	},
+	(t) => [index('craft_orders_status_idx').on(t.status), index('craft_orders_requester_idx').on(t.requesterId)]
+);
+export type CraftOrder = typeof craftOrders.$inferSelect;

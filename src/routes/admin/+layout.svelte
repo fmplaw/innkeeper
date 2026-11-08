@@ -23,6 +23,7 @@
 			links: [
 				{ href: '/admin/rosters', label: 'Rosters', icon: 'list' },
 				{ href: '/admin/sorties', label: 'Sorties', icon: 'calendar' },
+				{ href: '/admin/commandes', label: 'Commandes de craft', icon: 'package' },
 				{ href: '/admin/import', label: 'Import du jeu', icon: 'upload' }
 			]
 		},

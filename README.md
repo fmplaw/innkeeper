@@ -21,6 +21,7 @@
 - **Fiches de persos** tenues par chaque joueur : main et rerolls, double spécialisation, métiers avec niveau, intérêts PvE/PvP.
 - **Roster** filtrable et triable, répartition par classe et par rôle, **rosters** composés par les officiers (équipe de raid, PvP…).
 - **Sorties** pilotées dans [Raid-Helper](https://raid-helper.dev) : création depuis le site (officielles et proposées par les membres), médaillon par type (quêtes, donjon, raid, PvP, farm), inscription depuis le site, composition, comparaison avec un roster, banc.
+- **Commandes de craft** : un membre commande une recette connue d'un artisan (commission offerte, ou prix proposé par l'artisan et accepté par le demandeur), le bot l'annonce dans un salon Discord et met son message à jour quand elle est prise, livrée ou annulée ; mention sur Discord pour les artisans qui le souhaitent.
 - **Artisans** : persos par métier avec leurs recettes connues (exportées par l'addon, rangées par sous-section comme dans la fenêtre du métier en jeu), recherche « qui connaît cette recette ? », liens vers Wowhead et bulles au survol en option. Noms des recettes en français, même exportées d'un jeu en anglais (traduction via Wowhead côté serveur).
 - **Charte et règlement** rédigés dans l'admin, publiés pour tous et à accepter pour postuler.
 - **Addons conseillés** par la guilde : indispensables, requis en raid, recommandés, confort, avec le public visé (classes, rôles) et les liens CurseForge et Wago.

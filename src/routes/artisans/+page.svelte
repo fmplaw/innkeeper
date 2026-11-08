@@ -78,6 +78,7 @@
 					<h3>
 						<a href={recipeUrl(r.id)} target="_blank" rel="noopener">{r.name}</a>
 						<span class="muted small">{professionName(r.profession)}</span>
+						{#if data.canOrder}<a class="button secondary small order" href="/commandes/nouvelle?recette={r.id}">Commander</a>{/if}
 					</h3>
 					<ul class="artisans">
 						{#each r.artisans as a (a.characterId)}{@render who(a, r.profession, false)}{/each}
@@ -209,6 +210,11 @@
 	}
 	.result h3 a {
 		color: var(--text);
+	}
+	.result h3 .order {
+		margin-left: auto;
+		color: var(--text);
+		font-size: 0.875rem;
 	}
 	.result h3 a:hover {
 		color: var(--accent-ink);

@@ -91,6 +91,20 @@ Une clé de **membre** met à jour tes persos seulement ; une clé d'**officier*
 - **Artisans** : les persos de la guilde regroupés par métier, du plus haut niveau au plus bas, avec leur nombre de recettes connues. Un clic sur le perso ou sur « N recettes → » ouvre sa page joueur directement sur ce métier, avec toutes ses recettes rangées comme en jeu. La recherche (« bandage », « potion »…) montre qui connaît une recette, sans tenir compte des accents. Les recettes viennent de l'addon Innkeeper Sync : chaque artisan exporte les siennes en ouvrant ses fenêtres de métier en jeu. Chaque recette renvoie vers sa page Wowhead (base de Forever, en français) ; si la guilde l'a activé, survoler une recette affiche sa fiche du jeu. Les recettes s'affichent en français même pour un membre qui joue en anglais : le site reprend les noms des exports faits en français et demande les autres à Wowhead (seul le numéro de la recette est envoyé), quelques secondes après l'import. À partir de 20 recettes, un champ permet de filtrer la liste.
 - **Recettes dans Mes persos** : sous les métiers de chaque perso, « Recettes connues en jeu » liste par métier les recettes exportées par l'addon.
 
+### Commandes de craft
+
+Pour demander un craft à un artisan de la guilde :
+
+1. Dans **Artisans**, cherche la recette (« bandage », « potion »…) et clique sur **Commander**. Seules les recettes connues d'au moins un artisan, exportées avec l'addon, peuvent être commandées.
+2. Indique la quantité, un commentaire si besoin (pour quand ?), et éventuellement l'artisan ; sinon, n'importe lequel peut la prendre. Puis :
+   - **tu fournis les composants** : tu peux offrir une **commission** (en po, pa, pc), affichée sur la commande ;
+   - **l'artisan doit les trouver** : tu peux indiquer un **budget maximum**. L'artisan propose son prix, composants compris. S'il tient dans ton budget, il prend la commande aussitôt ; sinon, elle passe à **Prix proposé** : tu es mentionné sur Discord et tu cliques **Accepter** ou **Refuser** (elle redevient alors ouverte aux autres artisans).
+3. La commande apparaît dans **Commandes**, et le bot l'annonce dans le salon des commandes sur Discord si les officiers l'ont choisi.
+
+Côté artisan, **Commandes** liste en tête les commandes des recettes que tu connais, et le menu affiche leur nombre. **Je m'en occupe** la met à ton nom (composants fournis) ; pour une commande sans composants, **Proposer un prix** ; **Je ne peux plus** (ou **Retirer mon prix**) la rend ; **Livrée** la termine (le demandeur peut aussi la marquer livrée). Le paiement se fait en jeu : envoie la commande par courrier en **contre-remboursement** du prix convenu ou de la commission, le demandeur paie en la récupérant. Le message Discord se met à jour à chaque étape. Coche **Me mentionner sur Discord** en haut de la page pour être mentionné quand quelqu'un commande une recette que tu connais.
+
+Chacun a 5 commandes en cours au plus. Le demandeur peut annuler la sienne ; une commande que personne ne prend est fermée au bout de 14 jours. Les commandes terminées restent affichées 7 jours.
+
 ### Les sorties
 
 Menu **Sorties** : deux listes, **sorties officielles** et **sorties des membres**, avec la date, l'organisateur et le nombre d'inscrits. Le médaillon devant chaque sortie en donne le type, comme sur la carte du jeu : « ! » jaune pour les quêtes, vortex bleu pour un donjon, vortex vert pour un raid, épées croisées pour le PvP, pelle pour le farm, « … » pour le reste ou pour une sortie créée directement sur Discord (« Événement Discord »).
@@ -203,6 +217,10 @@ Admin → **Sorties** contient aussi :
 
 - les **salons** des sorties officielles et des sorties membres ;
 - les **images des sorties** : une par type et par instance, affichées sur Discord et sur le site (vrai fichier PNG, JPEG ou WebP, dont l’extension correspond au contenu ; 2 Mo au plus, format 16:9 conseillé). N'utilise que des images que la guilde a le droit de diffuser.
+
+### Commandes de craft (salon Discord)
+
+Admin → **Commandes de craft** : choisis le salon où le bot annonce les commandes. Conseillé : un salon où seul le bot écrit, les membres discutant d'une commande dans un fil sous son annonce. Le bot doit pouvoir y voir le salon, envoyer des messages, intégrer des liens et lire l'historique. Sans salon, les commandes restent sur le site. Un officier peut annuler n'importe quelle commande (noté dans le journal).
 
 ### Import du jeu
 

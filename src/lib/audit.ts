@@ -21,6 +21,8 @@ export const AUDIT_ACTIONS = {
 	'outing-template.update': { group: 'Sorties', label: 'a modifié le modèle de sortie' },
 	'outing-template.delete': { group: 'Sorties', label: 'a supprimé le modèle de sortie' },
 	'outing-image.update': { group: 'Sorties', label: "a changé l'image de sortie" },
+	'craft.close': { group: 'Commandes de craft', label: 'a fermé la commande' },
+	'crafts.update': { group: 'Configuration', label: 'a modifié le salon des commandes de craft' },
 	'raidhelper.update': { group: 'Configuration', label: 'a modifié la connexion Raid-Helper' },
 	'battlenet.update': { group: 'Configuration', label: 'a modifié la connexion Battle.net' },
 	'game.import': { group: 'Fiches', label: 'a importé les données du jeu' },
