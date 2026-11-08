@@ -33,6 +33,7 @@
 	<ul>
 		<li>Les fiches de tes personnages et ce que tu y écris (niveau, spécialisations, métiers, intérêts, notes).</li>
 		<li>Ta candidature, si tu en déposes une, et l'avis des officiers.</li>
+		<li>Tes commandes de craft (recette, quantité, commentaire), visibles des membres et annoncées sur le Discord de la guilde.</li>
 		<li>
 			Les données venues du jeu : niveau, métiers, dernière connexion en jeu et recettes. Elles viennent de l'addon de
 			la guilde, et de l'Armurerie publique de Blizzard (API Battle.net) si la guilde l'a connectée.

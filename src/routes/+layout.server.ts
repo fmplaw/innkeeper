@@ -1,4 +1,5 @@
 import { publicConfig } from '$lib/server/config';
+import { openOrdersFor } from '$lib/server/crafts';
 import { unseenDepartures } from '$lib/server/departures';
 import { dueReviewCount } from '$lib/server/progression';
 import { pendingCount } from '$lib/server/recruitment';
@@ -22,6 +23,8 @@ export const load: LayoutServerLoad = ({ locals, url }) => {
 		dueReviews: officer ? dueReviewCount() : 0,
 		// Départs de la guilde que personne n'a encore vus.
 		unseenDepartures: officer ? unseenDepartures() : 0,
+		// Commandes de craft ouvertes pour une recette que le joueur connaît.
+		craftOrders: locals.user ? openOrdersFor(locals.user.id) : 0,
 		// Dernier import du registre de guilde, pour les badges « vu en jeu ».
 		gameImportAt: gameImport ? new Date(gameImport.appliedAt * 1000) : null
 	};

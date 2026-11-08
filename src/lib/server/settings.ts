@@ -115,6 +115,12 @@ export const raidHelperSchema = z.object({
 });
 export type RaidHelperSettings = z.output<typeof raidHelperSchema>;
 
+// Commandes de craft : salon où le bot les annonce (aucun : elles restent sur le site).
+export const craftSchema = z.object({
+	channelId: discordId.default(null)
+});
+export type CraftSettings = z.output<typeof craftSchema>;
+
 const cache = new Map<string, unknown>();
 
 function read<T>(key: string): T | undefined {
@@ -158,6 +164,12 @@ export function getRaidHelper(): RaidHelperSettings {
 	return parsed.success ? parsed.data : raidHelperSchema.parse({});
 }
 export const setRaidHelper = (settings: RaidHelperSettings) => write('raidhelper', settings);
+
+export function getCrafts(): CraftSettings {
+	const parsed = craftSchema.safeParse(read('crafts') ?? {});
+	return parsed.success ? parsed.data : craftSchema.parse({});
+}
+export const setCrafts = (settings: CraftSettings) => write('crafts', settings);
 
 // Charte et règlement de la guilde : page publique /charte, à accepter pour postuler.
 export const charterSchema = z.object({
