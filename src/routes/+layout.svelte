@@ -118,7 +118,7 @@
 			{#if inSetup}
 				<span class="brand"><Crest src={guild.logoUrl} size={36} /><span class="brand-name">{guild.name}</span></span>
 			{:else}
-				<a class="brand" href="/"><Crest src={guild.logoUrl} size={36} /><span class="brand-name">{guild.name}</span></a>
+				<a class="brand" href="/" aria-label="{guild.name} : accueil"><Crest src={guild.logoUrl} size={36} /><span class="brand-name">{guild.name}</span></a>
 				<nav aria-label="Navigation principale">
 					{#each links as link (link.href)}
 						<a class="nav-link" href={link.href} aria-current={isCurrent(link.href) ? 'page' : undefined}>
@@ -274,12 +274,14 @@
 		align-items: center;
 		gap: 2rem;
 		height: 72px;
-		width: min(1160px, 100%);
+		/* Plus large que le contenu : le menu a jusqu'à neuf onglets et le nom de la guilde doit rester entier. */
+		width: min(1400px, 100%);
 		margin-inline: auto;
 		padding-inline: 2rem;
 	}
 	.brand {
 		display: flex;
+		flex-shrink: 0;
 		align-items: center;
 		gap: 0.625rem;
 		min-width: 0;
@@ -458,8 +460,9 @@
 		display: none;
 	}
 
-	/* Les onglets du menu prennent toute la place avant que le nom de la guilde ne soit coupé. */
-	@media (max-width: 1120px) {
+	/* Écran moyen : le nom du joueur part d'abord, puis celui de la guilde (le blason reste et ramène
+	   à l'accueil, où le nom s'affiche en grand) ; jamais de nom coupé au milieu. */
+	@media (max-width: 1320px) {
 		.me-name,
 		.chevron {
 			display: none;
@@ -468,9 +471,14 @@
 			gap: 1rem;
 		}
 	}
+	@media (min-width: 1001px) and (max-width: 1180px) {
+		.brand-name {
+			display: none;
+		}
+	}
 
 	/* Téléphone et petite tablette : barre d'onglets en bas. */
-	@media (max-width: 860px) {
+	@media (max-width: 1000px) {
 		.top.on-hero {
 			margin-bottom: -60px;
 		}
