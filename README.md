@@ -224,7 +224,7 @@ Sur le [portail développeur Discord](https://discord.com/developers/application
   <ORIGIN>/candidature/rejoindre      entrée des recrues sur le serveur
   ```
 - Copie l'**identifiant du client** et la **clé secrète** dans l'assistant (ou Admin → Connexion Discord).
-- Scopes demandés aux joueurs : `identify`, `guilds.members.read` (identifiant, pseudo, avatar, rôles sur le serveur de la guilde) et `connections` (le compte Battle.net est-il relié à Discord ? Blizzard ne relaie le canal guilde du jeu sur Discord que pour ces comptes ; BattleTag gardé dans `users.battle_tag`, lu à chaque connexion, montré aux officiers seulement). Les joueurs déjà connectés accordent le nouveau scope à leur prochaine connexion. Une recrue acceptée accorde en plus `guilds.join` une seule fois, pour que le bot la fasse entrer sur le serveur.
+- Scopes demandés aux joueurs : `identify` et `guilds.members.read` (identifiant, pseudo, avatar, rôles sur le serveur de la guilde). Une recrue acceptée accorde en plus `guilds.join` une seule fois, pour que le bot la fasse entrer sur le serveur.
 
 ### 2. Bot
 

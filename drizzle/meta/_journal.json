@@ -169,6 +169,13 @@
       "when": 1794138966765,
       "tag": "0023_battlenet_link",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "6",
+      "when": 1794154980001,
+      "tag": "0024_drop_battlenet_link",
+      "breakpoints": true
     }
   ]
 }

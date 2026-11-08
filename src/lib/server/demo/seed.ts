@@ -209,10 +209,7 @@ export function seedDemo(now = Date.now()): DemoEvent[] {
 				rolesCheckedAt: new Date(now),
 				createdAt: new Date(now - (40 - i) * DAY),
 				lastLogin: new Date(now - (i % 5) * DAY),
-				joinedAt: new Date(now - (40 - i) * DAY),
-				// Battle.net relié à Discord : la plupart ; deux à relancer, un pas encore vérifié.
-				battleTag: ['Pipwick', 'Kerrin'].includes(pseudo) ? null : `${pseudo}#${2100 + i * 37}`,
-				battlenetCheckedAt: pseudo === 'Fennick' ? null : new Date(now - (i % 5) * DAY)
+				joinedAt: new Date(now - (40 - i) * DAY)
 			})
 			.run();
 		chars.forEach(([name, surname, race, cls, spec, role, level, profs], k) => {
