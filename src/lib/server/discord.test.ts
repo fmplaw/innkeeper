@@ -28,7 +28,12 @@ describe('compte Battle.net relié à Discord (connexion)', () => {
 			])
 		);
 		expect(await fetchBattlenetConnection('jeton')).toBe('Vinshal#2481');
+		// Révoquée côté Discord (jeton expiré) : toujours affichée et relayée, donc reliée.
 		vi.stubGlobal('fetch', async () => Response.json([{ type: 'battlenet', name: 'Ancien#1', revoked: true }]));
+		expect(await fetchBattlenetConnection('jeton')).toBe('Ancien#1');
+		vi.stubGlobal('fetch', async () => Response.json([{ type: 'battlenet', name: '' }]));
+		expect(await fetchBattlenetConnection('jeton')).toBe('Battle.net');
+		vi.stubGlobal('fetch', async () => Response.json([{ type: 'steam', name: 'x' }]));
 		expect(await fetchBattlenetConnection('jeton')).toBeNull();
 		vi.stubGlobal('fetch', async () => new Response('', { status: 403 }));
 		expect(await fetchBattlenetConnection('jeton')).toBeUndefined();

@@ -28,9 +28,15 @@ export async function fetchBattlenetConnection(accessToken: string): Promise<str
 	try {
 		const res = await fetch(`${API}/users/@me/connections`, { headers: { Authorization: `Bearer ${accessToken}` }, signal: AbortSignal.timeout(10_000) });
 		if (!res.ok) return undefined;
-		const list = (await res.json()) as { type: string; name: string; revoked?: boolean }[];
-		const bnet = list.find((c) => c.type === 'battlenet' && !c.revoked);
-		return bnet ? bnet.name : null;
+		const list = (await res.json()) as { type: string; name?: string; revoked?: boolean }[];
+		// Une connexion « révoquée » côté Discord (jeton Battle.net expiré) reste affichée dans Discord et
+		// Blizzard continue de relayer le canal guilde : on la compte comme reliée.
+		const bnet = list.find((c) => c.type === 'battlenet');
+		if (!bnet) {
+			console.info(`Discord : pas de connexion Battle.net (connexions vues : ${list.map((c) => c.type).join(', ') || 'aucune'}).`);
+			return null;
+		}
+		return bnet.name?.trim() || 'Battle.net';
 	} catch {
 		return undefined;
 	}
