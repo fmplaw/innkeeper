@@ -96,10 +96,12 @@ Une clé de **membre** met à jour tes persos seulement ; une clé d'**officier*
 Pour demander un craft à un artisan de la guilde :
 
 1. Dans **Artisans**, cherche la recette (« bandage », « potion »…) et clique sur **Commander**. Seules les recettes connues d'au moins un artisan, exportées avec l'addon, peuvent être commandées.
-2. Indique la quantité, si tu fournis les composants ou si l'artisan doit les trouver, et un commentaire si besoin : pour quand, ce que tu proposes en échange. Tu peux aussi choisir l'artisan ; sinon, n'importe lequel peut la prendre.
+2. Indique la quantité, un commentaire si besoin (pour quand ?), et éventuellement l'artisan ; sinon, n'importe lequel peut la prendre. Puis :
+   - **tu fournis les composants** : tu peux offrir une **commission** (en po, pa, pc), affichée sur la commande ;
+   - **l'artisan doit les trouver** : tu peux indiquer un **budget maximum**. L'artisan propose son prix, composants compris. S'il tient dans ton budget, il prend la commande aussitôt ; sinon, elle passe à **Prix proposé** : tu es mentionné sur Discord et tu cliques **Accepter** ou **Refuser** (elle redevient alors ouverte aux autres artisans).
 3. La commande apparaît dans **Commandes**, et le bot l'annonce dans le salon des commandes sur Discord si les officiers l'ont choisi.
 
-Côté artisan, **Commandes** liste en tête les commandes des recettes que tu connais, et le menu affiche leur nombre. **Je m'en occupe** la met à ton nom ; **Je ne peux plus** la rend ; **Livrée** la termine (le demandeur peut aussi la marquer livrée). Le message Discord se met à jour à chaque étape. Coche **Me mentionner sur Discord** en haut de la page pour être mentionné quand quelqu'un commande une recette que tu connais.
+Côté artisan, **Commandes** liste en tête les commandes des recettes que tu connais, et le menu affiche leur nombre. **Je m'en occupe** la met à ton nom (composants fournis) ; pour une commande sans composants, **Proposer un prix** ; **Je ne peux plus** (ou **Retirer mon prix**) la rend ; **Livrée** la termine (le demandeur peut aussi la marquer livrée). Le paiement se fait en jeu : envoie la commande par courrier en **contre-remboursement** du prix convenu ou de la commission, le demandeur paie en la récupérant. Le message Discord se met à jour à chaque étape. Coche **Me mentionner sur Discord** en haut de la page pour être mentionné quand quelqu'un commande une recette que tu connais.
 
 Chacun a 5 commandes en cours au plus. Le demandeur peut annuler la sienne ; une commande que personne ne prend est fermée au bout de 14 jours. Les commandes terminées restent affichées 7 jours.
 

@@ -1,11 +1,13 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import MoneyInput from '$lib/components/MoneyInput.svelte';
 	import { keepValues } from '$lib/forms';
 	import { recipeUrl } from '$lib/wowhead';
 
 	let { data, form } = $props();
 	const cfg = $derived(data.config);
 	const professionName = (id: string) => cfg.professions.find((p) => p.id === id)?.name ?? id;
+	let materials = $state('provided');
 	// Un joueur peut avoir plusieurs persos qui connaissent la recette : un seul choix par joueur.
 	const players = $derived([...new Map((data.recipe?.artisans ?? []).map((a) => [a.playerId, a])).values()]);
 </script>
@@ -42,12 +44,21 @@
 		</div>
 		<fieldset>
 			<legend>Composants</legend>
-			<label class="choice"><input type="radio" name="materials" value="provided" checked /> Je fournis les composants</label>
-			<label class="choice"><input type="radio" name="materials" value="missing" /> Je ne les ai pas : l'artisan devra les trouver</label>
+			<label class="choice"><input type="radio" name="materials" value="provided" bind:group={materials} /> Je fournis les composants</label>
+			<label class="choice"><input type="radio" name="materials" value="missing" bind:group={materials} /> Je ne les ai pas : l'artisan devra les trouver</label>
 		</fieldset>
+		{#if materials === 'provided'}
+			<MoneyInput name="commission" label="Commission offerte (facultatif)" hint="Un petit quelque chose pour l'artisan, en plus des composants." />
+		{:else}
+			<MoneyInput
+				name="budget"
+				label="Budget maximum (facultatif)"
+				hint="L'artisan propose son prix, composants compris. S'il tient dans ton budget, il prend la commande aussitôt ; sinon, tu acceptes ou tu refuses."
+			/>
+		{/if}
 		<div>
 			<label for="comment">Commentaire (facultatif)</label>
-			<textarea id="comment" name="comment" maxlength="300" rows="3" placeholder="Pour quand ? Ce que tu proposes en échange (pièces, pourboire…)"></textarea>
+			<textarea id="comment" name="comment" maxlength="300" rows="3" placeholder="Pour quand ? Une précision pour l'artisan ?"></textarea>
 		</div>
 		<p class="hint muted">
 			{#if data.announced}La commande sera annoncée dans le salon des commandes sur Discord. {/if}Tu peux avoir {data.max} commandes en cours

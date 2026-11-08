@@ -40,7 +40,9 @@ db()
 	.where(eq(schema.characters.id, alchemist.id))
 	.run();
 
-const order = (extra = {}) => createOrder(REQUESTER, { recipeId: POTION, quantity: 5, materials: true, comment: 'Pour jeudi', artisanId: null, ...extra });
+const order = (extra = {}) => createOrder(REQUESTER, { recipeId: POTION, quantity: 5, materials: true, comment: 'Pour jeudi', artisanId: null, commission: 1000, budget: null, ...extra });
+const SILVER = 100;
+const GOLD = 10_000;
 const me = (id: string, officer = false) => ({ id, officer });
 
 describe('commandes de craft', () => {
@@ -73,6 +75,29 @@ describe('commandes de craft', () => {
 
 		const listed = (await listOrders()).find((o) => o.id === id)!;
 		expect(listed).toMatchObject({ requester: `Joueur ${REQUESTER}`, taker: `Joueur ${ARTISAN}`, professionName: 'Alchimie' });
+	});
+
+	it('composants à trouver : prix dans le budget pris aussitôt, sinon accepté ou refusé par le demandeur', async () => {
+		db().delete(schema.craftOrders).run();
+		const r = await order({ materials: false, budget: 2 * GOLD, commission: 5 * GOLD });
+		if ('error' in r) throw new Error(r.error);
+		expect(r.order).toMatchObject({ commission: null, budget: 2 * GOLD }); // pas de commission sans composants fournis
+		const id = r.order.id;
+		expect(await act('take', id, me(ARTISAN))).toHaveProperty('error'); // il faut proposer un prix
+		expect(await act('quote', id, me(ARTISAN))).toHaveProperty('error'); // prix manquant
+
+		// Au-dessus du budget : le demandeur décide.
+		expect(await act('quote', id, me(ARTISAN), null, 3 * GOLD)).toHaveProperty('order', expect.objectContaining({ status: 'quoted', quotedBy: ARTISAN, price: 3 * GOLD }));
+		expect(openOrdersFor(REQUESTER)).toBe(1); // une réponse attendue
+		expect(await act('accept', id, me(OTHER))).toHaveProperty('error');
+		expect(await act('refuse', id, me(REQUESTER))).toHaveProperty('order', expect.objectContaining({ status: 'open', price: null, quotedBy: null }));
+		await act('quote', id, me(ARTISAN), null, 3 * GOLD);
+		expect(await act('accept', id, me(REQUESTER))).toHaveProperty('order', expect.objectContaining({ status: 'taken', takenBy: ARTISAN, price: 3 * GOLD }));
+
+		// Dans le budget : prise tout de suite.
+		const r2 = await order({ materials: false, budget: 2 * GOLD });
+		if ('error' in r2) throw new Error(r2.error);
+		expect(await act('quote', r2.order.id, me(ARTISAN), null, 150 * SILVER)).toHaveProperty('order', expect.objectContaining({ status: 'taken', price: 150 * SILVER }));
 	});
 
 	it(`${MAX_ACTIVE} commandes en cours au plus, et fermeture après ${EXPIRE_DAYS} jours sans preneur`, async () => {

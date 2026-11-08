@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "1961f6cd-f8a4-4625-87a5-61c9444dc068",
+  "id": "5602191e-6116-4c5f-8e3d-33cfb565ed3a",
   "prevId": "db76753f-8c33-4f72-bb55-6f61b7e9583e",
   "tables": {
     "addons": {
@@ -695,6 +695,34 @@
           "notNull": false,
           "autoincrement": false
         },
+        "commission": {
+          "name": "commission",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "budget": {
+          "name": "budget",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "price": {
+          "name": "price",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "quoted_by": {
+          "name": "quoted_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "artisan_id": {
           "name": "artisan_id",
           "type": "text",
@@ -790,6 +818,19 @@
             "discord_id"
           ],
           "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "craft_orders_quoted_by_users_discord_id_fk": {
+          "name": "craft_orders_quoted_by_users_discord_id_fk",
+          "tableFrom": "craft_orders",
+          "tableTo": "users",
+          "columnsFrom": [
+            "quoted_by"
+          ],
+          "columnsTo": [
+            "discord_id"
+          ],
+          "onDelete": "set null",
           "onUpdate": "no action"
         },
         "craft_orders_artisan_id_users_discord_id_fk": {

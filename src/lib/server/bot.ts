@@ -152,10 +152,16 @@ export interface Embed {
  * Poste un message (avec encadré) dans un salon et renvoie son identifiant. Les mentions de rôles
  * notifient ; celles de joueurs seulement pour `mentionUsers`.
  */
-export async function postMessage(channelId: string, message: { content?: string; embeds?: Embed[] }, mentionUsers: string[] = []) {
+export async function postMessage(channelId: string, message: { content?: string; embeds?: Embed[]; replyTo?: string }, mentionUsers: string[] = []) {
+	const { replyTo, ...body } = message;
 	const res = await call(`/channels/${channelId}/messages`, {
 		method: 'POST',
-		body: JSON.stringify({ ...message, allowed_mentions: { parse: ['roles'], users: mentionUsers.slice(0, 100) } })
+		body: JSON.stringify({
+			...body,
+			// Réponse à un message du salon (sans échouer s'il a été supprimé entre-temps).
+			...(replyTo && { message_reference: { message_id: replyTo, fail_if_not_exists: false } }),
+			allowed_mentions: { parse: ['roles'], users: mentionUsers.slice(0, 100) }
+		})
 	});
 	if (!res.ok) throw new BotError(`Impossible de poster le message (Discord a répondu ${res.status}).`);
 	const posted = (await res.json().catch(() => null)) as { id?: string } | null;

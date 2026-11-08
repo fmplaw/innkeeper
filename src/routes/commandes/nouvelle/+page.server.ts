@@ -1,5 +1,6 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { z } from 'zod';
+import { readMoney } from '$lib/money';
 import { createOrder, MAX_ACTIVE, recipeChoice } from '$lib/server/crafts';
 import { requireUser } from '$lib/server/guards';
 import { getCrafts } from '$lib/server/settings';
@@ -31,7 +32,11 @@ export const actions: Actions = {
 			artisanId: form.get('artisanId')
 		});
 		if (!parsed.success) return fail(400, { error: parsed.error.issues[0].message });
-		const result = await createOrder(user.id, parsed.data);
+		const commission = readMoney(form, 'commission');
+		const budget = readMoney(form, 'budget');
+		if ('error' in commission) return fail(400, { error: commission.error });
+		if ('error' in budget) return fail(400, { error: budget.error });
+		const result = await createOrder(user.id, { ...parsed.data, commission: commission.value, budget: budget.value });
 		if ('error' in result) return fail(400, { error: result.error });
 		redirect(303, `/commandes?passee=${result.order.id}${result.announced || !getCrafts().channelId ? '' : '&discord=0'}#commande-${result.order.id}`);
 	}

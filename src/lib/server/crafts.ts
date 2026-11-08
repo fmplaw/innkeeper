@@ -1,5 +1,6 @@
 import { and, desc, eq, gte, inArray, lt, or, sql } from 'drizzle-orm';
 import { env } from '$env/dynamic/private';
+import { formatMoney } from '$lib/money';
 import { recipeUrl } from '$lib/wowhead';
 import { PROFESSIONS } from '$lib/game/forever';
 import { artisansByProfession, type Artisan } from './artisans';
@@ -21,8 +22,9 @@ export const EXPIRE_DAYS = 14;
 export const KEEP_CLOSED_DAYS = 7;
 const DAY = 86_400_000;
 
-export const STATUS_LABELS: Record<CraftStatus, string> = { open: 'Ouverte', taken: 'Prise', delivered: 'Livrée', cancelled: 'Annulée' };
-const STATUS_COLORS: Record<CraftStatus, number> = { open: 0xd4a017, taken: 0x3b82f6, delivered: 0x22a55b, cancelled: 0x6b7280 };
+export const STATUS_LABELS: Record<CraftStatus, string> = { open: 'Ouverte', quoted: 'Prix proposé', taken: 'Prise', delivered: 'Livrée', cancelled: 'Annulée' };
+const STATUS_COLORS: Record<CraftStatus, number> = { open: 0xd4a017, quoted: 0xe67e22, taken: 0x3b82f6, delivered: 0x22a55b, cancelled: 0x6b7280 };
+const ACTIVE: CraftStatus[] = ['open', 'quoted', 'taken'];
 
 type Actor = { id: string; officer: boolean };
 export type CraftError = { error: string };
@@ -51,7 +53,7 @@ export async function expireOld(now = new Date()) {
 	const stale = db()
 		.update(schema.craftOrders)
 		.set({ status: 'cancelled', closedNote: `Personne ne l’a prise en ${EXPIRE_DAYS} jours.`, closedAt: now, updatedAt: now })
-		.where(and(eq(schema.craftOrders.status, 'open'), lt(schema.craftOrders.createdAt, limit)))
+		.where(and(inArray(schema.craftOrders.status, ['open', 'quoted']), lt(schema.craftOrders.createdAt, limit)))
 		.returning()
 		.all();
 	for (const o of stale) await refreshAnnouncement(o);
@@ -63,6 +65,9 @@ export interface NewOrder {
 	materials: boolean;
 	comment: string | null;
 	artisanId: string | null;
+	/** Composants fournis : commission offerte (pc). Composants à trouver : budget maximum (pc). */
+	commission: number | null;
+	budget: number | null;
 }
 
 export async function createOrder(requesterId: string, input: NewOrder): Promise<CraftError | { order: CraftOrder; announced: boolean }> {
@@ -72,7 +77,7 @@ export async function createOrder(requesterId: string, input: NewOrder): Promise
 	const active = db()
 		.select({ n: sql<number>`count(*)` })
 		.from(schema.craftOrders)
-		.where(and(eq(schema.craftOrders.requesterId, requesterId), inArray(schema.craftOrders.status, ['open', 'taken'])))
+		.where(and(eq(schema.craftOrders.requesterId, requesterId), inArray(schema.craftOrders.status, ACTIVE)))
 		.get()!.n;
 	if (active >= MAX_ACTIVE) return { error: `Tu as déjà ${MAX_ACTIVE} commandes en cours : attends qu’une soit livrée, ou annule-en une.` };
 
@@ -86,7 +91,10 @@ export async function createOrder(requesterId: string, input: NewOrder): Promise
 			quantity: input.quantity,
 			materials: input.materials,
 			comment: input.comment,
-			artisanId: input.artisanId
+			artisanId: input.artisanId,
+			// Une commission n'a de sens qu'avec les composants fournis, un budget que sans.
+			commission: input.materials ? input.commission : null,
+			budget: input.materials ? null : input.budget
 		})
 		.returning()
 		.get();
@@ -97,12 +105,18 @@ function getOrder(id: number) {
 	return db().select().from(schema.craftOrders).where(eq(schema.craftOrders.id, id)).get() ?? null;
 }
 
-// Changements d'état autorisés : qui peut faire quoi, depuis quel état.
+// Changements d'état autorisés : qui peut faire quoi, depuis quel état. Composants fournis :
+// l'artisan prend la commande. Composants à trouver : il propose un prix ; dans le budget, la
+// commande est prise aussitôt, sinon le demandeur l'accepte ou la refuse.
 const TRANSITIONS = {
-	take: { from: ['open'], allowed: (o: CraftOrder, a: Actor) => o.requesterId !== a.id },
-	release: { from: ['taken'], allowed: (o: CraftOrder, a: Actor) => o.takenBy === a.id || a.officer },
+	take: { from: ['open'], allowed: (o: CraftOrder, a: Actor) => o.materials && o.requesterId !== a.id },
+	quote: { from: ['open'], allowed: (o: CraftOrder, a: Actor) => !o.materials && o.requesterId !== a.id },
+	accept: { from: ['quoted'], allowed: (o: CraftOrder, a: Actor) => o.requesterId === a.id },
+	refuse: { from: ['quoted'], allowed: (o: CraftOrder, a: Actor) => o.requesterId === a.id },
+	// Le demandeur, lui, refuse le prix (« refuse ») : « release » est pour l'artisan, ou un officier.
+	release: { from: ['quoted', 'taken'], allowed: (o: CraftOrder, a: Actor) => (o.status === 'taken' ? o.takenBy : o.quotedBy) === a.id || (a.officer && o.requesterId !== a.id) },
 	deliver: { from: ['taken'], allowed: (o: CraftOrder, a: Actor) => o.takenBy === a.id || o.requesterId === a.id || a.officer },
-	cancel: { from: ['open', 'taken'], allowed: (o: CraftOrder, a: Actor) => o.requesterId === a.id || a.officer }
+	cancel: { from: ['open', 'quoted', 'taken'], allowed: (o: CraftOrder, a: Actor) => o.requesterId === a.id || a.officer }
 } satisfies Record<string, { from: CraftStatus[]; allowed: (o: CraftOrder, a: Actor) => boolean }>;
 export type CraftAction = keyof typeof TRANSITIONS;
 
@@ -111,33 +125,50 @@ export function canDo(action: CraftAction, order: CraftOrder, actor: Actor) {
 	return (t.from as CraftStatus[]).includes(order.status) && t.allowed(order, actor);
 }
 
+function nextValues(action: CraftAction, order: CraftOrder, actor: Actor, price: number | null, now: Date): Partial<CraftOrder> {
+	switch (action) {
+		case 'take':
+			return { status: 'taken', takenBy: actor.id };
+		case 'quote':
+			return price !== null && order.budget !== null && price <= order.budget
+				? { status: 'taken', takenBy: actor.id, price, quotedBy: null }
+				: { status: 'quoted', quotedBy: actor.id, price };
+		case 'accept':
+			return { status: 'taken', takenBy: order.quotedBy, quotedBy: null };
+		case 'refuse':
+		case 'release':
+			// Composants à trouver : le prix tombe avec l'artisan qui l'avait proposé.
+			return { status: 'open', takenBy: null, quotedBy: null, price: null };
+		case 'deliver':
+			return { status: 'delivered', closedAt: now };
+		case 'cancel':
+			return { status: 'cancelled', closedAt: now, closedNote: order.requesterId === actor.id ? null : 'Fermée par un officier.' };
+	}
+}
+
 /**
- * Change l'état d'une commande. `locals` sert au journal quand un officier ferme la commande
- * d'un autre membre.
+ * Change l'état d'une commande. `price` : prix proposé (pc) pour « quote ». `locals` sert au
+ * journal quand un officier ferme la commande d'un autre membre.
  */
-export async function act(action: CraftAction, orderId: number, actor: Actor, locals: App.Locals | null = null): Promise<CraftError | { order: CraftOrder }> {
+export async function act(action: CraftAction, orderId: number, actor: Actor, locals: App.Locals | null = null, price: number | null = null): Promise<CraftError | { order: CraftOrder }> {
 	const order = getOrder(orderId);
 	if (!order) return { error: 'Cette commande n’existe plus.' };
 	if (!canDo(action, order, actor)) return { error: 'Cette commande a changé entre-temps, ou ce n’est pas à toi de le faire.' };
+	if (action === 'quote' && !price) return { error: 'Indique ton prix (composants et commission compris).' };
+	if (action === 'accept' && !order.quotedBy) return { error: 'L’artisan qui avait proposé ce prix n’est plus là.' };
 	const now = new Date();
-	const values: Partial<CraftOrder> =
-		action === 'take'
-			? { status: 'taken', takenBy: actor.id }
-			: action === 'release'
-				? { status: 'open', takenBy: null }
-				: action === 'deliver'
-					? { status: 'delivered', closedAt: now }
-					: { status: 'cancelled', closedAt: now, closedNote: order.requesterId === actor.id ? null : 'Fermée par un officier.' };
 	// L'état est revérifié dans la requête : deux artisans qui cliquent en même temps ne la prennent pas tous les deux.
 	const updated = db()
 		.update(schema.craftOrders)
-		.set({ ...values, updatedAt: now })
+		.set({ ...nextValues(action, order, actor, price, now), updatedAt: now })
 		.where(and(eq(schema.craftOrders.id, orderId), eq(schema.craftOrders.status, order.status)))
 		.returning()
 		.get();
 	if (!updated) return { error: 'Cette commande a changé entre-temps : recharge la page.' };
 	if (action === 'cancel' && order.requesterId !== actor.id && locals) audit(locals, 'craft.close', { label: `${order.quantity} × ${order.recipeName}`, url: '/commandes' });
 	await refreshAnnouncement(updated);
+	// Un prix attend sa réponse : le demandeur est mentionné, sous l'annonce.
+	if (updated.status === 'quoted') await notifyQuote(updated);
 	return { order: updated };
 }
 
@@ -149,10 +180,10 @@ export async function listOrders(now = new Date()) {
 	const orders = db()
 		.select()
 		.from(schema.craftOrders)
-		.where(or(inArray(schema.craftOrders.status, ['open', 'taken']), gte(schema.craftOrders.closedAt, since)))
+		.where(or(inArray(schema.craftOrders.status, ACTIVE), gte(schema.craftOrders.closedAt, since)))
 		.orderBy(desc(schema.craftOrders.createdAt))
 		.all();
-	const ids = [...new Set(orders.flatMap((o) => [o.requesterId, o.takenBy, o.artisanId]).filter((id): id is string => Boolean(id)))];
+	const ids = [...new Set(orders.flatMap((o) => [o.requesterId, o.takenBy, o.artisanId, o.quotedBy]).filter((id): id is string => Boolean(id)))];
 	const names = new Map(
 		ids.length
 			? db()
@@ -173,14 +204,24 @@ export async function listOrders(now = new Date()) {
 		requester: names.get(o.requesterId) ?? 'Ancien membre',
 		taker: o.takenBy ? (names.get(o.takenBy) ?? 'Ancien membre') : null,
 		artisan: o.artisanId ? (names.get(o.artisanId) ?? null) : null,
+		quoter: o.quotedBy ? (names.get(o.quotedBy) ?? 'Ancien membre') : null,
 		artisans: (knowers.get(o.recipeId) ?? []).map((a) => ({ playerId: a.playerId, name: a.name, player: a.player }))
 	}));
 }
 
-/** Commandes ouvertes d'une recette que le joueur connaît (compteur du menu). */
+/**
+ * Compteur du menu : commandes ouvertes d'une recette que le joueur connaît, plus ses propres
+ * commandes dont un prix attend sa réponse.
+ */
 export function openOrdersFor(userId: string) {
-	const open = db().select({ recipeId: schema.craftOrders.recipeId, requesterId: schema.craftOrders.requesterId }).from(schema.craftOrders).where(eq(schema.craftOrders.status, 'open')).all();
-	if (!open.length) return 0;
+	const rows = db()
+		.select({ recipeId: schema.craftOrders.recipeId, requesterId: schema.craftOrders.requesterId, status: schema.craftOrders.status })
+		.from(schema.craftOrders)
+		.where(inArray(schema.craftOrders.status, ['open', 'quoted']))
+		.all();
+	const toAnswer = rows.filter((o) => o.status === 'quoted' && o.requesterId === userId).length;
+	const open = rows.filter((o) => o.status === 'open');
+	if (!open.length) return toAnswer;
 	const known = new Set(
 		db()
 			.select({ known: schema.characters.knownRecipes })
@@ -189,15 +230,17 @@ export function openOrdersFor(userId: string) {
 			.all()
 			.flatMap((c) => (c.known ?? []).flatMap((k) => k.recipes.map((r) => r.id)))
 	);
-	return open.filter((o) => o.requesterId !== userId && known.has(o.recipeId)).length;
+	return toAnswer + open.filter((o) => o.requesterId !== userId && known.has(o.recipeId)).length;
 }
 
 // ── Discord ───────────────────────────────────────────────────────────────────
 
-function embed(order: CraftOrder, people: { requester: string; taker: string | null; artisan: string | null; artisans: string[] }): Embed {
+function embed(order: CraftOrder, people: { requester: string; taker: string | null; artisan: string | null; quoter: string | null; artisans: string[] }): Embed {
 	const state =
 		order.status === 'taken' && people.taker
-			? `Prise par ${people.taker}`
+			? `Prise par ${people.taker}${order.price ? ` pour ${formatMoney(order.price)}` : ''}`
+			: order.status === 'quoted' && people.quoter
+				? `${people.quoter} propose ${formatMoney(order.price)} : en attente du demandeur`
 			: order.status === 'cancelled' && order.closedNote
 				? `Annulée : ${order.closedNote}`
 				: STATUS_LABELS[order.status];
@@ -211,6 +254,8 @@ function embed(order: CraftOrder, people: { requester: string; taker: string | n
 			{ name: 'État', value: state, inline: true },
 			{ name: 'Demandée par', value: people.requester, inline: true },
 			{ name: 'Composants', value: order.materials ? 'Fournis par le demandeur' : 'À trouver par l’artisan', inline: true },
+			...(order.commission ? [{ name: 'Commission offerte', value: formatMoney(order.commission), inline: true }] : []),
+			...(order.budget && order.status === 'open' ? [{ name: 'Budget maximum', value: formatMoney(order.budget), inline: true }] : []),
 			...(people.artisan ? [{ name: 'Artisan souhaité', value: people.artisan, inline: true }] : []),
 			...(!done && people.artisans.length ? [{ name: `${professionName(order.profession)} : la connaissent`, value: people.artisans.slice(0, 15).join(', ') }] : [])
 		]
@@ -218,7 +263,7 @@ function embed(order: CraftOrder, people: { requester: string; taker: string | n
 }
 
 function peopleOf(order: CraftOrder) {
-	const ids = [order.requesterId, order.takenBy, order.artisanId].filter((id): id is string => Boolean(id));
+	const ids = [order.requesterId, order.takenBy, order.artisanId, order.quotedBy].filter((id): id is string => Boolean(id));
 	const names = new Map(
 		db()
 			.select({ id: schema.users.discordId, name: schema.users.displayName })
@@ -230,7 +275,8 @@ function peopleOf(order: CraftOrder) {
 	return {
 		requester: names.get(order.requesterId) ?? 'Ancien membre',
 		taker: order.takenBy ? (names.get(order.takenBy) ?? null) : null,
-		artisan: order.artisanId ? (names.get(order.artisanId) ?? null) : null
+		artisan: order.artisanId ? (names.get(order.artisanId) ?? null) : null,
+		quoter: order.quotedBy ? (names.get(order.quotedBy) ?? null) : null
 	};
 }
 
@@ -276,5 +322,23 @@ async function refreshAnnouncement(order: CraftOrder) {
 		await editMessage(order.discordChannelId, order.discordMessageId, { embeds: [embed(order, { ...peopleOf(order), artisans })] });
 	} catch (e) {
 		console.error('Mise à jour de l’annonce de commande impossible :', e instanceof Error ? e.message : e);
+	}
+}
+
+/** Réponse sous l'annonce : le demandeur est mentionné pour accepter ou refuser le prix proposé. */
+async function notifyQuote(order: CraftOrder) {
+	if (!order.discordChannelId || !order.discordMessageId || !botReady()) return;
+	const { quoter } = peopleOf(order);
+	try {
+		await postMessage(
+			order.discordChannelId,
+			{
+				content: `<@${order.requesterId}> ${quoter ?? 'Un artisan'} propose ${formatMoney(order.price)} pour ${order.quantity} × ${order.recipeName} (composants compris). Accepte ou refuse sur ${env.ORIGIN ?? ''}/commandes#commande-${order.id}`,
+				replyTo: order.discordMessageId
+			},
+			[order.requesterId]
+		);
+	} catch (e) {
+		console.error('Message de prix proposé impossible :', e instanceof Error ? e.message : e);
 	}
 }

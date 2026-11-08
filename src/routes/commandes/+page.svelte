@@ -1,13 +1,15 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { page } from '$app/state';
+	import MoneyInput from '$lib/components/MoneyInput.svelte';
+	import { formatMoney } from '$lib/money';
 	import { recipeUrl } from '$lib/wowhead';
 
 	let { data, form } = $props();
 	const cfg = $derived(data.config);
 	type Order = (typeof data.orders)[number];
 
-	const open = $derived(data.orders.filter((o) => o.status === 'open'));
+	const open = $derived(data.orders.filter((o) => o.status === 'open' || o.status === 'quoted'));
 	const taken = $derived(data.orders.filter((o) => o.status === 'taken'));
 	const closed = $derived(data.orders.filter((o) => o.status === 'delivered' || o.status === 'cancelled'));
 	// Commandes ouvertes d'une recette que je connais : en tête, mises en avant.
@@ -17,7 +19,13 @@
 	const discordFailed = $derived(page.url.searchParams.get('discord') === '0');
 
 	const when = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium', timeStyle: 'short' });
-	const DONE_LABELS: Record<string, string> = { take: 'Commande prise : le demandeur la voit à ton nom.', release: 'Commande rendue : elle est de nouveau ouverte.', deliver: 'Commande livrée.', cancel: 'Commande annulée.' };
+	// Mes commandes dont un prix attend ma réponse : tout en haut.
+	const toAnswer = $derived(data.orders.filter((o) => o.can.accept));
+	const DONE_LABELS: Record<string, string> = {
+		take: 'Commande prise : le demandeur la voit à ton nom.',
+		quote: 'Prix proposé : le demandeur est prévenu et doit l’accepter.',
+		accept: 'Prix accepté : l’artisan s’en occupe.',
+		refuse: 'Prix refusé : la commande est de nouveau ouverte aux autres artisans.', release: 'Commande rendue : elle est de nouveau ouverte.', deliver: 'Commande livrée.', cancel: 'Commande annulée.' };
 </script>
 
 <svelte:head><title>Commandes · {cfg.guild.name}</title></svelte:head>
@@ -38,6 +46,12 @@
 {/if}
 {#if form?.error}<p class="notice bad">{form.error}</p>{/if}
 {#if form?.done}<p class="notice ok">{DONE_LABELS[form.done]}</p>{/if}
+{#each toAnswer as o (o.id)}
+	<p class="notice warn">
+		{o.quoter} propose <strong>{formatMoney(o.price)}</strong> pour ta commande de {o.quantity} × {o.recipeName}.
+		<a href="#commande-{o.id}">Répondre</a>
+	</p>
+{/each}
 
 {#if data.me}
 	<form method="POST" action="?/alerts" use:enhance class="alerts">
@@ -57,7 +71,7 @@
 				<a href={recipeUrl(o.recipeId)} target="_blank" rel="noopener">{o.recipeName}</a>
 			</h3>
 			<span class="badge status {o.status}">
-				{o.status === 'taken' ? `Prise par ${o.taker}` : o.status === 'open' ? 'Ouverte' : o.status === 'delivered' ? 'Livrée' : 'Annulée'}
+				{o.status === 'taken' ? `Prise par ${o.taker}` : o.status === 'open' ? 'Ouverte' : o.status === 'quoted' ? 'Prix proposé' : o.status === 'delivered' ? 'Livrée' : 'Annulée'}
 			</span>
 		</div>
 		<p class="muted small">
@@ -69,6 +83,19 @@
 			{o.materials ? 'fournis par le demandeur' : 'à trouver par l’artisan'}
 			{#if o.artisan}· <strong>Artisan souhaité :</strong> {o.artisan}{/if}
 		</p>
+		{#if o.commission || o.budget || o.price}
+			<p class="money small">
+				{#if o.commission}<span><strong>Commission offerte :</strong> {formatMoney(o.commission)}</span>{/if}
+				{#if o.budget && o.status === 'open'}<span><strong>Budget maximum :</strong> {formatMoney(o.budget)}</span>{/if}
+				{#if o.price && o.status === 'quoted'}<span class="quote"><strong>{o.quoter} propose :</strong> {formatMoney(o.price)}, composants compris</span>{/if}
+				{#if o.price && o.status !== 'quoted'}<span><strong>Prix convenu :</strong> {formatMoney(o.price)}</span>{/if}
+			</p>
+		{/if}
+		{#if o.status === 'taken' && o.takenBy === data.me}
+			<p class="muted small">
+				Envoie la commande par courrier en jeu, en <strong>contre-remboursement</strong>{o.price || o.commission ? ` de ${formatMoney((o.price ?? 0) || (o.commission ?? 0))}` : ''} : le demandeur paie en la récupérant.
+			</p>
+		{/if}
 		{#if o.status !== 'delivered' && o.status !== 'cancelled'}
 			<p class="muted small">
 				{#if o.artisans.length}
@@ -79,16 +106,34 @@
 			</p>
 		{/if}
 		{#if o.closedNote}<p class="muted small">{o.closedNote}</p>{/if}
-		{#if o.can.take || o.can.release || o.can.deliver || o.can.cancel}
+		{#if o.can.quote}
+			<details class="quote-form" open={form?.id === o.id}>
+				<summary>Proposer un prix</summary>
+				<form method="POST" action="?/quote" use:enhance class="quote-fields">
+					<input type="hidden" name="id" value={o.id} />
+					<MoneyInput name="price" label="Ton prix, composants et commission compris" hint={o.budget ? `Dans le budget (${formatMoney(o.budget)} au plus), la commande est à toi tout de suite ; au-delà, le demandeur doit accepter.` : 'Le demandeur doit accepter ton prix.'} />
+					<button>Proposer</button>
+				</form>
+			</details>
+		{/if}
+		{#if o.can.take || o.can.accept || o.can.refuse || o.can.release || o.can.deliver || o.can.cancel}
 			<div class="row actions">
 				{#if o.can.take}
 					<form method="POST" action="?/take" use:enhance><input type="hidden" name="id" value={o.id} /><button>Je m'en occupe</button></form>
+				{/if}
+				{#if o.can.accept}
+					<form method="POST" action="?/accept" use:enhance><input type="hidden" name="id" value={o.id} /><button>Accepter {formatMoney(o.price)}</button></form>
+				{/if}
+				{#if o.can.refuse}
+					<form method="POST" action="?/refuse" use:enhance><input type="hidden" name="id" value={o.id} /><button class="secondary">Refuser</button></form>
 				{/if}
 				{#if o.can.deliver}
 					<form method="POST" action="?/deliver" use:enhance><input type="hidden" name="id" value={o.id} /><button class={o.takenBy === data.me ? '' : 'secondary'}>Livrée</button></form>
 				{/if}
 				{#if o.can.release}
-					<form method="POST" action="?/release" use:enhance><input type="hidden" name="id" value={o.id} /><button class="secondary">Je ne peux plus</button></form>
+					<form method="POST" action="?/release" use:enhance>
+						<input type="hidden" name="id" value={o.id} /><button class="secondary">{o.status === 'quoted' ? 'Retirer mon prix' : 'Je ne peux plus'}</button>
+					</form>
 				{/if}
 				{#if o.can.cancel}
 					<form method="POST" action="?/cancel" use:enhance={({ cancel }) => { if (!confirm('Annuler cette commande ?')) cancel(); }}>
@@ -184,6 +229,26 @@
 	}
 	.actions {
 		gap: 0.5rem;
+	}
+	.money {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.25rem 1.25rem;
+	}
+	.quote {
+		color: var(--gold);
+	}
+	.quote-form summary {
+		cursor: pointer;
+		color: var(--accent-ink);
+		font-size: 0.875rem;
+	}
+	.quote-fields {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: flex-end;
+		gap: 0.75rem;
+		margin-top: 0.5rem;
 	}
 	.closed .order {
 		opacity: 0.75;

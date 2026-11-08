@@ -1,5 +1,6 @@
 import { fail } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
+import { readMoney } from '$lib/money';
 import { act, canDo, listOrders, type CraftAction } from '$lib/server/crafts';
 import { db, schema } from '$lib/server/db';
 import { requireUser, requireViewer } from '$lib/server/guards';
@@ -14,6 +15,9 @@ export const load: PageServerLoad = async ({ locals }) => {
 		...o,
 		can: {
 			take: Boolean(locals.user && who && canDo('take', o, who)),
+			quote: Boolean(locals.user && who && canDo('quote', o, who)),
+			accept: Boolean(who && canDo('accept', o, who)),
+			refuse: Boolean(who && canDo('refuse', o, who)),
 			release: Boolean(who && canDo('release', o, who)),
 			deliver: Boolean(who && canDo('deliver', o, who)),
 			cancel: Boolean(who && canDo('cancel', o, who))
@@ -39,14 +43,24 @@ const change =
 	async ({ locals, request }: RequestEvent) => {
 		const who = action === 'cancel' && locals.admin ? { id: 'admin-local', officer: true } : actor(locals);
 		if (!who) requireUser(locals);
-		const id = Number((await request.formData()).get('id'));
-		const result = await act(action, id, who!, locals);
-		if ('error' in result) return fail(400, { error: result.error });
-		return { done: action, id };
+		const form = await request.formData();
+		const id = Number(form.get('id'));
+		let price: number | null = null;
+		if (action === 'quote') {
+			const money = readMoney(form, 'price');
+			if ('error' in money) return fail(400, { error: money.error, id });
+			price = money.value;
+		}
+		const result = await act(action, id, who!, locals, price);
+		if ('error' in result) return fail(400, { error: result.error, id });
+		return { done: action === 'quote' && result.order.status === 'taken' ? 'take' : action, id };
 	};
 
 export const actions: Actions = {
 	take: change('take'),
+	quote: change('quote'),
+	accept: change('accept'),
+	refuse: change('refuse'),
 	release: change('release'),
 	deliver: change('deliver'),
 	cancel: change('cancel'),

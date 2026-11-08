@@ -343,7 +343,8 @@ export type NewCharacter = typeof characters.$inferInsert;
 
 // Commandes de craft : un membre demande une recette connue d'un artisan de la guilde ; le bot
 // l'annonce dans le salon des commandes et met son message à jour à chaque changement d'état.
-export const CRAFT_STATUSES = ['open', 'taken', 'delivered', 'cancelled'] as const;
+// « quoted » : un artisan a proposé un prix au-dessus du budget, le demandeur doit l'accepter.
+export const CRAFT_STATUSES = ['open', 'quoted', 'taken', 'delivered', 'cancelled'] as const;
 export type CraftStatus = (typeof CRAFT_STATUSES)[number];
 
 export const craftOrders = sqliteTable(
@@ -361,6 +362,13 @@ export const craftOrders = sqliteTable(
 		// Le demandeur fournit les composants, ou l'artisan doit les trouver.
 		materials: integer('materials', { mode: 'boolean' }).notNull().default(false),
 		comment: text('comment'),
+		// Montants en pièces de cuivre. Composants fournis : commission offerte par le demandeur
+		// (facultative). Composants à trouver : budget maximum du demandeur (facultatif), puis prix
+		// proposé par un artisan (`quotedBy`) et, une fois accepté, prix convenu.
+		commission: integer('commission'),
+		budget: integer('budget'),
+		price: integer('price'),
+		quotedBy: text('quoted_by').references(() => users.discordId, { onDelete: 'set null' }),
 		// Artisan souhaité (joueur), facultatif.
 		artisanId: text('artisan_id').references(() => users.discordId, { onDelete: 'set null' }),
 		status: text('status', { enum: CRAFT_STATUSES }).notNull().default('open'),

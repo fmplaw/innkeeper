@@ -81,7 +81,7 @@ const PAGES: Record<string, Record<string, Rule>> = {
 	'/admin/sorties': { load: 'officier', connection: 'officier', create: 'officier', update: 'officier', image: 'officier', delete: 'officier' },
 	'/admin/statistiques': { load: 'officier' },
 	'/artisans': { load: 'connecte' },
-	'/commandes': { load: 'connecte', take: 'joueur', release: 'joueur', deliver: 'joueur', cancel: 'connecte', alerts: 'joueur' },
+	'/commandes': { load: 'connecte', take: 'joueur', quote: 'joueur', accept: 'joueur', refuse: 'joueur', release: 'joueur', deliver: 'joueur', cancel: 'connecte', alerts: 'joueur' },
 	'/commandes/nouvelle': { load: 'joueur', default: 'joueur' },
 	'/candidature': { load: { exempt: 'parcours candidat' }, withdraw: { exempt: 'parcours candidat' } },
 	'/charte': { load: { exempt: 'charte publique' } },

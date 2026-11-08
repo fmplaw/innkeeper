@@ -7,6 +7,10 @@ CREATE TABLE `craft_orders` (
 	`quantity` integer DEFAULT 1 NOT NULL,
 	`materials` integer DEFAULT false NOT NULL,
 	`comment` text,
+	`commission` integer,
+	`budget` integer,
+	`price` integer,
+	`quoted_by` text,
 	`artisan_id` text,
 	`status` text DEFAULT 'open' NOT NULL,
 	`taken_by` text,
@@ -17,6 +21,7 @@ CREATE TABLE `craft_orders` (
 	`updated_at` integer DEFAULT (unixepoch()) NOT NULL,
 	`closed_at` integer,
 	FOREIGN KEY (`requester_id`) REFERENCES `users`(`discord_id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`quoted_by`) REFERENCES `users`(`discord_id`) ON UPDATE no action ON DELETE set null,
 	FOREIGN KEY (`artisan_id`) REFERENCES `users`(`discord_id`) ON UPDATE no action ON DELETE set null,
 	FOREIGN KEY (`taken_by`) REFERENCES `users`(`discord_id`) ON UPDATE no action ON DELETE set null
 );
