@@ -54,7 +54,7 @@
 				</div>
 			{/if}
 			{#if c.knownRecipes?.length}
-				<div class="wide"><dt>Recettes connues en jeu</dt><dd class="recipes"><KnownRecipes {cfg} known={c.knownRecipes} /></dd></div>
+				<div class="wide"><dt>Recettes connues en jeu</dt><dd class="recipes"><KnownRecipes {cfg} known={c.knownRecipes} characterId={c.id} /></dd></div>
 			{/if}
 			{#if c.recipes}<div><dt>Recettes notables</dt><dd>{c.recipes}</dd></div>{/if}
 			{#if c.notes}<div><dt>Notes</dt><dd class="notes">{c.notes}</dd></div>{/if}

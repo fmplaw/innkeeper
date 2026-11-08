@@ -64,6 +64,7 @@ InnkeeperSyncDB = {
 				{
 					["id"] = 2662,
 					["name"] = "Ceinture en cuivre",
+					["category"] = "Ceintures",
 				}, -- [1]
 				{
 					["id"] = 2663,

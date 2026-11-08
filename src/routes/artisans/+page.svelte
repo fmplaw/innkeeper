@@ -3,8 +3,8 @@
 	import ArmoryLink from '$lib/components/ArmoryLink.svelte';
 	import ClassEmblem from '$lib/components/ClassEmblem.svelte';
 	import Glyph from '$lib/components/Glyph.svelte';
-	import RecipeList from '$lib/components/RecipeList.svelte';
 	import { classColor } from '$lib/labels';
+	import { recipesAnchor } from '$lib/recipes';
 	import type { Role } from '$lib/roles';
 	import { recipeUrl } from '$lib/wowhead';
 
@@ -41,19 +41,17 @@
 	</div>
 </div>
 
-{#snippet who(a: (typeof data.professions)[number]['artisans'][number], showRecipes: boolean)}
+{#snippet who(a: (typeof data.professions)[number]['artisans'][number], profession: string, showRecipes: boolean)}
+	{@const href = `/joueurs/${a.playerId}${a.recipes.length ? `#${recipesAnchor(a.characterId, profession)}` : ''}`}
 	<li class="artisan">
 		<ClassEmblem {cfg} classId={a.class} role={a.role as Role} size={30} />
 		<span class="ident">
-			<a class="name class-ink" style:--c={classColor(cfg, a.class)} href="/joueurs/{a.playerId}">{a.name}</a><ArmoryLink href={armoryHref(cfg, a)} name={a.name} />
+			<a class="name class-ink" style:--c={classColor(cfg, a.class)} {href}>{a.name}</a><ArmoryLink href={armoryHref(cfg, a)} name={a.name} />
 			<span class="muted small">{a.player}{a.isMain ? '' : ' · reroll'}</span>
 		</span>
 		<span class="skill num" title="Niveau du métier">{a.skill ?? '—'}</span>
 		{#if showRecipes && a.recipes.length}
-			<details class="recipes">
-				<summary>{a.recipes.length} recette{a.recipes.length > 1 ? 's' : ''}</summary>
-				<RecipeList recipes={a.recipes} />
-			</details>
+			<a class="recipes" {href}>{a.recipes.length} recette{a.recipes.length > 1 ? 's' : ''} →</a>
 		{/if}
 	</li>
 {/snippet}
@@ -82,7 +80,7 @@
 						<span class="muted small">{professionName(r.profession)}</span>
 					</h3>
 					<ul class="artisans">
-						{#each r.artisans as a (a.characterId)}{@render who(a, false)}{/each}
+						{#each r.artisans as a (a.characterId)}{@render who(a, r.profession, false)}{/each}
 					</ul>
 				</article>
 			{:else}
@@ -97,7 +95,7 @@
 			<section class="group" id={p.id}>
 				<h2>{professionName(p.id)} <span class="muted">({p.artisans.length})</span></h2>
 				<ul class="artisans">
-					{#each p.artisans as a (a.characterId)}{@render who(a, true)}{/each}
+					{#each p.artisans as a (a.characterId)}{@render who(a, p.id, true)}{/each}
 				</ul>
 			</section>
 		{/each}
@@ -201,11 +199,13 @@
 	}
 	.recipes {
 		grid-column: 2 / -1;
-		font-size: 0.875rem;
-	}
-	.recipes summary {
-		cursor: pointer;
+		justify-self: start;
 		color: var(--muted);
+		font-size: 0.875rem;
+		text-decoration: none;
+	}
+	.recipes:hover {
+		color: var(--accent-ink);
 	}
 	.result h3 a {
 		color: var(--text);

@@ -1,7 +1,7 @@
 import { randomBytes } from 'node:crypto';
 import { eq } from 'drizzle-orm';
 import { db, schema } from '../db';
-import type { ProfessionEntry } from '../db/schema';
+import type { KnownRecipes, ProfessionEntry } from '../db/schema';
 import { createLocalAdmin } from '../local-admin';
 import {
 	guildSchema,
@@ -43,8 +43,8 @@ type Char = [name: string, surname: string, race: string, cls: string, spec: str
 const { officer: R_OFF, member: R_MEM, newcomer: R_NEW } = DEMO_ROLES;
 
 // Recettes exportées par l'addon (identifiants de sorts du Classic), pour la page Artisans.
-const R = (id: number, name: string) => ({ id, name });
-const DEMO_RECIPES: Record<string, { profession: string; skill: number; recipes: { id: number; name: string }[] }[]> = {
+const R = (id: number, name: string, category?: string) => ({ id, name, ...(category && { category }) });
+const DEMO_RECIPES: Record<string, KnownRecipes[]> = {
 	Aldren: [{ profession: 'blacksmithing', skill: 182, recipes: [R(2660, 'Pierre à aiguiser brute'), R(2663, 'Brassards en cuivre')] }],
 	Ysolde: [{ profession: 'alchemy', skill: 168, recipes: [R(2330, 'Potion de soins mineure'), R(2329, 'Élixir de force du lion')] }],
 	Lysandre: [
@@ -63,8 +63,9 @@ const DEMO_RECIPES: Record<string, { profession: string; skill: number; recipes:
 	],
 	Eodric: [{ profession: 'leatherworking', skill: 171, recipes: [R(2881, 'Cuir léger'), R(2149, 'Bottes en cuir cousues main')] }],
 	Brunhild: [
-		{ profession: 'first-aid', skill: 150, recipes: [R(3275, 'Bandage en lin'), R(3276, 'Bandage épais en lin'), R(3277, 'Bandage en laine'), R(7934, 'Anti-venin')] },
-		{ profession: 'cooking', skill: 120, recipes: [R(2538, 'Viande de loup grillée'), R(2540, 'Viande de sanglier rôtie'), R(8604, 'Œufs aux herbes')] }
+		// Exportées par l'addon 0.17 : rangées par sous-section, comme dans la fenêtre du métier.
+		{ profession: 'first-aid', skill: 150, recipes: [R(3275, 'Bandage en lin', 'Bandages'), R(3276, 'Bandage épais en lin', 'Bandages'), R(3277, 'Bandage en laine', 'Bandages'), R(7934, 'Anti-venin', 'Remèdes')] },
+		{ profession: 'cooking', skill: 120, recipes: [R(2538, 'Viande de loup grillée', 'Plats courants'), R(8604, 'Œufs aux herbes', 'Nourriture modifiant l’Endurance'), R(2540, 'Viande de sanglier rôtie', 'Nourriture modifiant la Force')] }
 	]
 };
 

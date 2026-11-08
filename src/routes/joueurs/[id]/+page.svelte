@@ -49,7 +49,7 @@
 				{#if c.pve || c.pvp}<p><InterestBadges pve={c.pve} pvp={c.pvp} /></p>{/if}
 				{#if c.professions.length}<p class="muted">{professionNames(cfg, c.professions)}</p>{/if}
 				{#if c.recipes}<p class="muted small">Recettes : {c.recipes}</p>{/if}
-				<KnownRecipes {cfg} known={c.knownRecipes} />
+				<KnownRecipes {cfg} known={c.knownRecipes} characterId={c.id} />
 				{#if c.lastOnlineAt}<p class="muted small">Vu en jeu le {dateFormat.format(c.lastOnlineAt)}</p>{/if}
 				{#if c.rosters.length}
 					<p class="rosters">
@@ -111,6 +111,8 @@
 	.list {
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+		/* Une fiche dont les recettes sont dépliées ne doit pas étirer ses voisines. */
+		align-items: start;
 		gap: 1rem;
 	}
 	article {

@@ -1,17 +1,18 @@
 <script lang="ts">
+	import { groupRecipes } from '$lib/recipes';
+	import type { Recipe } from '$lib/server/db/schema';
 	import { recipeUrl } from '$lib/wowhead';
 
-	// Liste de recettes (Artisans, fiches) : hauteur limitée pour qu'un artisan à 150 recettes ne
-	// repousse pas toute la page, et petit filtre dès que la liste devient longue.
-	let { recipes }: { recipes: { id: number; name: string }[] } = $props();
+	// Recettes d'un métier rangées comme dans la fenêtre du jeu (« Bandages », « Remèdes »…),
+	// avec un petit filtre dès que la liste devient longue.
+	let { recipes }: { recipes: Recipe[] } = $props();
 
 	const FILTER_FROM = 20;
 	const fold = (s: string) => s.normalize('NFD').replace(/\p{M}/gu, '').replace(/œ/g, 'oe').toLocaleLowerCase('fr');
 	let filter = $state('');
-	const sorted = $derived(recipes.toSorted((a, b) => a.name.localeCompare(b.name, 'fr')));
-	const shown = $derived.by(() => {
+	const groups = $derived.by(() => {
 		const q = fold(filter.trim());
-		return q ? sorted.filter((r) => fold(r.name).includes(q)) : sorted;
+		return groupRecipes(q ? recipes.filter((r) => fold(r.name).includes(q)) : recipes);
 	});
 </script>
 
@@ -19,19 +20,24 @@
 	{#if recipes.length >= FILTER_FROM}
 		<input type="search" class="filter" bind:value={filter} placeholder="Filtrer ces recettes…" aria-label="Filtrer ces recettes" />
 	{/if}
-	<ul class:long={recipes.length > 12}>
-		{#each shown as r (r.id)}
-			<li><a href={recipeUrl(r.id)} target="_blank" rel="noopener">{r.name}</a></li>
-		{:else}
-			<li class="muted">Aucune recette ne contient « {filter.trim()} ».</li>
-		{/each}
-	</ul>
+	{#each groups as g (g.category)}
+		<section>
+			{#if g.category}<h4>{g.category} <span class="muted">{g.recipes.length}</span></h4>{/if}
+			<ul>
+				{#each g.recipes as r (r.id)}
+					<li><a href={recipeUrl(r.id)} target="_blank" rel="noopener">{r.name}</a></li>
+				{/each}
+			</ul>
+		</section>
+	{:else}
+		<p class="muted">Aucune recette ne contient « {filter.trim()} ».</p>
+	{/each}
 </div>
 
 <style>
 	.recipe-list {
 		display: grid;
-		gap: 0.5rem;
+		gap: 0.75rem;
 		margin: 0.5rem 0 0.25rem;
 		font-size: 0.875rem;
 	}
@@ -39,6 +45,18 @@
 		max-width: 16rem;
 		padding: 0.25rem 0.625rem;
 		font-size: 0.875rem;
+	}
+	h4 {
+		margin: 0 0 0.25rem;
+		padding-bottom: 0.125rem;
+		border-bottom: 1px solid var(--border);
+		color: var(--gold);
+		font-size: 0.8125rem;
+		font-weight: 600;
+		letter-spacing: 0.02em;
+	}
+	h4 .muted {
+		font-weight: 400;
 	}
 	ul {
 		display: grid;
@@ -48,14 +66,8 @@
 		padding: 0;
 		list-style: none;
 	}
-	/* Au-delà d'une douzaine : la liste défile dans son cadre. */
-	ul.long {
-		max-height: 14rem;
-		overflow-y: auto;
-		padding: 0.5rem 0.625rem;
-		border: 1px solid var(--border);
-		border-radius: 0.5rem;
-		overscroll-behavior: contain;
+	p {
+		margin: 0;
 	}
 	a {
 		color: var(--text);

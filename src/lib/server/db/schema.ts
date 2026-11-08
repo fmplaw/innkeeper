@@ -17,7 +17,14 @@ export type ArmoryStatus = (typeof ARMORY_STATUSES)[number];
 export interface KnownRecipes {
 	profession: string;
 	skill: number | null;
-	recipes: { id: number; name: string }[];
+	/** `category` : sous-section de la fenêtre du métier en jeu (« Bandages »…), absente des anciens exports. */
+	recipes: Recipe[];
+}
+
+export interface Recipe {
+	id: number;
+	name: string;
+	category?: string | null;
 }
 
 const timestamp = (name: string) =>
