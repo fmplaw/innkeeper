@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { reagentCost } from '$lib/recipes';
 import { horde } from '../../test/helpers';
-import { CHEAPEST_UNITS, listAuctionHouses, priceTable, refreshPrices, summarize } from './auction';
+import { CHEAPEST_UNITS, listAuctionHouses, nameReagents, priceTable, refreshPrices, summarize } from './auction';
 import { resetBattlenetToken } from './battlenet';
 import { battlenetSchema, craftSchema, getAuctionStatus, setBattlenet, setCrafts } from './settings';
 
@@ -75,5 +75,12 @@ describe('prix de l’hôtel des ventes', () => {
 		const broken = api({ '/data/wow/ruleset/2/auctions/113/commodities': { auctions: [] } });
 		expect((await refreshPrices(broken.fetchFn)).ok).toBe(false);
 		expect(priceTable([765]).prices).toEqual({ 765: 12 });
+	});
+
+	it('nomme les composants exportés sans nom', () => {
+		const known = [{ profession: 'cooking', skill: 80, recipes: [{ id: 6499, name: 'Palourdes bouillies', reagents: [{ id: 5503, count: 1 }, { id: 159, name: 'Eau de source', count: 1 }] }] }];
+		const named = nameReagents(known, { 5503: 'Viande de palourde', 159: 'Autre nom' });
+		expect(named[0].recipes[0].reagents).toEqual([{ id: 5503, name: 'Viande de palourde', count: 1 }, { id: 159, name: 'Eau de source', count: 1 }]);
+		expect(nameReagents(known, {})).toBe(known);
 	});
 });

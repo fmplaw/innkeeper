@@ -1,9 +1,10 @@
-import { inArray, sql } from 'drizzle-orm';
+import { eq, inArray, isNotNull, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { VENDOR_REAGENTS } from '$lib/game/vendor-reagents';
 import { BattlenetError, getDynamic, isConfigured } from './battlenet';
 import { db, schema } from './db';
-import { getCrafts, getVendorPrices, setAuctionStatus, setVendorPrices } from './settings';
+import type { KnownRecipes } from './db/schema';
+import { getCrafts, getItemNames, getVendorPrices, setAuctionStatus, setItemNames, setVendorPrices } from './settings';
 
 // Prix de l'hôtel des ventes de Forever, lus sur Battle.net. Forever range ses HV par type de
 // règles (JcE, JcJ…), chacun avec plusieurs HV par faction : la guilde choisit le sien dans
@@ -22,7 +23,7 @@ const STALE_MS = 24 * 3_600_000;
 const indexSchema = z.object({ rulesets: z.array(z.object({ id: z.number().int() })).default([]) });
 const rulesetSchema = z.object({ id: z.number().int(), name: z.string() });
 const housesSchema = z.object({ auctions: z.array(z.object({ id: z.number().int(), name: z.string() })).default([]) });
-const itemSchema = z.object({ purchase_price: z.number().int().nullish(), purchase_quantity: z.number().int().nullish() });
+const itemSchema = z.object({ name: z.string().nullish(), purchase_price: z.number().int().nullish(), purchase_quantity: z.number().int().nullish() });
 const commoditiesSchema = z.object({
 	auctions: z.array(z.object({ item: z.object({ id: z.number().int() }), quantity: z.number().int(), unit_price: z.number().int() })).default([])
 });
@@ -101,6 +102,49 @@ export function withVendorPrices(prices: ReturnType<typeof summarize>, vendor: R
 	return [...byItem.values()];
 }
 
+/** Composants sans nom dans les fiches (objet jamais affiché en jeu au moment de l'export). */
+function unnamedReagents() {
+	const rows = db().select({ known: schema.characters.knownRecipes }).from(schema.characters).where(isNotNull(schema.characters.knownRecipes)).all();
+	return [...new Set(rows.flatMap((r) => (r.known ?? []).flatMap((k) => k.recipes.flatMap((x) => (x.reagents ?? []).filter((g) => !g.name).map((g) => g.id)))))];
+}
+
+/** Donne leur nom aux composants qui n'en ont pas, d'après une liste (id → nom) ; renvoie la même liste si rien ne change. */
+export function nameReagents(known: KnownRecipes[], names: Record<number, string>): KnownRecipes[] {
+	let changed = false;
+	const result = known.map((k) => ({
+		...k,
+		recipes: k.recipes.map((r) => {
+			if (!r.reagents?.some((g) => !g.name && names[g.id])) return r;
+			changed = true;
+			return { ...r, reagents: r.reagents.map((g) => (!g.name && names[g.id] ? { ...g, name: names[g.id] } : g)) };
+		})
+	}));
+	return changed ? result : known;
+}
+
+/**
+ * Le jeu ne connaît le nom d'un objet qu'une fois affiché : l'addon exporte parfois un composant
+ * sans nom. Battle.net donne son nom français ; gardé, puis écrit dans les fiches concernées.
+ */
+export async function fillReagentNames(fetchFn: Fetch = fetch, max = 100) {
+	const names = { ...getItemNames() };
+	const missing = unnamedReagents().filter((id) => names[id] === undefined).slice(0, max);
+	for (const id of missing) {
+		try {
+			const item = itemSchema.parse((await getDynamic(`/data/wow/item/${id}`, fetchFn, 'static')) ?? {});
+			if (item.name) names[id] = item.name;
+		} catch {
+			// Réessayé à la prochaine lecture.
+		}
+	}
+	if (missing.length) setItemNames(names);
+	const rows = db().select({ id: schema.characters.id, known: schema.characters.knownRecipes }).from(schema.characters).where(isNotNull(schema.characters.knownRecipes)).all();
+	for (const r of rows) {
+		const named = nameReagents(r.known!, names);
+		if (named !== r.known) db().update(schema.characters).set({ knownRecipes: named }).where(eq(schema.characters.id, r.id)).run();
+	}
+}
+
 /** Relit les prix de l'HV choisi et remplace ceux de la base. */
 export async function refreshPrices(fetchFn: Fetch = fetch) {
 	const { auctionRuleset, auctionHouse } = getCrafts();
@@ -114,6 +158,7 @@ export async function refreshPrices(fetchFn: Fetch = fetch) {
 			tx.delete(schema.auctionPrices).run();
 			for (let i = 0; i < prices.length; i += 500) tx.insert(schema.auctionPrices).values(prices.slice(i, i + 500).map((p) => ({ ...p, updatedAt: now }))).run();
 		});
+		await fillReagentNames(fetchFn);
 		const message = `${prices.length} objets à l’hôtel des ventes.`;
 		setAuctionStatus({ at: now.getTime(), ok: true, message });
 		return { ok: true, message };

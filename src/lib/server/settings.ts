@@ -187,6 +187,10 @@ export const setAuctionStatus = (status: AuctionStatus) => write('auctionStatus'
 export const getVendorPrices = () => read<Record<number, number>>('vendorPrices') ?? {};
 export const setVendorPrices = (prices: Record<number, number>) => write('vendorPrices', prices);
 
+/** Noms français des composants exportés sans nom (objet jamais affiché en jeu), lus sur Battle.net. */
+export const getItemNames = () => read<Record<number, string>>('itemNames') ?? {};
+export const setItemNames = (names: Record<number, string>) => write('itemNames', names);
+
 // Charte et règlement de la guilde : page publique /charte, à accepter pour postuler.
 export const charterSchema = z.object({
 	text: z.string().trim().max(20_000, 'Charte trop longue (20 000 caractères au plus)'),
