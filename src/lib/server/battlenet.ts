@@ -95,11 +95,12 @@ async function accessToken(s: BattlenetSettings, fetchFn: Fetch) {
 }
 
 /**
- * GET sur l'API ; null si la ressource n'existe pas (404), erreur sinon. `dynamic` : données qui
- * changent souvent (hôtels des ventes), espace de noms `dynamic-forever-<région>`.
+ * GET sur l'API ; null si la ressource n'existe pas (404), erreur sinon. Espaces de noms :
+ * `profile` (persos, guilde), `dynamic` (hôtels des ventes), `static` (objets du jeu).
  */
-async function get(s: BattlenetSettings, path: string, fetchFn: Fetch, dynamic = false): Promise<unknown | null> {
-	const namespace = dynamic ? `dynamic-forever-${s.region}` : NAMESPACE(s.region);
+async function get(s: BattlenetSettings, path: string, fetchFn: Fetch, kind: 'profile' | 'dynamic' | 'static' = 'profile'): Promise<unknown | null> {
+	const dynamic = kind === 'dynamic';
+	const namespace = kind === 'profile' ? NAMESPACE(s.region) : `${kind}-forever-${s.region}`;
 	const url = `https://${s.region}.api.blizzard.com${path}?namespace=${namespace}&locale=fr_FR`;
 	// Un hôtel des ventes pèse plusieurs Mo : plus de temps.
 	const res = await fetchFn(url, { headers: { Authorization: `Bearer ${await accessToken(s, fetchFn)}` }, signal: AbortSignal.timeout(dynamic ? 60_000 : 15_000) });
@@ -324,9 +325,9 @@ async function markVerified(roster: NonNullable<GameExport['roster']>, updates: 
 /** Pour les tests : oublie les recherches en mémoire. */
 export const resetArmoryCache = () => lookups.clear();
 
-/** Données « dynamiques » de Forever (hôtels des ventes), avec la connexion Battle.net de la guilde. */
-export function getDynamic(path: string, fetchFn: Fetch = fetch) {
+/** Données « dynamiques » (hôtels des ventes) ou « statiques » (objets) de Forever, avec la connexion Battle.net de la guilde. */
+export function getDynamic(path: string, fetchFn: Fetch = fetch, kind: 'dynamic' | 'static' = 'dynamic') {
 	const s = getBattlenet();
 	if (!s.clientId || !s.clientSecret) throw new BattlenetError('Battle.net n’est pas connecté (Admin → Import du jeu).');
-	return get(s, path, fetchFn, true);
+	return get(s, path, fetchFn, kind);
 }

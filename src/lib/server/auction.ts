@@ -1,8 +1,9 @@
 import { inArray, sql } from 'drizzle-orm';
 import { z } from 'zod';
+import { VENDOR_REAGENTS } from '$lib/game/vendor-reagents';
 import { BattlenetError, getDynamic, isConfigured } from './battlenet';
 import { db, schema } from './db';
-import { getCrafts, setAuctionStatus } from './settings';
+import { getCrafts, getVendorPrices, setAuctionStatus, setVendorPrices } from './settings';
 
 // Prix de l'hôtel des ventes de Forever, lus sur Battle.net. Forever range ses HV par type de
 // règles (JcE, JcJ…), chacun avec plusieurs HV par faction : la guilde choisit le sien dans
@@ -21,6 +22,7 @@ const STALE_MS = 24 * 3_600_000;
 const indexSchema = z.object({ rulesets: z.array(z.object({ id: z.number().int() })).default([]) });
 const rulesetSchema = z.object({ id: z.number().int(), name: z.string() });
 const housesSchema = z.object({ auctions: z.array(z.object({ id: z.number().int(), name: z.string() })).default([]) });
+const itemSchema = z.object({ purchase_price: z.number().int().nullish(), purchase_quantity: z.number().int().nullish() });
 const commoditiesSchema = z.object({
 	auctions: z.array(z.object({ item: z.object({ id: z.number().int() }), quantity: z.number().int(), unit_price: z.number().int() })).default([])
 });
@@ -62,14 +64,51 @@ export function summarize(lots: { item: { id: number }; quantity: number; unit_p
 	});
 }
 
+/**
+ * Prix unitaires (pc) des composants vendus par les marchands, d'après Battle.net. Ils ne changent
+ * pas : demandés une fois par objet, puis gardés. Un objet introuvable est simplement ignoré.
+ */
+export async function vendorPrices(fetchFn: Fetch = fetch) {
+	const known = { ...getVendorPrices() };
+	const missing = Object.keys(VENDOR_REAGENTS)
+		.map(Number)
+		.filter((id) => known[id] === undefined);
+	for (const id of missing) {
+		try {
+			const item = itemSchema.parse((await getDynamic(`/data/wow/item/${id}`, fetchFn, 'static')) ?? {});
+			// 0 : inconnu de Battle.net ou sans prix, pour ne pas le redemander toutes les heures.
+			known[id] = item.purchase_price ? Math.max(1, Math.round(item.purchase_price / Math.max(item.purchase_quantity ?? 1, 1))) : 0;
+		} catch {
+			// Panne : réessayé à la prochaine lecture.
+		}
+	}
+	if (missing.length) setVendorPrices(known);
+	return known;
+}
+
+/** Ajoute les composants des marchands : le prix du marchand, ou celui de l'HV s'il est moins cher. */
+export function withVendorPrices(prices: ReturnType<typeof summarize>, vendor: Record<number, number>) {
+	const byItem = new Map(prices.map((p) => [p.itemId, p]));
+	for (const [id, price] of Object.entries(vendor)) {
+		if (price <= 0) continue;
+		const itemId = Number(id);
+		const auction = byItem.get(itemId);
+		if (auction) {
+			auction.unitPrice = Math.min(auction.unitPrice, price);
+			auction.minPrice = Math.min(auction.minPrice, price);
+		} else byItem.set(itemId, { itemId, unitPrice: price, minPrice: price, quantity: 0 });
+	}
+	return [...byItem.values()];
+}
+
 /** Relit les prix de l'HV choisi et remplace ceux de la base. */
 export async function refreshPrices(fetchFn: Fetch = fetch) {
 	const { auctionRuleset, auctionHouse } = getCrafts();
 	if (!auctionRuleset || !auctionHouse) return { ok: false, message: 'Aucun hôtel des ventes choisi.' };
 	try {
 		const data = commoditiesSchema.parse((await getDynamic(`/data/wow/ruleset/${auctionRuleset}/auctions/${auctionHouse}/commodities`, fetchFn)) ?? {});
-		const prices = summarize(data.auctions);
-		if (!prices.length) throw new BattlenetError('Battle.net ne donne aucun prix pour cet hôtel des ventes.');
+		if (!data.auctions.length) throw new BattlenetError('Battle.net ne donne aucun prix pour cet hôtel des ventes.');
+		const prices = withVendorPrices(summarize(data.auctions), await vendorPrices(fetchFn));
 		const now = new Date();
 		db().transaction((tx) => {
 			tx.delete(schema.auctionPrices).run();

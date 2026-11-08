@@ -183,6 +183,10 @@ export interface AuctionStatus {
 export const getAuctionStatus = () => read<AuctionStatus>('auctionStatus') ?? null;
 export const setAuctionStatus = (status: AuctionStatus) => write('auctionStatus', status);
 
+/** Prix unitaires (pc) des composants vendus par les marchands, lus une fois sur Battle.net. */
+export const getVendorPrices = () => read<Record<number, number>>('vendorPrices') ?? {};
+export const setVendorPrices = (prices: Record<number, number>) => write('vendorPrices', prices);
+
 // Charte et règlement de la guilde : page publique /charte, à accepter pour postuler.
 export const charterSchema = z.object({
 	text: z.string().trim().max(20_000, 'Charte trop longue (20 000 caractères au plus)'),

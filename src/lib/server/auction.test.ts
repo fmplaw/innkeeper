@@ -37,33 +37,43 @@ describe('prix de l’hôtel des ventes', () => {
 			'/data/wow/ruleset/index': { rulesets: [{ id: 2 }] },
 			'/data/wow/ruleset/2': { id: 2, name: 'Normal' },
 			'/data/wow/ruleset/2/auctions/index': { auctions: [{ id: 113, name: 'Hôtel des ventes de la Horde' }] },
-			'/data/wow/ruleset/2/auctions/113/commodities': { auctions: [lot(765, 50, 11), lot(3371, 50, 8)] }
+			'/data/wow/ruleset/2/auctions/113/commodities': { auctions: [lot(765, 50, 11), lot(3371, 50, 8)] },
+			// Marchands : 20 pc les 5 fioles ; l'eau de source n'est pas à l'HV.
+			'/data/wow/item/3371': { purchase_price: 20, purchase_quantity: 5 },
+			'/data/wow/item/159': { purchase_price: 25, purchase_quantity: 5 }
 		});
 		expect(await listAuctionHouses(fetchFn)).toEqual([{ ruleset: 2, rulesetName: 'Normal', house: 113, name: 'Hôtel des ventes de la Horde' }]);
 		expect(seen[0]).toBe('/data/wow/ruleset/index?dynamic-forever-eu');
 
 		expect(await refreshPrices(fetchFn)).toEqual({ ok: false, message: 'Aucun hôtel des ventes choisi.' });
 		setCrafts(craftSchema.parse({ auctionRuleset: 2, auctionHouse: 113 }));
-		expect(await refreshPrices(fetchFn)).toEqual({ ok: true, message: '2 objets à l’hôtel des ventes.' });
+		expect(await refreshPrices(fetchFn)).toEqual({ ok: true, message: '3 objets à l’hôtel des ventes.' });
+		expect(seen).toContain('/data/wow/item/3371?static-forever-eu');
 		expect(getAuctionStatus()?.ok).toBe(true);
 
-		// Élixir de Force mineure : 1 Feuillargent + 1 Fiole vide ≈ 19 pc, comme en jeu.
-		const { prices, at } = priceTable([765, 3371, 999]);
+		// Élixir de Force mineure : 1 Feuillargent (11 pc à l'HV) + 1 Fiole vide (4 pc chez le marchand, moins cher que l'HV).
+		const { prices, at } = priceTable([765, 3371, 159, 999]);
+		expect(prices[159]).toBe(5);
 		expect(at).not.toBeNull();
 		const reagents = [
 			{ id: 765, name: 'Feuillargent', count: 1 },
 			{ id: 3371, name: 'Fiole vide', count: 1 }
 		];
-		expect(reagentCost(reagents, 1, prices)).toEqual({ total: 19, missing: [] });
-		expect(reagentCost([...reagents, { id: 999, name: 'Eau de source', count: 2 }], 3, prices)).toEqual({ total: 57, missing: ['Eau de source'] });
+		expect(reagentCost(reagents, 1, prices)).toEqual({ total: 15, missing: [] });
+		expect(reagentCost([...reagents, { id: 999, name: 'Poussière étrange', count: 2 }], 3, prices)).toEqual({ total: 45, missing: ['Poussière étrange'] });
 		expect(reagentCost([{ id: 999, count: 1 }], 1, prices)).toBeNull();
 
 		// Prix trop vieux : plus d'estimation.
 		expect(priceTable([765], Date.now() + 25 * 3_600_000).prices).toEqual({});
 
+		// Prix des marchands gardés : pas redemandés.
+		const again = api({ '/data/wow/ruleset/2/auctions/113/commodities': { auctions: [lot(765, 50, 12)] } });
+		await refreshPrices(again.fetchFn);
+		expect(again.seen.some((p) => p.startsWith('/data/wow/item/'))).toBe(false);
+
 		// HV vide ou en panne : les anciens prix restent, l'échec est noté.
 		const broken = api({ '/data/wow/ruleset/2/auctions/113/commodities': { auctions: [] } });
 		expect((await refreshPrices(broken.fetchFn)).ok).toBe(false);
-		expect(priceTable([765]).prices).toEqual({ 765: 11 });
+		expect(priceTable([765]).prices).toEqual({ 765: 12 });
 	});
 });
