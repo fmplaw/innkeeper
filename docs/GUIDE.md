@@ -246,7 +246,7 @@ Bon à savoir :
 2. En jeu, avec un perso de la guilde : tape **`/innkeeper`** (ou `/ik`). Pour exporter tes recettes, ouvre la fenêtre de chacun de tes métiers. Puis tape **`/reload`**.
 3. Dépose le fichier `WTF/Account/<TON COMPTE>/SavedVariables/InnkeeperSync.lua`.
 4. Vérifie l'**aperçu** :
-   - niveaux et métiers qui changent. Les métiers du perso qui exporte sont ceux du jeu : un métier abandonné (par exemple Alchimie remplacée par Forge) quitte sa fiche, avec ses recettes. Pour les autres membres, l'onglet des métiers de guilde ajoute et met à jour sans rien retirer ; chacun remet ses métiers à jour en exportant lui-même ;
+   - niveaux et métiers qui changent. Les métiers du perso qui exporte sont ceux du jeu : un métier abandonné (par exemple Alchimie remplacée par Forge) quitte sa fiche, avec ses recettes. Pour les autres membres, l'onglet des métiers de guilde ajoute et met à jour sans rien retirer, ni faire baisser un niveau (le jeu y affiche le niveau 1 pour tout le monde) ; chacun remet ses métiers à jour en exportant lui-même ;
    - **membres de la guilde sans fiche** (à relancer) ;
    - **fiches introuvables en jeu** (prénom ou nom de famille différent de celui du jeu ?) ;
    - fiches déjà à jour d'après un **export plus récent** : un vieux fichier ne fait pas revenir un perso en arrière (seules ses recettes encore inconnues s'ajoutent).

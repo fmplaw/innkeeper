@@ -31,6 +31,8 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ### Corrigé
 
+- **Niveaux de métiers remis à 1** : l'onglet Métiers de guilde de Forever donne le niveau 1 à tout le monde, et un import de l'addon par un officier écrasait les vrais niveaux venus de Battle.net (par exemple Travail du cuir 123 affiché 1). Un import ne fait plus jamais baisser un niveau connu ; les fiches touchées reprennent leur niveau à la prochaine déconnexion du perso (synchronisation Battle.net).
+
 - **Admin → Commandes de craft** : « Enregistrer » échouait (erreur 500) depuis l'ajout du bouton « Relire les prix maintenant » ; le salon et l'hôtel des ventes s'enregistrent de nouveau.
 
 - **Nom de la guilde coupé dans le menu** (« Le Pac… ») depuis l'onglet Commandes : l'en-tête s'élargit sur grand écran, le nom n'est plus jamais coupé. Sur un écran moyen, seul le blason reste (il ramène à l'accueil) ; jusqu'à 1000 px de large, le menu passe dans la barre d'onglets du bas.

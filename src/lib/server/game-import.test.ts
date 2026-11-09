@@ -356,4 +356,18 @@ describe('changement de métier', () => {
 			{ id: 'herbalism', level: 10 }
 		]);
 	});
+
+	it('l’onglet de guilde (niveau 1 pour tous) ne fait pas baisser un niveau connu', () => {
+		createUser('m3');
+		const zha = sheet('m3', 'Zha', { professions: [{ id: 'leatherworking', level: 123 }, { id: 'skinning', level: 210 }, { id: 'first-aid', level: 49 }] });
+		const plan = planImport({
+			format: 1,
+			exportedAt: 1794400000,
+			guildProfessions: [
+				{ skillLine: 165, name: 'Travail du cuir', members: [{ name: 'Zha', skill: 1 }] },
+				{ skillLine: 393, name: 'Dépeçage', members: [{ name: 'Zha', skill: 1 }] }
+			]
+		});
+		expect(plan.updates.find((u) => u.characterId === zha.id)?.professions).toBeUndefined();
+	});
 });
