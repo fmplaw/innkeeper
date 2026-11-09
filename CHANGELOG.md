@@ -26,6 +26,8 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ### Modifié
 
+- **Noms français officiels des instances** (relevés en jeu) : La salle des Thanes, Ruines de Lordaeron, Excavations : les Paluns, Cité de Dalaran, La cité Submergée, Bastion Krol'dok, Prison d'Alcaz, Repaire des Noiregueules, La terrasse du Façonneur ; raids Profondeurs des Saisons et Sommet d'Hyjal. Aussi : Bas et Sommet du pic Rochenoire, Haches-Tripes, Le temple d'Atal'Hakkar. Les sorties déjà créées et les images envoyées sont conservées.
+
 - **Badges « en jeu », « existe en jeu »… : vraie infobulle** au survol, au clavier et au toucher (l'ancienne, celle du navigateur, ne s'affichait pas sur téléphone), avec des explications plus claires. « en jeu » : dans le registre de la guilde. « existe en jeu » : le perso existe, mais n'est pas dans la guilde (pas encore invité, ou parti).
 - **Recettes en français**, même exportées d'un jeu en anglais (« Enchant Bracer - Minor Stamina » devient « Ench. de bracelets (Endurance mineure) ») : le site retient les noms des exports faits en français et demande les autres à Wowhead, en arrière-plan, en n'envoyant que le numéro de la recette. Les recettes déjà importées sont traduites au démarrage. La recherche de la page Artisans trouve donc aussi leurs recettes.
 - **Longues listes de recettes** (Mes persos, fiches des joueurs) : à partir de 20 recettes, un champ permet de filtrer la liste.
