@@ -32,6 +32,10 @@
 		];
 	});
 	const missing = $derived(groupSlots.filter((g) => g.have < g.need).map((g) => `${g.need - g.have} ${g.label.toLowerCase()}${g.need - g.have > 1 && g.label !== 'DPS' ? 's' : ''}`));
+	// Peut-être / en retard : ils pourraient compléter le groupe.
+	const pendingNote = $derived(
+		comp.pending.map((s) => `${s.name} (${ROLE_LABELS[s.likelyRole!].toLowerCase()}, ${(RAID_HELPER.statuses[s.category] ?? s.category).toLowerCase()})`).join(', ')
+	);
 	const full = $derived(Boolean(data.event.limit && comp.presentCount >= data.event.limit));
 	const free = $derived(data.event.limit ? Math.max(data.event.limit - comp.presentCount, 0) : null);
 
@@ -150,7 +154,10 @@
 						{g.label} <strong class="num">{g.have}/{g.need}</strong>
 					</span>
 				{/each}
-				<span class="strip-note" class:ok={!missing.length}>{missing.length ? `Il manque : ${missing.join(', ')}.` : 'Groupe complet en rôles.'}</span>
+				<span class="strip-note" class:ok={!missing.length}>
+					{missing.length ? `Il manque : ${missing.join(', ')}.` : 'Groupe complet en rôles.'}
+					{#if pendingNote}<span class="pending muted">En attente : {pendingNote}.</span>{/if}
+				</span>
 			</section>
 		{:else}
 			<section class="strip" aria-label="Classes présentes, utile pour les buffs de raid">
@@ -212,9 +219,28 @@
 		{#if comp.statuses.length || comp.unknown.length}
 			<section class="others">
 				{#each comp.statuses as g (g.key)}
-					<div>
+					<div class="status-group">
 						<p class="muted small">{g.label} <span class="num">({g.signups.length})</span></p>
-						<p>{g.signups.map((s) => s.name).join(', ')}</p>
+						<ul>
+							{#each g.signups as s (s.id)}
+								<li>
+									<span class="dot" style:--c={s.class ? classColor(cfg, s.class) : 'transparent'}></span>
+									<div class="who">
+										<strong>{s.name}</strong>
+										<span class="muted small">
+											{#if s.likelyRole}<span class="mark" style:color="var(--r-{s.likelyRole})" title={ROLE_LABELS[s.likelyRole]}><Glyph name={ROLE_ICONS[s.likelyRole]} size={14} /></span>{/if}
+											{#if s.class}{className(cfg, s.class)}{#if s.spec}{' '}{specName(cfg, s.class, s.spec)}{/if}{:else if !s.player}pas de compte sur le site{:else}pas de perso sur sa fiche{/if}
+											{#if s.fromSheet}<span title="Raid-Helper n'a pas de spé pour cette inscription : c'est le main de sa fiche"> · d'après sa fiche</span>{/if}
+										</span>
+									</div>
+									{#if s.player && s.character}
+										<a class="site muted small" href="/joueurs/{s.player.id}" title="{fullName(s.character)}, {s.character.isMain ? 'main' : 'reroll'}">
+											{s.character.isMain ? '' : 'reroll · '}niv. {s.character.level}
+										</a>
+									{/if}
+								</li>
+							{/each}
+						</ul>
 					</div>
 				{/each}
 				{#if comp.unknown.length}
@@ -547,6 +573,35 @@
 	}
 	.others p {
 		margin: 0;
+	}
+	.status-group {
+		display: grid;
+		gap: 0.375rem;
+		min-width: min(16rem, 100%);
+	}
+	.status-group ul {
+		display: grid;
+		gap: 0.5rem;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+	.status-group li {
+		display: flex;
+		align-items: center;
+		gap: 0.625rem;
+	}
+	.status-group li .dot {
+		width: 12px;
+		height: 12px;
+	}
+	.status-group .mark {
+		display: inline-flex;
+		vertical-align: -2px;
+		margin-right: 0.125rem;
+	}
+	.pending {
+		display: block;
 	}
 	.compare-res {
 		display: grid;

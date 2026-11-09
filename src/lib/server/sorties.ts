@@ -21,6 +21,10 @@ export interface SignupView {
 	character: Pick<Character, 'id' | 'name' | 'surname' | 'isMain' | 'level'> | null;
 	// Autres rôles que le joueur peut tenir : spé secondaire ou autre perso.
 	otherRoles: { role: Role; via: string }[];
+	// Inscrit en statut (peut-être, en retard, absent…) : rôle qu'il tiendrait, d'après la spé
+	// gardée par Raid-Helper, sinon d'après le main de sa fiche (fromSheet).
+	likelyRole: Role | null;
+	fromSheet: boolean;
 }
 
 /** Croise les inscrits d'une sortie Raid-Helper avec les joueurs et persos du site. */
@@ -44,7 +48,10 @@ export function buildComposition(event: RaidHelperEvent) {
 
 		const candidates = own.filter((c) => c.class === mapped?.class);
 		const score = (c: Character) => (c.spec === mapped?.spec ? 2 : 0) + (c.role === role ? 1 : 0) + (c.isMain ? 0.5 : 0);
-		const character = candidates.sort((a, b) => score(b) - score(a))[0] ?? null;
+		let character = candidates.sort((a, b) => score(b) - score(a))[0] ?? null;
+		// Statut sans spé (« Peut-être » cliqué directement sur Discord) : le main de sa fiche.
+		const main = !role && !mapped ? (own.find((c) => c.isMain) ?? null) : null;
+		if (main) character = main;
 
 		const otherRoles: SignupView['otherRoles'] = [];
 		const add = (r: Role | null, via: string) => {
@@ -65,8 +72,8 @@ export function buildComposition(event: RaidHelperEvent) {
 			category: s.className,
 			rhSpec: s.specName ?? null,
 			role,
-			class: mapped?.class ?? null,
-			spec: mapped?.spec ?? null,
+			class: mapped?.class ?? main?.class ?? null,
+			spec: mapped?.spec ?? main?.spec ?? null,
 			player: player ? { id: player.discordId, displayName: player.displayName } : null,
 			character: character && {
 				id: character.id,
@@ -75,7 +82,9 @@ export function buildComposition(event: RaidHelperEvent) {
 				isMain: character.isMain,
 				level: character.level
 			},
-			otherRoles
+			otherRoles,
+			likelyRole: role ? null : (roleOfRaidHelperSpec(s.specName) ?? main?.role ?? null),
+			fromSheet: Boolean(main)
 		};
 	});
 	views.sort((a, b) => a.position - b.position);
@@ -101,6 +110,8 @@ export function buildComposition(event: RaidHelperEvent) {
 		.map(([key, label]) => ({ key, label, signups: views.filter((v) => v.category === key && !benchedWithRole.has(v)) }))
 		.filter((g) => g.signups.length);
 	const unknown = views.filter((v) => !v.role && !(v.category in rh.statuses));
+	// Peut-être et en retard : qui pourrait encore venir, et pour quel rôle.
+	const pending = views.filter((v) => (v.category === 'Tentative' || v.category === 'Late') && v.likelyRole);
 
 	return {
 		byRole,
@@ -110,6 +121,7 @@ export function buildComposition(event: RaidHelperEvent) {
 		byClass,
 		statuses,
 		unknown,
+		pending,
 		presentCount: present.length,
 		withoutAccount: present.filter((v) => !v.player).length,
 		withoutCharacter: present.filter((v) => v.player && !v.character).length

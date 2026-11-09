@@ -117,3 +117,30 @@ describe('banc', () => {
 		expect(comp.statuses.find((g) => g.key === 'Bench')?.signups.map((s) => s.name)).toEqual(['SansSpe']);
 	});
 });
+
+describe('peut-être, en retard, absents', () => {
+	it('donnent leur classe et le rôle qu’ils tiendraient : spé gardée par Raid-Helper, sinon main de la fiche', () => {
+		const comp = buildComposition({
+			id: '2',
+			serverId: '1',
+			title: 'Cavernes',
+			startTime: 0,
+			signUps: [
+				signup('u-retard', 'Vol', 'Late'),
+				signup('u-shaman', 'Thrall', 'Tentative', 'Restoration1'),
+				signup('u-absent', 'Saurfang', 'Absence'),
+				signup('u-sans-compte', 'Savi', 'Tentative')
+			]
+		});
+		const all = comp.statuses.flatMap((g) => g.signups);
+		const by = (name: string) => all.find((s) => s.name === name)!;
+		expect(by('Vol')).toMatchObject({ class: 'priest', likelyRole: 'healer', fromSheet: true, role: null });
+		expect(by('Vol').character?.name).toBe('Vol');
+		expect(by('Thrall')).toMatchObject({ class: 'shaman', spec: 'restoration', likelyRole: 'healer', fromSheet: false });
+		expect(by('Saurfang')).toMatchObject({ class: 'warrior', likelyRole: 'tank' });
+		expect(by('Savi')).toMatchObject({ class: null, likelyRole: null, player: null });
+		// Les absents ne comptent pas parmi ceux qui pourraient venir ; personne n'est compté présent.
+		expect(comp.pending.map((s) => s.name)).toEqual(['Vol', 'Thrall']);
+		expect(comp.presentCount).toBe(0);
+	});
+});
