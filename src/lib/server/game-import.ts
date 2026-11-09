@@ -328,7 +328,11 @@ function mergeProfessions(current: ProfessionEntry[], fromGame: ProfessionEntry[
 	let kept = current.filter((e) => !fromGame.some((g) => g.id === e.id));
 	// Plus de 2 principaux : le perso a changé de métier en jeu, on garde ceux du jeu.
 	if ([...kept, ...fromGame].filter(isPrimary).length > MAX_PRIMARY_PROFESSIONS) kept = kept.filter((e) => !isPrimary(e));
-	return sortProfessions([...kept, ...fromGame]);
+	// L'onglet Métiers de guilde de Forever donne le niveau 1 à tout le monde : un niveau ne
+	// baisse pas en jeu, on garde le plus haut connu (Battle.net, export du perso lui-même).
+	const known = (id: string) => current.find((e) => e.id === id)?.level ?? 0;
+	const game = fromGame.map((g) => (known(g.id) > (g.level ?? 0) ? { ...g, level: known(g.id) } : g));
+	return sortProfessions([...kept, ...game]);
 }
 
 const isProfession = (id: string) => PROFESSIONS.some((p) => p.id === id);

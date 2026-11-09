@@ -454,7 +454,7 @@ git push origin v0.9.2
 - Interface uniquement en français.
 - SQLite uniquement (Postgres prévu plus tard).
 - Données de jeu provisoires tant que Forever n'est pas sorti : noms anglais pour les nouvelles instances, tranches de niveau à confirmer, raids de 2027 non annoncés.
-- L'onglet Métiers de guilde de Forever n'a pas encore été vérifié en jeu : si son contenu est vide, seuls les métiers des joueurs qui exportent eux-mêmes seront importés.
+- L'onglet Métiers de guilde de Forever liste bien les métiers de chacun, mais avec le niveau 1 pour tout le monde : il ajoute des métiers sans jamais faire baisser un niveau connu. Les vrais niveaux viennent de Battle.net ou de l'export du perso lui-même.
 
 ---
 
