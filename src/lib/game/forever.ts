@@ -245,46 +245,46 @@ export interface Instance {
 }
 
 /**
- * Donjons et raids de Forever (état des annonces au 28/10/2026 : Blizzard Watch, Warcraft
- * Tavern, CurseForge). Les donjons du Classic d'origine restent ; 9 donjons s'ajoutent. Seuls
- * 3 raids sont annoncés (9 décembre 2026) : Molten Core, BWL, ZG, AQ et Naxxramas ne le sont
- * pas, d'autres raids sont promis pour 2027. Noms anglais pour les nouveautés tant que les
- * noms français officiels ne sont pas connus ; tranches de niveau parfois divergentes selon
- * les sources. À revoir au lancement.
+ * Donjons et raids de Forever. Noms français officiels relevés en jeu le 9/11/2026 (hauts faits
+ * « Spéléologue » et « Conquête ») et sur l'article de Blizzard sur les donjons. Les donjons du
+ * Classic d'origine restent ; 9 donjons s'ajoutent. Seuls 3 raids sont annoncés (9 décembre
+ * 2026) : Molten Core, BWL, ZG, AQ et Naxxramas ne le sont pas, d'autres raids sont promis
+ * pour 2027. Les identifiants restent en anglais : ils servent aux images et aux sorties déjà
+ * créées. Tranches de niveau d'après Blizzard pour les nouveautés.
  */
 export const INSTANCES: readonly Instance[] = [
 	{ id: 'ragefire', name: 'Gouffre de Ragefeu', kind: 'dungeon', size: 5, levels: [13, 18] },
-	{ id: 'hall-of-thanes', name: 'Hall of Thanes', kind: 'dungeon', size: 5, levels: [13, 18], isNew: true },
-	{ id: 'ruins-of-lordaeron', name: 'Ruins of Lordaeron', kind: 'dungeon', size: 5, levels: [15, 20], isNew: true },
+	{ id: 'hall-of-thanes', name: 'La salle des Thanes', kind: 'dungeon', size: 5, levels: [13, 18], isNew: true },
+	{ id: 'ruins-of-lordaeron', name: 'Ruines de Lordaeron', kind: 'dungeon', size: 5, levels: [15, 20], isNew: true },
 	{ id: 'wailing-caverns', name: 'Cavernes des Lamentations', kind: 'dungeon', size: 5, levels: [17, 24] },
 	{ id: 'deadmines', name: 'Les Mortemines', kind: 'dungeon', size: 5, levels: [17, 26] },
 	{ id: 'shadowfang', name: "Donjon d'Ombrecroc", kind: 'dungeon', size: 5, levels: [22, 30] },
 	{ id: 'blackfathom', name: 'Profondeurs de Brassenoire', kind: 'dungeon', size: 5, levels: [24, 32] },
 	{ id: 'stockade', name: 'La Prison de Hurlevent', kind: 'dungeon', size: 5, levels: [24, 32] },
-	{ id: 'excavation-site', name: 'Excavation Site', kind: 'dungeon', size: 5, levels: [24, 29], isNew: true },
-	{ id: 'city-of-dalaran', name: 'City of Dalaran', kind: 'dungeon', size: 5, levels: [28, 33], isNew: true },
+	{ id: 'excavation-site', name: 'Excavations : les Paluns', kind: 'dungeon', size: 5, levels: [24, 29], isNew: true },
+	{ id: 'city-of-dalaran', name: 'Cité de Dalaran', kind: 'dungeon', size: 5, levels: [28, 33], isNew: true },
 	{ id: 'gnomeregan', name: 'Gnomeregan', kind: 'dungeon', size: 5, levels: [29, 38] },
 	{ id: 'razorfen-kraul', name: 'Kraal de Tranchebauge', kind: 'dungeon', size: 5, levels: [29, 38] },
 	{ id: 'scarlet-monastery', name: 'Monastère Écarlate', kind: 'dungeon', size: 5, levels: [34, 45] },
-	{ id: 'drowned-city', name: 'The Drowned City', kind: 'dungeon', size: 5, levels: [35, 40], isNew: true },
+	{ id: 'drowned-city', name: 'La cité Submergée', kind: 'dungeon', size: 5, levels: [35, 40], isNew: true },
 	{ id: 'razorfen-downs', name: 'Souilles de Tranchebauge', kind: 'dungeon', size: 5, levels: [37, 46] },
-	{ id: 'kroldok-stronghold', name: "Krol'dok Stronghold", kind: 'dungeon', size: 5, levels: [40, 45], isNew: true },
+	{ id: 'kroldok-stronghold', name: "Bastion Krol'dok", kind: 'dungeon', size: 5, levels: [40, 45], isNew: true },
 	{ id: 'uldaman', name: 'Uldaman', kind: 'dungeon', size: 5, levels: [41, 51] },
 	{ id: 'zulfarrak', name: "Zul'Farrak", kind: 'dungeon', size: 5, levels: [44, 54] },
 	{ id: 'maraudon', name: 'Maraudon', kind: 'dungeon', size: 5, levels: [46, 55] },
-	{ id: 'alcaz-island-prison', name: 'Alcaz Island Prison', kind: 'dungeon', size: 5, levels: [48, 53], isNew: true },
-	{ id: 'sunken-temple', name: "Temple d'Atal'Hakkar", kind: 'dungeon', size: 5, levels: [50, 56] },
+	{ id: 'alcaz-island-prison', name: "Prison d'Alcaz", kind: 'dungeon', size: 5, levels: [48, 53], isNew: true },
+	{ id: 'sunken-temple', name: "Le temple d'Atal'Hakkar", kind: 'dungeon', size: 5, levels: [50, 56] },
 	{ id: 'blackrock-depths', name: 'Profondeurs de Rochenoire', kind: 'dungeon', size: 5, levels: [52, 60] },
-	{ id: 'lower-blackrock', name: 'Pic Rochenoire inférieur', kind: 'dungeon', size: 5, levels: [55, 60] },
-	{ id: 'dire-maul', name: 'Hache-Tripes', kind: 'dungeon', size: 5, levels: [55, 60] },
-	{ id: 'blackmaw-hold', name: 'Blackmaw Hold', kind: 'dungeon', size: 5, levels: [55, 60], isNew: true },
+	{ id: 'lower-blackrock', name: 'Bas du pic Rochenoire', kind: 'dungeon', size: 5, levels: [55, 60] },
+	{ id: 'dire-maul', name: 'Haches-Tripes', kind: 'dungeon', size: 5, levels: [55, 60] },
+	{ id: 'blackmaw-hold', name: 'Repaire des Noiregueules', kind: 'dungeon', size: 5, levels: [55, 60], isNew: true },
 	{ id: 'stratholme', name: 'Stratholme', kind: 'dungeon', size: 5, levels: [58, 60] },
 	{ id: 'scholomance', name: 'Scholomance', kind: 'dungeon', size: 5, levels: [58, 60] },
-	{ id: 'shapers-terrace', name: "Shaper's Terrace", kind: 'dungeon', size: 5, levels: [58, 60], isNew: true },
+	{ id: 'shapers-terrace', name: 'La terrasse du Façonneur', kind: 'dungeon', size: 5, levels: [58, 60], isNew: true },
 	// Donjon à 10 dans le Classic d'origine ; pas annoncé comme raid dans Forever.
-	{ id: 'upper-blackrock', name: 'Pic Rochenoire supérieur', kind: 'dungeon', size: 10, levels: [58, 60] },
-	{ id: 'barrow-deeps', name: 'Barrow Deeps', kind: 'raid', size: 10, levels: [60, 60], isNew: true, opensOn: '2026-12-09' },
-	{ id: 'hyjal-summit', name: 'Hyjal Summit', kind: 'raid', size: 20, levels: [60, 60], isNew: true, opensOn: '2026-12-09' },
+	{ id: 'upper-blackrock', name: 'Sommet du pic Rochenoire', kind: 'dungeon', size: 10, levels: [58, 60] },
+	{ id: 'barrow-deeps', name: 'Profondeurs des Saisons', kind: 'raid', size: 10, levels: [60, 60], isNew: true, opensOn: '2026-12-09' },
+	{ id: 'hyjal-summit', name: "Sommet d'Hyjal", kind: 'raid', size: 20, levels: [60, 60], isNew: true, opensOn: '2026-12-09' },
 	{ id: 'onyxia', name: "Repaire d'Onyxia", kind: 'raid', size: 40, levels: [60, 60], opensOn: '2026-12-09' }
 ];
 

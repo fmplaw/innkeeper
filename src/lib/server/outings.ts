@@ -242,7 +242,7 @@ export function recordOuting(values: typeof outings.$inferInsert) {
 
 export const getOuting = (eventId: string) => db().select().from(outings).where(eq(outings.eventId, eventId)).get();
 
-/** Type d'une sortie pour l'affichage : activité (son médaillon) et libellé, « Raid · Barrow Deeps ». */
+/** Type d'une sortie pour l'affichage : activité (son médaillon) et libellé, « Raid · Profondeurs des Saisons ». */
 export interface OutingType {
 	activity: string;
 	label: string;

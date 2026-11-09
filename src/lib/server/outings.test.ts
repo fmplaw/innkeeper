@@ -166,8 +166,8 @@ describe('types de sortie et instances', () => {
 
 	it('libellé : niveaux, taille hors groupe de 5, nouveauté et date d’ouverture', async () => {
 		const { instanceLabel, getInstance } = await import('$lib/activities');
-		expect(instanceLabel(getInstance('hall-of-thanes')!)).toBe('Hall of Thanes (niveaux 13 à 18) · nouveau');
-		expect(instanceLabel(getInstance('hyjal-summit')!)).toBe('Hyjal Summit (niveau 60, 20 joueurs) · nouveau · dès le 9 déc.');
+		expect(instanceLabel(getInstance('hall-of-thanes')!)).toBe('La salle des Thanes (niveaux 13 à 18) · nouveau');
+		expect(instanceLabel(getInstance('hyjal-summit')!)).toBe("Sommet d'Hyjal (niveau 60, 20 joueurs) · nouveau · dès le 9 déc.");
 		expect(instanceLabel(getInstance('deadmines')!)).toBe('Les Mortemines (niveaux 17 à 26)');
 	});
 });
@@ -321,7 +321,7 @@ describe('type des sorties pour l’affichage', () => {
 		recordOuting({ eventId: 'ev-t1', kind: 'official', createdBy: null, title: 'Raid', activity: 'raid', instanceId: 'barrow-deeps', startTime: soon });
 		recordOuting({ eventId: 'ev-t2', kind: 'member', createdBy: 'm9', title: 'Sans type', activity: null, instanceId: null, startTime: soon });
 		const [raid, untyped, discord] = withOutingTypes([{ id: 'ev-t1' }, { id: 'ev-t2' }, { id: 'ev-discord' }]);
-		expect(raid.type).toEqual({ activity: 'raid', label: 'Raid · Barrow Deeps' });
+		expect(raid.type).toEqual({ activity: 'raid', label: 'Raid · Profondeurs des Saisons' });
 		expect(untyped.type).toEqual({ activity: 'other', label: 'Autre' });
 		expect(discord.type).toBeNull();
 	});

@@ -154,7 +154,7 @@ export function seedDemo(now = Date.now()): DemoEvent[] {
 			serverType: 'pve',
 			tagline: 'Guilde PvE détendue, raids le mercredi et le dimanche',
 			description:
-				"Nous sommes une guilde francophone d'adultes qui jouent pour le plaisir de jouer ensemble : donjons en soirée, quêtes de groupe, et un roster de raid qui se prépare pour l'ouverture de Barrow Deeps.\n\nOn privilégie la bonne humeur et la ponctualité aux performances.",
+				"Nous sommes une guilde francophone d'adultes qui jouent pour le plaisir de jouer ensemble : donjons en soirée, quêtes de groupe, et un roster de raid qui se prépare pour l'ouverture des profondeurs des Saisons.\n\nOn privilégie la bonne humeur et la ponctualité aux performances.",
 			ambitions: ['pve', 'casual'],
 			schedule: 'Raids : mercredi et dimanche, 21 h – 23 h 30\nDonjons et quêtes : tous les soirs, à la demande',
 			recruitment: { open: true, classes: ['priest', 'shaman', 'warrior'], roles: ['healer', 'tank'], text: 'On cherche surtout des soigneurs pour compléter le roster de raid.' },
@@ -292,7 +292,7 @@ export function seedDemo(now = Date.now()): DemoEvent[] {
 		for (const [voter, value] of votes) db().insert(schema.applicationVotes).values({ applicationId: app.id, voterId: demoUserId(voter), voterName: voter, value }).run();
 	});
 
-	const roster = db().insert(schema.rosters).values({ name: 'Roster Barrow Deeps', description: 'Groupe de 10 pour l’ouverture du raid', visibility: 'members' }).returning().get();
+	const roster = db().insert(schema.rosters).values({ name: 'Roster Profondeurs des Saisons', description: 'Groupe de 10 pour l’ouverture du raid', visibility: 'members' }).returning().get();
 	const mains = db().select().from(schema.characters).all().filter((c) => c.isMain);
 	for (const c of [...mains].sort((a, b) => b.level - a.level).slice(0, 10)) db().insert(schema.rosterMembers).values({ rosterId: roster.id, characterId: c.id }).run();
 
@@ -360,7 +360,7 @@ function demoEvents(now: number, mains: { userId: string; name: string; class: s
 			['Dorna', 'Bench'],
 			['Pipwick', 'Tentative']
 		]),
-		event('910000000000000002', 'Raid : Barrow Deeps (ouverture)', true, 'Ysolde', at(41, 21), 'Première soirée sur le nouveau raid. Composition indicative, on ajuste selon les présents.', 'raid', 'barrow-deeps', 10, [
+		event('910000000000000002', 'Raid : Profondeurs des Saisons (ouverture)', true, 'Ysolde', at(41, 21), 'Première soirée sur le nouveau raid. Composition indicative, on ajuste selon les présents.', 'raid', 'barrow-deeps', 10, [
 			['Aldren'],
 			['Halvard'],
 			['Ysolde'],
