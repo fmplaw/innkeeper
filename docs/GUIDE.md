@@ -126,6 +126,7 @@ Sur la page d'une sortie :
   Ton inscription apparaît aussi sur le message Raid-Helper dans Discord, sous le nom de ton perso. Tu peux la **modifier** ou te **désinscrire** à tout moment.
 - **Groupe complet** : si toutes les places sont prises, une nouvelle inscription « Présent » passe automatiquement sur le banc.
 - **Composition** : les inscrits par rôle, les remplaçants de chaque rôle, et ce qui manque (« Il manque : 1 tank »). Pour un raid, la répartition par classe et la comparaison avec un roster.
+- **Peut-être, en retard, absents** : chacun avec sa classe, sa spé et le rôle qu'il tiendrait, d'après la spé gardée par Raid-Helper ou, à défaut (« Peut-être » cliqué directement sur Discord), d'après le main de sa fiche (« d'après sa fiche »). Pour un petit groupe, « En attente » rappelle sous « Il manque » qui pourrait encore venir, et dans quel rôle.
 - **Actualiser** : une inscription faite sur Discord apparaît sur le site en une minute au plus ; ce bouton la fait apparaître tout de suite.
 
 Tu peux aussi t'inscrire directement sur Discord avec les boutons de Raid-Helper : c'est la même liste.
