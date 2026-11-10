@@ -8,3 +8,6 @@ export const recipeUrl = (id: number) => `${WOWHEAD_FOREVER}/spell=${id}`;
 /** Bulle du jeu sur un lien qui ne mène pas à Wowhead (attribut data-wowhead). Ici le script lit
  * « fr.forever » (domain=forever/fr donne la bulle en anglais : vérifié sur la démo le 10/11/2026). */
 export const recipeTooltip = (id: number) => `spell=${id}&domain=fr.forever`;
+
+/** Petite icône du jeu (18 px) chez Wowhead, d'après le nom de fichier gardé par le site. */
+export const recipeIconUrl = (icon: string) => `https://wow.zamimg.com/images/wow/icons/small/${icon}.jpg`;

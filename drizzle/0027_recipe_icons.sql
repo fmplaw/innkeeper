@@ -1,0 +1,1 @@
+ALTER TABLE `recipe_names` ADD `icon` text;

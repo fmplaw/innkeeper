@@ -4,7 +4,7 @@
 	import { keepValues } from '$lib/forms';
 	import { formatMoney } from '$lib/money';
 	import { craftsFor, reagentCost, reagentList } from '$lib/recipes';
-	import { recipeUrl } from '$lib/wowhead';
+	import RecipeLink from '$lib/components/RecipeLink.svelte';
 
 	let { data, form } = $props();
 	const cfg = $derived(data.config);
@@ -32,7 +32,7 @@
 	<form method="POST" use:enhance={keepValues} class="card form">
 		<input type="hidden" name="recipeId" value={data.recipe.id} />
 		<h2>
-			<a href={recipeUrl(data.recipe.id)} target="_blank" rel="noopener">{data.recipe.name}</a>
+			<RecipeLink recipe={data.recipe} />
 			<span class="muted small">{professionName(data.recipe.profession)}</span>
 		</h2>
 		<div class="grid">
@@ -97,7 +97,7 @@
 		gap: 0.5rem;
 		margin: 0;
 	}
-	h2 a {
+	h2 :global(a.name) {
 		color: var(--text);
 	}
 	.reagents p {
