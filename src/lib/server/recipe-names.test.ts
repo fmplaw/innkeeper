@@ -4,7 +4,7 @@ import { createUser, horde } from '../../test/helpers';
 import { createCharacter } from './characters';
 import { db, schema } from './db';
 import { applyImport, planImport } from './game-import';
-import { fetchWowheadName, translateInBackground, translateRecipes } from './recipe-names';
+import { fetchWowheadName, fetchWowheadSpell, translateInBackground, translateRecipes } from './recipe-names';
 
 horde();
 
@@ -40,12 +40,12 @@ const exportOf = (name: string, locale: string, recipes: { id: number; name: str
 const known = (id: number) => db().select().from(schema.characters).where(eq(schema.characters.id, id)).get()!.knownRecipes;
 
 /** Faux Wowhead : répond pour les numéros connus, 404 sinon ; compte les appels. */
-function fakeWowhead(names: Record<number, string>) {
+function fakeWowhead(names: Record<number, string>, icons: Record<number, string> = {}) {
 	const calls: number[] = [];
 	const fetchFn = (async (url: string) => {
 		const id = Number(String(url).match(/spell\/(\d+)/)![1]);
 		calls.push(id);
-		return names[id] ? new Response(JSON.stringify({ name: names[id] })) : new Response('{}', { status: 404 });
+		return names[id] ? new Response(JSON.stringify({ name: names[id], icon: icons[id] })) : new Response('{}', { status: 404 });
 	}) as typeof fetch;
 	return { fetchFn, calls };
 }
@@ -119,5 +119,27 @@ describe('noms français des recettes', () => {
 		expect(await fetchWowheadName(1, down)).toBeNull();
 		const odd = (async () => new Response(JSON.stringify({ name: 42 }))) as unknown as typeof fetch;
 		expect(await fetchWowheadName(1, odd)).toBeNull();
+	});
+
+	it("ajoute l'icône de Wowhead, sans toucher au nom appris d'un export en français", async () => {
+		createUser('ic');
+		const brena = sheet('ic', 'Brena');
+		applyImport(planImport(exportOf('Brena', 'frFR', [{ id: 3170, name: 'Élixir de sang de troll mineur' }])));
+		const wowhead = fakeWowhead({ 3170: 'Élixir de sang de Troll mineur' }, { 3170: 'INV_Potion_78' });
+		await translateInBackground(wowhead.fetchFn);
+		expect(known(brena.id)![0].recipes).toEqual([{ id: 3170, name: 'Élixir de sang de troll mineur', icon: 'inv_potion_78' }]);
+		expect(wowhead.calls).toContain(3170);
+
+		// Déjà connue : plus redemandée, et un nouvel export la garde.
+		const asked = wowhead.calls.length;
+		await translateInBackground(wowhead.fetchFn);
+		expect(wowhead.calls).toHaveLength(asked);
+		applyImport(planImport({ ...exportOf('Brena', 'frFR', [{ id: 3170, name: 'Élixir de sang de troll mineur' }]), exportedAt: 1_800_000_200 }));
+		expect(known(brena.id)![0].recipes[0].icon).toBe('inv_potion_78');
+	});
+
+	it("une icône au nom bizarre n'est pas gardée", async () => {
+		const odd = (async () => new Response(JSON.stringify({ name: 'X', icon: '../../evil"' }))) as unknown as typeof fetch;
+		expect(await fetchWowheadSpell(1, odd)).toEqual({ name: 'X', icon: '' });
 	});
 });

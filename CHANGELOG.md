@@ -6,6 +6,8 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ### Ajouté
 
+- **Icônes des recettes** : avec les bulles Wowhead activées (Admin → Guilde), chaque recette a sa petite icône du jeu devant son nom, sur les pages des joueurs, dans Mes persos, dans Artisans et dans les commandes. Le site demande à Wowhead le nom de l'icône de chaque recette, une seule fois (seul le numéro de la recette est envoyé) ; les images viennent de Wowhead.
+
 - **Commander en cliquant sur une recette** : sur la page d'un joueur, un clic sur une de ses recettes ouvre la commande, adressée à cet artisan (« Clique sur une recette pour la commander à … ») ; dans la recherche d'Artisans, le nom de la recette ouvre aussi la commande. Wowhead passe sur une petite icône à côté du nom, et la bulle du jeu reste au survol du nom (sur téléphone, sur l'icône, pour que le premier appui ouvre bien la commande). Dans Mes persos et pour un visiteur, le nom mène toujours à Wowhead.
 
 - **Sorties : détail des « Peut-être », « En retard » et « Absents »** : classe, spé, niveau et rôle qu'ils tiendraient (spé gardée par Raid-Helper, sinon main de leur fiche), au lieu du seul nom. Pour un petit groupe, « En attente : Savi (soigneur, peut-être) » sous « Il manque ».

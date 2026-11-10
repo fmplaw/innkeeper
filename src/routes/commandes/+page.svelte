@@ -3,7 +3,7 @@
 	import { page } from '$app/state';
 	import MoneyInput from '$lib/components/MoneyInput.svelte';
 	import { formatMoney } from '$lib/money';
-	import { recipeUrl } from '$lib/wowhead';
+	import RecipeLink from '$lib/components/RecipeLink.svelte';
 
 	let { data, form } = $props();
 	const cfg = $derived(data.config);
@@ -68,7 +68,7 @@
 		<div class="top">
 			<h3>
 				<span class="qty num">{o.quantity} ×</span>
-				<a href={recipeUrl(o.recipeId)} target="_blank" rel="noopener">{o.recipeName}</a>
+				<RecipeLink recipe={{ id: o.recipeId, name: o.recipeName, icon: o.icon }} />
 			</h3>
 			<span class="badge status {o.status}">
 				{o.status === 'taken' ? `Prise par ${o.taker}` : o.status === 'open' ? 'Ouverte' : o.status === 'quoted' ? 'Prix proposé' : o.status === 'delivered' ? 'Livrée' : 'Annulée'}
@@ -216,10 +216,10 @@
 		margin: 0;
 		font-size: 1.0625rem;
 	}
-	h3 a {
+	h3 :global(a.name) {
 		color: var(--text);
 	}
-	h3 a:hover {
+	h3 :global(a.name:hover) {
 		color: var(--accent-ink);
 	}
 	.qty {

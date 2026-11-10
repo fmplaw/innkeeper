@@ -42,15 +42,15 @@
 	</ul>
 	<p>
 		Les données restent sur le serveur de la guilde, avec des sauvegardes gardées 60 jours au plus. Elles ne sont ni
-		vendues ni partagées. Seule exception, sans rien sur toi : pour afficher en français les recettes exportées d'un jeu
-		en anglais, le serveur demande leur nom à Wowhead, en n'envoyant que le numéro de la recette.
+		vendues ni partagées. Seule exception, sans rien sur toi : pour afficher les recettes en français et avec leur icône, le
+		serveur demande à Wowhead leur nom et leur icône, en n'envoyant que le numéro de la recette.
 	</p>
 
 	{#if data.config.wowheadTooltips}
 		<h2>Bulles Wowhead</h2>
 		<p>
-			Pour afficher la fiche d'une recette au survol, le site charge un script de <strong>Wowhead</strong>, la base de
-			données du jeu. Ton navigateur contacte alors les serveurs de Wowhead, qui reçoivent ton adresse IP et la page
+			Pour afficher la fiche d'une recette au survol et la petite icône de chaque recette, le site charge un script et des
+			images de <strong>Wowhead</strong>, la base de données du jeu. Ton navigateur contacte alors les serveurs de Wowhead, qui reçoivent ton adresse IP et la page
 			consultée, selon leur propre politique de confidentialité.
 		</p>
 	{/if}

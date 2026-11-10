@@ -29,6 +29,8 @@ export interface Recipe {
 	reagents?: Reagent[] | null;
 	/** Objets obtenus par fabrication, quand il y en a plus d'un. */
 	made?: number | null;
+	/** Icône du jeu (nom de fichier chez Wowhead, ex. « inv_potion_78 »), ajoutée par le site. */
+	icon?: string | null;
 }
 
 export interface Reagent {
@@ -138,6 +140,8 @@ export const recipeNames = sqliteTable('recipe_names', {
 	id: integer('id').primaryKey(),
 	name: text('name').notNull(),
 	source: text('source', { enum: ['game', 'wowhead'] }).notNull(),
+	/** Icône d'après Wowhead ; null = pas encore demandée, '' = Wowhead n'en donne pas. */
+	icon: text('icon'),
 	updatedAt: timestamp('updated_at')
 });
 

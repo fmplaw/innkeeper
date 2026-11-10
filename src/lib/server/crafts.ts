@@ -39,6 +39,7 @@ export interface RecipeChoice {
 	/** Composants d'une fabrication, d'après l'export d'un artisan (addon 1.4), et objets obtenus. */
 	reagents: Reagent[] | null;
 	made: number | null;
+	icon: string | null;
 }
 
 /** La recette et les artisans de la guilde qui la connaissent (null si personne ne la connaît). */
@@ -48,7 +49,7 @@ export function recipeChoice(recipeId: number): RecipeChoice | null {
 		if (!artisans.length) continue;
 		const known = artisans.map((a) => a.recipes.find((r) => r.id === recipeId)!);
 		const withReagents = known.find((r) => r.reagents?.length);
-		return { id: recipeId, name: known[0].name, profession: p.id, artisans, reagents: withReagents?.reagents ?? null, made: withReagents?.made ?? null };
+		return { id: recipeId, name: known[0].name, profession: p.id, artisans, reagents: withReagents?.reagents ?? null, made: withReagents?.made ?? null, icon: known.find((r) => r.icon)?.icon ?? null };
 	}
 	return null;
 }
@@ -204,17 +205,20 @@ export async function listOrders(now = new Date()) {
 	);
 	const knowers = new Map<number, Artisan[]>();
 	const reagentsOf = new Map<number, { reagents: Reagent[]; made: number | null }>();
+	const iconOf = new Map<number, string>();
 	for (const p of artisansByProfession())
 		for (const a of p.artisans)
 			for (const r of a.recipes) {
 				if (!orders.some((o) => o.recipeId === r.id)) continue;
 				knowers.set(r.id, [...(knowers.get(r.id) ?? []), a]);
+				if (r.icon) iconOf.set(r.id, r.icon);
 				if (r.reagents?.length && !reagentsOf.has(r.id)) reagentsOf.set(r.id, { reagents: r.reagents, made: r.made ?? null });
 			}
 	const { prices, at: pricesAt } = priceTable([...reagentsOf.values()].flatMap((r) => r.reagents.map((x) => x.id)));
 	return orders.map((o) => ({
 		...o,
 		professionName: professionName(o.profession),
+		icon: iconOf.get(o.recipeId) ?? null,
 		requester: names.get(o.requesterId) ?? 'Ancien membre',
 		taker: o.takenBy ? (names.get(o.takenBy) ?? 'Ancien membre') : null,
 		artisan: o.artisanId ? (names.get(o.artisanId) ?? null) : null,
