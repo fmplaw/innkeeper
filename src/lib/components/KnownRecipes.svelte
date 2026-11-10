@@ -6,10 +6,16 @@
 	import type { KnownRecipes } from '$lib/server/db/schema';
 	import RecipeList from './RecipeList.svelte';
 
-	// Recettes exportées par l'addon, repliées par métier. Chaque recette renvoie vers Wowhead,
+	// Recettes exportées par l'addon, repliées par métier. Chaque recette renvoie vers Wowhead (ou vers la commande, voir RecipeLink),
 	// avec la bulle du jeu au survol quand la guilde l'a activée (Admin → Guilde). Un lien de la
 	// page Artisans (#recettes-<perso>-<métier>) ouvre directement le bon métier.
-	let { cfg, known, characterId }: { cfg: PublicConfig; known: KnownRecipes[] | null; characterId: number } = $props();
+	// orderFrom : l'artisan à qui commander (fiche d'un autre joueur, membre connecté).
+	let {
+		cfg,
+		known,
+		characterId,
+		orderFrom = null
+	}: { cfg: PublicConfig; known: KnownRecipes[] | null; characterId: number; orderFrom?: { id: string; name: string } | null } = $props();
 
 	let hash = $state('');
 	onMount(() => {
@@ -26,7 +32,7 @@
 		<summary>
 			{professionNames(cfg, [{ id: k.profession, level: k.skill }]) || k.profession} · {k.recipes.length} recette{k.recipes.length > 1 ? 's' : ''} connue{k.recipes.length > 1 ? 's' : ''}
 		</summary>
-		<RecipeList recipes={k.recipes} />
+		<RecipeList recipes={k.recipes} {orderFrom} />
 	</details>
 {/each}
 

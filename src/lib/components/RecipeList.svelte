@@ -1,11 +1,13 @@
 <script lang="ts">
 	import { groupRecipes } from '$lib/recipes';
 	import type { Recipe } from '$lib/server/db/schema';
-	import { recipeUrl } from '$lib/wowhead';
+	import RecipeLink from './RecipeLink.svelte';
 
 	// Recettes d'un métier rangées comme dans la fenêtre du jeu (« Bandages », « Remèdes »…),
-	// avec un petit filtre dès que la liste devient longue.
-	let { recipes }: { recipes: Recipe[] } = $props();
+	// avec un petit filtre dès que la liste devient longue. Avec orderFrom (un autre joueur, pour
+	// un membre connecté), chaque recette ouvre la commande adressée à cet artisan.
+	let { recipes, orderFrom = null }: { recipes: Recipe[]; orderFrom?: { id: string; name: string } | null } = $props();
+	const orderHref = (id: number) => (orderFrom ? `/commandes/nouvelle?recette=${id}&artisan=${orderFrom.id}` : null);
 
 	const FILTER_FROM = 20;
 	const fold = (s: string) => s.normalize('NFD').replace(/\p{M}/gu, '').replace(/œ/g, 'oe').toLocaleLowerCase('fr');
@@ -17,6 +19,7 @@
 </script>
 
 <div class="recipe-list">
+	{#if orderFrom}<p class="muted hint">Clique sur une recette pour la commander à {orderFrom.name}.</p>{/if}
 	{#if recipes.length >= FILTER_FROM}
 		<input type="search" class="filter" bind:value={filter} placeholder="Filtrer ces recettes…" aria-label="Filtrer ces recettes" />
 	{/if}
@@ -25,7 +28,7 @@
 			{#if g.category}<h4>{g.category} <span class="muted">{g.recipes.length}</span></h4>{/if}
 			<ul>
 				{#each g.recipes as r (r.id)}
-					<li><a href={recipeUrl(r.id)} target="_blank" rel="noopener">{r.name}</a></li>
+					<li><RecipeLink recipe={r} orderHref={orderHref(r.id)} /></li>
 				{/each}
 			</ul>
 		</section>
@@ -69,10 +72,10 @@
 	p {
 		margin: 0;
 	}
-	a {
+	li :global(a.name) {
 		color: var(--text);
 	}
-	a:hover {
+	li :global(a.name:hover) {
 		color: var(--accent-ink);
 	}
 </style>

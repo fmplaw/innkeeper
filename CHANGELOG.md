@@ -6,6 +6,8 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ### Ajouté
 
+- **Commander en cliquant sur une recette** : sur la page d'un joueur, un clic sur une de ses recettes ouvre la commande, adressée à cet artisan (« Clique sur une recette pour la commander à … ») ; dans la recherche d'Artisans, le nom de la recette ouvre aussi la commande. Wowhead passe sur une petite icône à côté du nom, et la bulle du jeu reste au survol du nom (sur téléphone, sur l'icône, pour que le premier appui ouvre bien la commande). Dans Mes persos et pour un visiteur, le nom mène toujours à Wowhead.
+
 - **Sorties : détail des « Peut-être », « En retard » et « Absents »** : classe, spé, niveau et rôle qu'ils tiendraient (spé gardée par Raid-Helper, sinon main de leur fiche), au lieu du seul nom. Pour un petit groupe, « En attente : Savi (soigneur, peut-être) » sous « Il manque ».
 
 - **Coût des composants à l'hôtel des ventes** : le site lit toutes les heures, sur Battle.net, les prix de l'HV choisi dans Admin → Commandes de craft (moyenne des 20 moins chers pour chaque composant). Avec l'addon Innkeeper Sync 1.4.0 (zip du site), qui exporte les composants de chaque recette, Artisans, le formulaire de commande, chaque commande et son annonce Discord affichent ce qu'il faut réunir et son coût estimé. Les composants vendus par les marchands (fioles, fils, teintures, épices…) comptent au prix du marchand, donné par Battle.net, ou à celui de l'HV s'il est moins cher ; un composant sans prix connu est signalé.

@@ -49,7 +49,7 @@
 				{#if c.pve || c.pvp}<p><InterestBadges pve={c.pve} pvp={c.pvp} /></p>{/if}
 				{#if c.professions.length}<p class="muted">{professionNames(cfg, c.professions)}</p>{/if}
 				{#if c.recipes}<p class="muted small">Recettes : {c.recipes}</p>{/if}
-				<KnownRecipes {cfg} known={c.knownRecipes} characterId={c.id} />
+				<KnownRecipes {cfg} known={c.knownRecipes} characterId={c.id} orderFrom={data.canOrder ? { id: p.id, name: c.name } : null} />
 				{#if c.lastOnlineAt}<p class="muted small">Vu en jeu le {dateFormat.format(c.lastOnlineAt)}</p>{/if}
 				{#if c.rosters.length}
 					<p class="rosters">
