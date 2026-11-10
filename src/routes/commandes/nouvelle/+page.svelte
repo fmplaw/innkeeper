@@ -25,7 +25,7 @@
 {#if !data.recipe}
 	<p class="notice warn">
 		Personne dans la guilde ne connaît cette recette, ou elle n'a pas encore été exportée. Cherche ce qu'il te faut dans
-		<a href="/artisans">Artisans</a>, puis clique sur « Commander ».
+		<a href="/artisans">Artisans</a>, puis clique sur le nom de la recette.
 	</p>
 {:else}
 	{#if form?.error}<p class="notice bad">{form.error}</p>{/if}

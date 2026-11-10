@@ -7,7 +7,7 @@
 	import { formatMoney } from '$lib/money';
 	import { reagentCost, reagentList, recipesAnchor } from '$lib/recipes';
 	import type { Role } from '$lib/roles';
-	import { recipeUrl } from '$lib/wowhead';
+	import RecipeLink from '$lib/components/RecipeLink.svelte';
 
 	let { data } = $props();
 	const cfg = $derived(data.config);
@@ -79,7 +79,7 @@
 			{#each results as r (r.id)}
 				<article class="result">
 					<h3>
-						<a href={recipeUrl(r.id)} target="_blank" rel="noopener">{r.name}</a>
+						<RecipeLink recipe={r} orderHref={data.canOrder ? `/commandes/nouvelle?recette=${r.id}` : null} />
 						<span class="muted small">{professionName(r.profession)}</span>
 						{#if data.canOrder}<a class="button secondary small order" href="/commandes/nouvelle?recette={r.id}">Commander</a>{/if}
 					</h3>
@@ -217,7 +217,7 @@
 	.recipes:hover {
 		color: var(--accent-ink);
 	}
-	.result h3 a {
+	.result h3 :global(a.name) {
 		color: var(--text);
 	}
 	.reagents {
@@ -228,7 +228,7 @@
 		color: var(--text);
 		font-size: 0.875rem;
 	}
-	.result h3 a:hover {
+	.result h3 :global(a.name:hover) {
 		color: var(--accent-ink);
 	}
 </style>
