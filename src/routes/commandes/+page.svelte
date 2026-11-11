@@ -25,7 +25,9 @@
 		take: 'Commande prise : le demandeur la voit à ton nom.',
 		quote: 'Prix proposé : le demandeur est prévenu et doit l’accepter.',
 		accept: 'Prix accepté : l’artisan s’en occupe.',
-		refuse: 'Prix refusé : la commande est de nouveau ouverte aux autres artisans.', release: 'Commande rendue : elle est de nouveau ouverte.', deliver: 'Commande livrée.', cancel: 'Commande annulée.' };
+		refuse: 'Prix refusé : la commande est de nouveau ouverte aux autres artisans.', release: 'Commande rendue : elle est de nouveau ouverte.', deliver: 'Commande livrée.', cancel: 'Commande annulée.',
+		rateUp: 'Merci ! Ton 👍 est noté pour l’artisan.',
+		rateDown: 'Avis noté : seuls l’artisan et les officiers le voient.' };
 </script>
 
 <svelte:head><title>Commandes · {cfg.guild.name}</title></svelte:head>
@@ -112,6 +114,30 @@
 			</p>
 		{/if}
 		{#if o.closedNote}<p class="muted small">{o.closedNote}</p>{/if}
+		{#if o.rating === 'up'}
+			<p class="rating up small">👍 Bien reçue{o.taker ? `, merci ${o.taker} !` : ' !'}</p>
+		{:else if o.rating === 'down'}
+			<p class="rating down small">👎 Souci signalé{o.ratingNote ? ` : « ${o.ratingNote} »` : ''} <span class="muted">(visible de l'artisan et des officiers)</span></p>
+		{/if}
+		{#if o.can.rate}
+			<div class="rate">
+				<span class="small">{o.rating ? 'Changer ton avis :' : 'Tout s’est bien passé ?'}</span>
+				{#if o.rating !== 'up'}
+					<form method="POST" action="?/rate" use:enhance>
+						<input type="hidden" name="id" value={o.id} /><input type="hidden" name="rating" value="up" /><button class="small">👍 Oui, merci !</button>
+					</form>
+				{/if}
+				<details class="down-form" open={form?.id === o.id && form?.rating === 'down'}>
+					<summary class="small">👎 Un souci</summary>
+					<form method="POST" action="?/rate" use:enhance class="down-fields">
+						<input type="hidden" name="id" value={o.id} /><input type="hidden" name="rating" value="down" />
+						<label for="note-{o.id}" class="small">Qu'est-ce qui ne s'est pas bien passé ? Seuls l'artisan et les officiers le verront.</label>
+						<textarea id="note-{o.id}" name="note" maxlength="200" rows="2" required placeholder="Jamais reçue, mauvais objet…">{o.rating === 'down' ? (o.ratingNote ?? '') : ''}</textarea>
+						<button class="secondary small">Envoyer</button>
+					</form>
+				</details>
+			</div>
+		{/if}
 		{#if o.can.quote}
 			<details class="quote-form" open={form?.id === o.id}>
 				<summary>Proposer un prix</summary>
@@ -174,7 +200,61 @@
 	</section>
 {/if}
 
+{#if data.stats.length}
+	<section class="leaders">
+		<h2>Artisans les plus actifs</h2>
+		<p class="muted small">Commandes livrées à d'autres membres, sur les 30 derniers jours (et en tout).</p>
+		<ol>
+			{#each data.stats as s (s.playerId)}
+				<li>
+					<a href="/joueurs/{s.playerId}">{s.name}</a>
+					<span class="num">{s.recent}</span>
+					<span class="muted small">({s.delivered} en tout{s.up ? ` · ${s.up} 👍` : ''}{s.down ? ` · ${s.down} 👎` : ''})</span>
+				</li>
+			{/each}
+		</ol>
+	</section>
+{/if}
+
 <style>
+	.rating {
+		margin: 0;
+	}
+	.rating.up {
+		color: var(--good);
+	}
+	.rate {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.5rem 0.75rem;
+	}
+	.rate form {
+		margin: 0;
+	}
+	.down-form summary {
+		cursor: pointer;
+	}
+	.down-fields {
+		display: grid;
+		gap: 0.375rem;
+		margin-top: 0.5rem;
+		max-width: 28rem;
+	}
+	.down-fields button {
+		justify-self: start;
+	}
+	.leaders ol {
+		display: grid;
+		gap: 0.25rem;
+		margin: 0.5rem 0 0;
+		padding-left: 1.5rem;
+	}
+	.leaders li .num {
+		margin-left: 0.375rem;
+		color: var(--gold);
+		font-weight: 600;
+	}
 	.alerts {
 		margin-top: 1rem;
 	}
