@@ -360,6 +360,9 @@ export type NewCharacter = typeof characters.$inferInsert;
 // « quoted » : un artisan a proposé un prix au-dessus du budget, le demandeur doit l'accepter.
 export const CRAFT_STATUSES = ['open', 'quoted', 'taken', 'delivered', 'cancelled'] as const;
 export type CraftStatus = (typeof CRAFT_STATUSES)[number];
+// Avis du demandeur sur une commande livrée : 👍 (vu de tous) ou 👎 (artisan et officiers seulement).
+export const CRAFT_RATINGS = ['up', 'down'] as const;
+export type CraftRating = (typeof CRAFT_RATINGS)[number];
 
 export const craftOrders = sqliteTable(
 	'craft_orders',
@@ -389,6 +392,10 @@ export const craftOrders = sqliteTable(
 		takenBy: text('taken_by').references(() => users.discordId, { onDelete: 'set null' }),
 		// Fermée sans nouvelles, ou par un officier : expliqué sur la page et sur Discord.
 		closedNote: text('closed_note'),
+		// Avis du demandeur après la livraison ; un 👎 s'accompagne d'un mot d'explication.
+		rating: text('rating', { enum: CRAFT_RATINGS }),
+		ratingNote: text('rating_note'),
+		ratedAt: integer('rated_at', { mode: 'timestamp' }),
 		discordChannelId: text('discord_channel_id'),
 		discordMessageId: text('discord_message_id'),
 		createdAt: timestamp('created_at'),

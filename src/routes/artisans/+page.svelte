@@ -50,7 +50,11 @@
 		<ClassEmblem {cfg} classId={a.class} role={a.role as Role} size={30} />
 		<span class="ident">
 			<a class="name class-ink" style:--c={classColor(cfg, a.class)} {href}>{a.name}</a><ArmoryLink href={armoryHref(cfg, a)} name={a.name} />
-			<span class="muted small">{a.player}{a.isMain ? '' : ' · reroll'}</span>
+			<span class="muted small"
+				>{a.player}{a.isMain ? '' : ' · reroll'}{#if data.crafts[a.playerId]}{@const c = data.crafts[a.playerId]}<span title="Commandes de craft livrées à d'autres membres"
+						>{` · ${c.delivered} commande${c.delivered > 1 ? 's' : ''} livrée${c.delivered > 1 ? 's' : ''}${c.up ? ` · ${c.up} 👍` : ''}${c.down ? ` · ${c.down} 👎` : ''}`}</span
+					>{/if}</span
+			>
 		</span>
 		<span class="skill num" title="Niveau du métier">{a.skill ?? '—'}</span>
 		{#if showRecipes && a.recipes.length}

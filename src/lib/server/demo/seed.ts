@@ -276,7 +276,10 @@ export function seedDemo(now = Date.now()): DemoEvent[] {
 	order('Thorgrim', 3277, 'Bandage en laine', 'first-aid', { quantity: 20, materials: true, commission: 2000, comment: 'Pour le raid de jeudi, je t’envoie l’étoffe.', createdAt: new Date(now - 5 * 3_600_000) });
 	order('Aldren', 8604, 'Œufs aux herbes', 'cooking', { quantity: 10, materials: false, budget: 5000, status: 'quoted', quotedBy: demoUserId('Brunhild'), price: 8000, createdAt: new Date(now - 8 * 3_600_000) });
 	order('Pipwick', 2330, 'Potion de soins mineure', 'alchemy', { quantity: 10, materials: false, price: 12_000, status: 'taken', takenBy: demoUserId('Ysolde'), createdAt: new Date(now - DAY) });
-	order('Lysandre', 2663, 'Brassards en cuivre', 'blacksmithing', { quantity: 1, materials: true, status: 'delivered', takenBy: demoUserId('Aldren'), createdAt: new Date(now - 3 * DAY), closedAt: new Date(now - 2 * DAY) });
+	order('Lysandre', 2663, 'Brassards en cuivre', 'blacksmithing', { quantity: 1, materials: true, status: 'delivered', takenBy: demoUserId('Aldren'), createdAt: new Date(now - 3 * DAY), closedAt: new Date(now - 2 * DAY), rating: 'up', ratedAt: new Date(now - 2 * DAY) });
+	// Livrées : une notée 👍 plus tôt, une à noter par Aldren (profil d'officier de la démo).
+	order('Pipwick', 3275, 'Bandage en lin', 'first-aid', { quantity: 20, materials: true, status: 'delivered', takenBy: demoUserId('Ysolde'), createdAt: new Date(now - 20 * DAY), closedAt: new Date(now - 18 * DAY), rating: 'up', ratedAt: new Date(now - 18 * DAY) });
+	order('Aldren', 2329, 'Élixir de force du lion', 'alchemy', { quantity: 5, materials: true, commission: 2000, status: 'delivered', takenBy: demoUserId('Ysolde'), createdAt: new Date(now - 2 * DAY), closedAt: new Date(now - DAY) });
 
 	APPLICANTS.forEach(([pseudo, [name, surname, race, cls, spec, role, level], answers, votes], i) => {
 		const userId = demoUserId(pseudo);

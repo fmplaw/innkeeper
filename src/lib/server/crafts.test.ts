@@ -2,7 +2,7 @@ import { eq } from 'drizzle-orm';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createUser, horde } from '../../test/helpers';
 import { createCharacter } from './characters';
-import { act, createOrder, EXPIRE_DAYS, listOrders, MAX_ACTIVE, openOrdersFor, recipeChoice } from './crafts';
+import { act, artisanStats, createOrder, EXPIRE_DAYS, listOrders, MAX_ACTIVE, openOrdersFor, RATE_DAYS, rateOrder, recipeChoice, seesDown } from './crafts';
 import { db, schema } from './db';
 import { craftSchema, setCrafts, setDiscord } from './settings';
 
@@ -135,4 +135,55 @@ describe('commandes de craft', () => {
 		expect(embed.fields.find((f) => f.name === 'État')?.value).toBe(`Prise par Joueur ${ARTISAN}`);
 		expect(calls[1].body.allowed_mentions).toEqual({ parse: [] });
 	});
+
+	it('avis du demandeur (👍 / 👎) et décompte des commandes livrées par artisan', async () => {
+		const before = artisanStats().find((s) => s.playerId === ARTISAN) ?? { delivered: 0, recent: 0, up: 0, down: 0 };
+		const delivered = async () => {
+			const r = await order({ quantity: 1 });
+			if ('error' in r) throw new Error(r.error);
+			await act('take', r.order.id, me(ARTISAN));
+			await act('deliver', r.order.id, me(ARTISAN));
+			return r.order.id;
+		};
+		const a = await delivered();
+		const b = await delivered();
+
+		// Seulement le demandeur, et seulement une commande livrée.
+		expect(await rateOrder(a, me(ARTISAN), 'up', null)).toHaveProperty('error');
+		expect(await rateOrder(a, me(OTHER, true), 'up', null)).toHaveProperty('error');
+		const open = await order({ quantity: 1 });
+		if ('error' in open) throw new Error(open.error);
+		expect(await rateOrder(open.order.id, me(REQUESTER), 'up', null)).toHaveProperty('error');
+		await act('cancel', open.order.id, me(REQUESTER));
+
+		expect(await rateOrder(a, me(REQUESTER), 'up', 'ignoré')).toMatchObject({ order: { rating: 'up', ratingNote: null } });
+		// Un 👎 demande une explication.
+		expect(await rateOrder(b, me(REQUESTER), 'down', '  ')).toEqual({ error: 'Explique en quelques mots ce qui ne s’est pas bien passé.' });
+		expect(await rateOrder(b, me(REQUESTER), 'down', 'Jamais reçue')).toMatchObject({ order: { rating: 'down', ratingNote: 'Jamais reçue' } });
+		// Trop tard au-delà de RATE_DAYS jours.
+		expect(await rateOrder(b, me(REQUESTER), 'up', null, new Date(Date.now() + (RATE_DAYS + 1) * 86_400_000))).toHaveProperty('error');
+
+		const after = artisanStats().find((s) => s.playerId === ARTISAN)!;
+		expect(after).toMatchObject({ delivered: before.delivered + 2, recent: before.recent + 2, up: before.up + 1, down: before.down + 1 });
+		// Le 👎 : demandeur, artisan et officiers seulement.
+		const o = { requesterId: REQUESTER, takenBy: ARTISAN };
+		expect([seesDown(o, me(REQUESTER)), seesDown(o, me(ARTISAN)), seesDown(o, me(OTHER, true)), seesDown(o, me(OTHER)), seesDown(o, { id: null, officer: false })]).toEqual([
+			true,
+			true,
+			true,
+			false,
+			false
+		]);
+	});
+
+	it("une commande qu'on livre soi-même ne compte pas et ne se note pas", async () => {
+		createUser('100000000000000009', [ROLE]);
+		const solo = '100000000000000009';
+		const r = await createOrder(solo, { recipeId: POTION, quantity: 1, materials: true, comment: null, artisanId: null, commission: null, budget: null });
+		if ('error' in r) throw new Error(r.error);
+		db().update(schema.craftOrders).set({ status: 'delivered', takenBy: solo, closedAt: new Date() }).where(eq(schema.craftOrders.id, r.order.id)).run();
+		expect(await rateOrder(r.order.id, me(solo), 'up', null)).toHaveProperty('error');
+		expect(artisanStats().some((s) => s.playerId === solo)).toBe(false);
+	});
 });
+

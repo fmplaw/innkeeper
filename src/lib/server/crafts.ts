@@ -9,7 +9,7 @@ import { priceTable } from './auction';
 import { audit } from './audit';
 import { BotError, botReady, editMessage, postMessage, type Embed } from './bot';
 import { db, schema } from './db';
-import type { CraftOrder, CraftStatus, Reagent } from './db/schema';
+import type { CraftOrder, CraftRating, CraftStatus, Reagent } from './db/schema';
 import { getCrafts } from './settings';
 
 // Commandes de craft. Un membre commande une recette qu'au moins un artisan de la guilde connaît ;
@@ -23,6 +23,10 @@ export const EXPIRE_DAYS = 14;
 /** Les commandes livrées ou annulées restent affichées ce nombre de jours. */
 export const KEEP_CLOSED_DAYS = 7;
 const DAY = 86_400_000;
+/** Le demandeur donne son avis (👍 / 👎) tant que la commande livrée reste dans la liste. */
+export const RATE_DAYS = KEEP_CLOSED_DAYS;
+/** Période des « artisans les plus actifs ». */
+export const ACTIVE_DAYS = 30;
 
 export const STATUS_LABELS: Record<CraftStatus, string> = { open: 'Ouverte', quoted: 'Prix proposé', taken: 'Prise', delivered: 'Livrée', cancelled: 'Annulée' };
 const STATUS_COLORS: Record<CraftStatus, number> = { open: 0xd4a017, quoted: 0xe67e22, taken: 0x3b82f6, delivered: 0x22a55b, cancelled: 0x6b7280 };
@@ -181,6 +185,80 @@ export async function act(action: CraftAction, orderId: number, actor: Actor, lo
 	return { order: updated };
 }
 
+// ── Avis du demandeur ─────────────────────────────────────────────────────────
+
+/** Le demandeur d'une commande livrée par un autre, dans les RATE_DAYS jours. */
+export function canRate(order: CraftOrder, actor: Actor, now = new Date()) {
+	return (
+		order.status === 'delivered' &&
+		order.requesterId === actor.id &&
+		order.takenBy !== actor.id &&
+		Boolean(order.closedAt) &&
+		now.getTime() - order.closedAt!.getTime() <= RATE_DAYS * DAY
+	);
+}
+
+/** 👍 ou 👎 (avec un mot d'explication) ; modifiable tant que canRate. */
+export async function rateOrder(orderId: number, actor: Actor, rating: CraftRating, note: string | null, now = new Date()): Promise<CraftError | { order: CraftOrder }> {
+	const order = getOrder(orderId);
+	if (!order) return { error: 'Cette commande n’existe plus.' };
+	if (!canRate(order, actor, now)) return { error: 'Tu ne peux plus donner ton avis sur cette commande.' };
+	const text = note?.trim() || null;
+	if (rating === 'down' && !text) return { error: 'Explique en quelques mots ce qui ne s’est pas bien passé.' };
+	if (text && text.length > 200) return { error: 'Explication trop longue (200 caractères au plus).' };
+	const updated = db()
+		.update(schema.craftOrders)
+		.set({ rating, ratingNote: rating === 'down' ? text : null, ratedAt: now, updatedAt: now })
+		.where(eq(schema.craftOrders.id, orderId))
+		.returning()
+		.get();
+	await refreshAnnouncement(updated);
+	return { order: updated };
+}
+
+/** Un 👎 et son explication ne se montrent qu'au demandeur, à l'artisan et aux officiers. */
+export function seesDown(order: Pick<CraftOrder, 'requesterId' | 'takenBy'>, viewer: { id: string | null; officer: boolean }) {
+	return viewer.officer || (viewer.id !== null && (viewer.id === order.requesterId || viewer.id === order.takenBy));
+}
+
+export interface ArtisanStats {
+	playerId: string;
+	name: string;
+	/** Commandes livrées à d'autres membres : en tout, et sur les ACTIVE_DAYS derniers jours. */
+	delivered: number;
+	recent: number;
+	up: number;
+	down: number;
+}
+
+/** Commandes livrées par artisan (les siennes non comptées), du plus actif au moins actif. */
+export function artisanStats(now = new Date()): ArtisanStats[] {
+	const since = now.getTime() - ACTIVE_DAYS * DAY;
+	const rows = db()
+		.select({
+			takenBy: schema.craftOrders.takenBy,
+			requesterId: schema.craftOrders.requesterId,
+			closedAt: schema.craftOrders.closedAt,
+			rating: schema.craftOrders.rating,
+			name: schema.users.displayName
+		})
+		.from(schema.craftOrders)
+		.innerJoin(schema.users, eq(schema.users.discordId, schema.craftOrders.takenBy))
+		.where(eq(schema.craftOrders.status, 'delivered'))
+		.all();
+	const stats = new Map<string, ArtisanStats>();
+	for (const r of rows) {
+		if (!r.takenBy || r.takenBy === r.requesterId) continue;
+		const s = stats.get(r.takenBy) ?? { playerId: r.takenBy, name: r.name, delivered: 0, recent: 0, up: 0, down: 0 };
+		s.delivered++;
+		if (r.closedAt && r.closedAt.getTime() >= since) s.recent++;
+		if (r.rating === 'up') s.up++;
+		if (r.rating === 'down') s.down++;
+		stats.set(r.takenBy, s);
+	}
+	return [...stats.values()].sort((a, b) => b.recent - a.recent || b.delivered - a.delivered || a.name.localeCompare(b.name, 'fr'));
+}
+
 // ── Liste ─────────────────────────────────────────────────────────────────────
 
 export async function listOrders(now = new Date()) {
@@ -276,7 +354,9 @@ function embed(
 				? `${people.quoter} propose ${formatMoney(order.price)} : en attente du demandeur`
 			: order.status === 'cancelled' && order.closedNote
 				? `Annulée : ${order.closedNote}`
-				: STATUS_LABELS[order.status];
+				: order.status === 'delivered' && order.rating === 'up'
+					? `${STATUS_LABELS.delivered} · 👍 bien reçue`
+					: STATUS_LABELS[order.status];
 	const done = order.status === 'delivered' || order.status === 'cancelled';
 	return {
 		title: `${done ? '~~' : ''}${order.quantity} × ${order.recipeName}${done ? '~~' : ''}`,
