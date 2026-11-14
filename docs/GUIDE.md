@@ -53,7 +53,7 @@ Menu **Mes persos** → **Ajouter un perso**.
 
 Rien n'est bloqué : c'est une aide à la saisie, et un repère pour les officiers.
 
-**Lien vers l'Armurerie** : un perso trouvé dans l'Armurerie a une petite icône ↗ à côté de son nom (Mes persos, fiches des joueurs, roster, Artisans, candidatures). Elle ouvre sa page Blizzard dans un nouvel onglet : équipement, talents, métiers, réputations.
+**Lien vers l'Armurerie** : un perso trouvé dans l'Armurerie a une petite icône ↗ à côté de son nom (Mes persos, fiches des joueurs, roster, Artisans, candidatures). Elle ouvre sa page Blizzard dans un nouvel onglet : équipement, talents, métiers, réputations. Si le perso disparaît de l'Armurerie (renommé, supprimé en jeu), l'icône disparaît à la synchronisation Battle.net suivante.
 
 **Main et rerolls** : ton premier perso devient ton **main**. Les suivants sont des rerolls rattachés à ton main. Pour changer de main, clique sur **« Définir comme main »** sous le reroll concerné, dans Mes persos. Un main qui a encore des rerolls ne peut pas être supprimé.
 

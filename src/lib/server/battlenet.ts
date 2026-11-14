@@ -339,7 +339,7 @@ async function markVerified(roster: NonNullable<GameExport['roster']>, updates: 
 const OUTSIDE_PER_PASS = 60;
 
 /**
- * Fiches du site absentes du registre de la guilde mais trouvées dans l'Armurerie (recrue pas
+ * Fiches du site absentes du registre de la guilde mais déjà trouvées dans l'Armurerie (recrue pas
  * encore entrée en jeu, reroll hors guilde, invité) : niveau, métiers et dernière connexion
  * d'après leur fiche Battle.net. Pas de « vu en jeu » (game_synced_at), réservé au registre.
  * Même règle que la guilde : un export de l'addon plus récent que la dernière déconnexion reste.
@@ -361,7 +361,11 @@ async function refreshOutsideGuild(seen: Set<number>, fetchFn: Fetch, now = new 
 		await Promise.all(
 			sheets.slice(i, i + PARALLEL).map(async (c) => {
 				const found = await lookupCharacter(c.name, c.surname, fetchFn);
-				if (found.status !== 'found' || armoryStatusFor(c.class, found) !== 'found' || !found.lastLogin) return;
+				// Plus dans l'Armurerie (renommé, supprimé…) ou autre classe : le statut suit, et le
+				// lien vers une page de Blizzard qui dirait « introuvable » disparaît.
+				const status = armoryStatusFor(c.class, found);
+				if (status && status !== 'found') setArmoryStatus(c.id, status);
+				if (found.status !== 'found' || status !== 'found' || !found.lastLogin) return;
 				const dataAt = new Date(Math.floor(found.lastLogin / 1000) * 1000);
 				if (c.gameExportedAt && c.gameExportedAt.getTime() >= dataAt.getTime()) return;
 				const values: Partial<typeof schema.characters.$inferInsert> = { gameExportedAt: dataAt, lastOnlineAt: dataAt };
