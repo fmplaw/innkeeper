@@ -6,6 +6,8 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ### Ajouté
 
+- **Battle.net met aussi à jour les persos hors de la guilde** : une recrue inscrite sur le site avant d'entrer dans la guilde en jeu, ou un reroll resté hors guilde, voit son niveau, ses métiers et sa dernière connexion suivre l'Armurerie à chaque synchronisation, comme les membres du registre. Seulement pour les persos trouvés dans l'Armurerie avec la même classe ; ils n'ont pas le badge « en jeu ». Le résultat de la synchronisation les compte à part.
+
 - **Avis sur les commandes et artisans les plus actifs** : une fois sa commande livrée, le demandeur a 7 jours pour donner son avis. 👍 s'affiche sur la commande et sur son message Discord ; 👎 demande une explication, visible seulement de l'artisan et des officiers. La page Commandes montre les cinq artisans qui ont livré le plus de commandes sur 30 jours (avec leur total et leurs 👍), et la page Artisans les commandes livrées de chacun. Les commandes qu'on se livre à soi-même ne comptent pas.
 
 - **Icônes des recettes** : avec les bulles Wowhead activées (Admin → Guilde), chaque recette a sa petite icône du jeu devant son nom, sur les pages des joueurs, dans Mes persos, dans Artisans et dans les commandes. Le site demande à Wowhead le nom de l'icône de chaque recette, une seule fois (seul le numéro de la recette est envoyé) ; les images viennent de Wowhead.

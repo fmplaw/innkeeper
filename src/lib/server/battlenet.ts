@@ -1,4 +1,4 @@
-import { asc, eq, inArray, isNull, ne, or } from 'drizzle-orm';
+import { and, asc, eq, inArray, isNull, ne, or } from 'drizzle-orm';
 import { z } from 'zod';
 import { characterSlug } from '$lib/armory';
 import { PROFESSIONS } from '$lib/game/forever';
@@ -175,18 +175,20 @@ async function run(by: App.Locals | null, fetchFn: Fetch) {
 		const plan = planImport(data, { completeProfessions: complete, dataAt });
 		const changed = applyImport(plan, { by: 'Battle.net', via: 'battlenet' });
 		await markVerified(data.roster ?? [], plan.updates, fetchFn);
+		const outside = await refreshOutsideGuild(new Set(plan.updates.map((u) => u.characterId)), fetchFn);
 		const departures = await detectDepartures(new Set(plan.updates.map((u) => u.characterId)), plan.rosterSize, (name, surname) => lookupCharacter(name, surname, fetchFn));
 		const message = [
 			`${plan.rosterSize} membres en jeu, ${plan.updates.length} persos reconnus, ${changed} fiche${changed > 1 ? 's' : ''} mise${changed > 1 ? 's' : ''} à jour.`,
+			outside ? `Hors de la guilde : ${outside} fiche${outside > 1 ? 's' : ''} mise${outside > 1 ? 's' : ''} à jour.` : '',
 			departures.left.length ? `Départ de la guilde : ${departures.left.join(', ')}.` : '',
 			departures.returned.length ? `De retour : ${departures.returned.join(', ')}.` : ''
 		]
 			.filter(Boolean)
 			.join(' ');
 		setBattlenetStatus({ at: Date.now(), ok: true, message });
-		if (by || changed) {
+		if (by || changed || outside) {
 			const locals = by ?? ({ user: null, candidate: null, admin: null } as unknown as App.Locals);
-			audit(locals, 'game.battlenet', { label: 'Battle.net', url: '/admin/import' }, { persos: changed, reconnus: plan.updates.length, membres: plan.rosterSize });
+			audit(locals, 'game.battlenet', { label: 'Battle.net', url: '/admin/import' }, { persos: changed, horsGuilde: outside, reconnus: plan.updates.length, membres: plan.rosterSize });
 		}
 		return { ok: true, message };
 	} catch (e) {
@@ -215,7 +217,18 @@ export const resetBattlenetToken = () => (token = null);
 // les persos déconnectés depuis son ouverture : « introuvable » n'est donc pas une preuve.
 
 export type ArmoryLookup =
-	| { status: 'found'; name: string; surname: string | null; level: number; classId: string | null; raceId: string | null; guild: string | null; professions: ProfessionEntry[] }
+	| {
+			status: 'found';
+			name: string;
+			surname: string | null;
+			level: number;
+			classId: string | null;
+			raceId: string | null;
+			guild: string | null;
+			professions: ProfessionEntry[];
+			/** Dernière déconnexion (ms), date des données de l'Armurerie ; null si inconnue. */
+			lastLogin: number | null;
+	  }
 	| { status: 'missing' }
 	| { status: 'unavailable' };
 
@@ -229,7 +242,7 @@ const professionsOf = (raw: unknown): ProfessionEntry[] => {
 		const known = PROFESSIONS.find((x) => x.skillLine === e.profession.id);
 		const level = Math.max(0, ...e.tiers.map((t) => t.skill_points ?? 0));
 		return known ? [{ id: known.id, level: level || null }] : [];
-	});
+	}).sort((a, b) => PROFESSIONS.findIndex((p) => p.id === a.id) - PROFESSIONS.findIndex((p) => p.id === b.id));
 };
 
 /** Cherche un perso dans l'Armurerie (résultat gardé 10 minutes). */
@@ -256,7 +269,8 @@ export async function lookupCharacter(name: string, surname: string | null | und
 				classId: c.data.character_class ? (CLASS_FILES[c.data.character_class.id]?.toLowerCase() ?? null) : null,
 				raceId: c.data.race ? (RACE_IDS[c.data.race.id] ?? null) : null,
 				guild: c.data.guild?.name ?? null,
-				professions
+				professions,
+				lastLogin: c.data.last_login_timestamp || null
 			};
 		}
 	} catch {
@@ -320,6 +334,50 @@ async function markVerified(roster: NonNullable<GameExport['roster']>, updates: 
 		if (sheet && cls !== undefined) setArmoryStatus(sheet.id, !cls || cls === sheet.class ? 'found' : 'mismatch');
 	}
 	await verifyPending(new Set(ids), fetchFn);
+}
+
+const OUTSIDE_PER_PASS = 60;
+
+/**
+ * Fiches du site absentes du registre de la guilde mais trouvées dans l'Armurerie (recrue pas
+ * encore entrée en jeu, reroll hors guilde, invité) : niveau, métiers et dernière connexion
+ * d'après leur fiche Battle.net. Pas de « vu en jeu » (game_synced_at), réservé au registre.
+ * Même règle que la guilde : un export de l'addon plus récent que la dernière déconnexion reste.
+ * Renvoie le nombre de fiches modifiées.
+ */
+async function refreshOutsideGuild(seen: Set<number>, fetchFn: Fetch, now = new Date()) {
+	const sheets = db()
+		.select({ c: schema.characters })
+		.from(schema.characters)
+		.innerJoin(schema.users, eq(schema.users.discordId, schema.characters.userId))
+		.where(and(eq(schema.characters.armoryStatus, 'found'), isNull(schema.users.leftAt)))
+		.orderBy(asc(schema.characters.gameExportedAt))
+		.all()
+		.map((r) => r.c)
+		.filter((c) => !seen.has(c.id))
+		.slice(0, OUTSIDE_PER_PASS);
+	let changed = 0;
+	for (let i = 0; i < sheets.length; i += PARALLEL) {
+		await Promise.all(
+			sheets.slice(i, i + PARALLEL).map(async (c) => {
+				const found = await lookupCharacter(c.name, c.surname, fetchFn);
+				if (found.status !== 'found' || armoryStatusFor(c.class, found) !== 'found' || !found.lastLogin) return;
+				const dataAt = new Date(Math.floor(found.lastLogin / 1000) * 1000);
+				if (c.gameExportedAt && c.gameExportedAt.getTime() >= dataAt.getTime()) return;
+				const values: Partial<typeof schema.characters.$inferInsert> = { gameExportedAt: dataAt, lastOnlineAt: dataAt };
+				const level = Math.min(Math.max(found.level, 1), 100);
+				if (level !== c.level) values.level = level;
+				// Liste vide : pas de métier, ou réponse indisponible ; on ne retire rien sur cette base.
+				if (found.professions.length && JSON.stringify(found.professions) !== JSON.stringify(c.professions)) values.professions = found.professions;
+				if (values.level !== undefined || values.professions) {
+					values.updatedAt = now;
+					changed++;
+				}
+				db().update(schema.characters).set(values).where(eq(schema.characters.id, c.id)).run();
+			})
+		);
+	}
+	return changed;
 }
 
 /** Pour les tests : oublie les recherches en mémoire. */
