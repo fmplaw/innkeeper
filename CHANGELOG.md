@@ -4,9 +4,7 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ## [Non publié]
 
-### Corrigé
-
-- **Lien vers l'Armurerie cassé** : un perso trouvé autrefois dans l'Armurerie puis disparu (renommé, supprimé en jeu) gardait son lien, et la page de Blizzard affichait une erreur. Chaque synchronisation Battle.net revérifie désormais les persos hors du registre de la guilde : le lien disparaît s'ils n'y sont plus.
+## [0.17.0] - 2026-11-14
 
 ### Ajouté
 
@@ -46,6 +44,8 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 - **Import du jeu : changement de métier.** Les métiers du perso qui exporte suivent ceux du jeu : un métier abandonné quitte sa fiche, avec ses recettes. Pour les autres membres (onglet des métiers de guilde, peut-être incomplet), l'import ajoute et met à jour sans rien retirer. Un export sans liste de métiers (pas encore chargée à la connexion) ne retire rien.
 
 ### Corrigé
+
+- **Lien vers l'Armurerie cassé** : un perso trouvé autrefois dans l'Armurerie puis disparu (renommé, supprimé en jeu) gardait son lien, et la page de Blizzard affichait une erreur. Chaque synchronisation Battle.net revérifie désormais les persos hors du registre de la guilde : le lien disparaît s'ils n'y sont plus.
 
 - **Niveaux de métiers remis à 1** : l'onglet Métiers de guilde de Forever donne le niveau 1 à tout le monde, et un import de l'addon par un officier écrasait les vrais niveaux venus de Battle.net (par exemple Travail du cuir 123 affiché 1). Un import ne fait plus jamais baisser un niveau connu ; les fiches touchées reprennent leur niveau à la prochaine déconnexion du perso (synchronisation Battle.net).
 
@@ -250,7 +250,8 @@ Première version publique.
 - **Apparence** : palettes Horde, Alliance et multi-faction, logo, bannière et couleur d'accent de la guilde, affichage adapté aux téléphones.
 - **Exploitation** : image Docker multi-architecture publiée par la CI, sauvegardes de la base, point de contrôle `/healthz`.
 
-[Non publié]: https://github.com/fmplaw/innkeeper/compare/v0.16.0...HEAD
+[Non publié]: https://github.com/fmplaw/innkeeper/compare/v0.17.0...HEAD
+[0.17.0]: https://github.com/fmplaw/innkeeper/compare/v0.16.0...v0.17.0
 [0.16.0]: https://github.com/fmplaw/innkeeper/compare/v0.15.0...v0.16.0
 [0.15.0]: https://github.com/fmplaw/innkeeper/compare/v0.14.0...v0.15.0
 [0.14.0]: https://github.com/fmplaw/innkeeper/compare/v0.13.1...v0.14.0
