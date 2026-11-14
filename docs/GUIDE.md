@@ -241,6 +241,7 @@ Même page, **Hôtel des ventes** (avec Battle.net connecté) : choisis l'HV de 
 Bon à savoir :
 - l'Armurerie se met à jour quand un perso **se déconnecte** du jeu. Un perso qui ne s'est pas reconnecté depuis l'ouverture de l'Armurerie n'y figure pas encore : sa fiche garde ses données ;
 - les métiers donnés par Battle.net sont complets : un métier abandonné quitte la fiche ;
+- les persos inscrits sur le site mais **pas (encore) dans la guilde en jeu** (une recrue qui n'a pas encore reçu son invitation, un reroll hors guilde) sont aussi mis à jour : niveau, métiers et dernière connexion d'après leur fiche dans l'Armurerie. Seulement s'ils y ont été trouvés avec la même classe que sur le site, et sans le badge « en jeu », réservé aux membres du registre ;
 - un export de l'addon fait en jeu depuis la dernière déconnexion d'un perso reste prioritaire : Battle.net ne fait pas revenir son niveau en arrière ;
 - Battle.net ne donne pas le nom des rangs : le site le retient du dernier registre envoyé par l'addon (« Rang 1 », « Rang 2 »… en attendant) ;
 - les **recettes** viennent de l'addon (voir ci-dessous).

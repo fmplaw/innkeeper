@@ -179,7 +179,8 @@ describe('synchronisation Battle.net', () => {
 			classId: 'druid',
 			raceId: 'tauren',
 			guild: null,
-			professions: [{ id: 'herbalism', level: 120 }]
+			professions: [{ id: 'herbalism', level: 120 }],
+			lastLogin: NOW - 3_600_000
 		});
 		const asked = calls.length;
 		await lookupCharacter('nova', 'ETOILE', fetchFn);
@@ -237,5 +238,31 @@ describe('synchronisation Battle.net', () => {
 		// Hors registre : cherché dans l'Armurerie, guerrier en jeu et chaman sur la fiche.
 		expect(character(brak.id).armoryStatus).toBe('mismatch');
 		expect(character(brak.id).armoryCheckedAt).not.toBeNull();
+		// Autre classe en jeu : sans doute un autre perso, sa fiche n'est pas mise à jour.
+		expect(character(brak.id).level).toBe(5);
+	});
+
+	it("met à jour les fiches hors de la guilde trouvées dans l'Armurerie, sans les dire « en jeu »", async () => {
+		resetArmoryCache();
+		// Nova (druide, vérifiée plus haut) n'est pas dans le registre ; fiche restée au niveau 5.
+		const nova = db().select().from(schema.characters).where(eq(schema.characters.name, 'Nova')).get()!;
+		db().update(schema.characters).set({ level: 5, professions: [], gameExportedAt: null, lastOnlineAt: null }).where(eq(schema.characters.id, nova.id)).run();
+		const result = await syncBattlenet(null, fakeBattlenet().fetchFn);
+		expect(result.message).toContain('Hors de la guilde : 1 fiche mise à jour.');
+		const n = character(nova.id);
+		expect(n.level).toBe(24);
+		expect(n.professions).toEqual([{ id: 'herbalism', level: 120 }]);
+		expect(Math.abs(n.lastOnlineAt!.getTime() - (NOW - 3_600_000))).toBeLessThan(1000);
+		expect(n.gameSyncedAt).toBeNull();
+
+		// Rien de neuf depuis sa dernière déconnexion : la fiche ne bouge plus.
+		resetArmoryCache();
+		expect((await syncBattlenet(null, fakeBattlenet().fetchFn)).message).not.toContain('Hors de la guilde');
+
+		// Un export de l'addon plus récent que la dernière déconnexion reste prioritaire.
+		db().update(schema.characters).set({ level: 26, gameExportedAt: new Date(NOW) }).where(eq(schema.characters.id, nova.id)).run();
+		resetArmoryCache();
+		await syncBattlenet(null, fakeBattlenet().fetchFn);
+		expect(character(nova.id).level).toBe(26);
 	});
 });
