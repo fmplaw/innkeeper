@@ -1,7 +1,7 @@
 services:
   site:
     # Version publiée ; pour construire depuis les sources, remplace par `build: .`
-    image: ghcr.io/fmplaw/innkeeper:0.16.0
+    image: ghcr.io/fmplaw/innkeeper:0.17.0
     env_file: .env
     ports:
       # Joignable seulement depuis cette machine, par le reverse proxy HTTPS : Docker passe
