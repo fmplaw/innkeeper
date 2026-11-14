@@ -4,6 +4,12 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ## [Non publié]
 
+## [0.17.1] - 2026-11-14
+
+### Corrigé
+
+- **Image Docker de la 0.17.0** : le contrôle de types de la page Commandes échouait dans la CI, et l'image `ghcr.io/fmplaw/innkeeper:0.17.0` n'a pas été publiée. Aucun changement de fonctionnement : utilisez la 0.17.1.
+
 ## [0.17.0] - 2026-11-14
 
 ### Ajouté
@@ -250,7 +256,8 @@ Première version publique.
 - **Apparence** : palettes Horde, Alliance et multi-faction, logo, bannière et couleur d'accent de la guilde, affichage adapté aux téléphones.
 - **Exploitation** : image Docker multi-architecture publiée par la CI, sauvegardes de la base, point de contrôle `/healthz`.
 
-[Non publié]: https://github.com/fmplaw/innkeeper/compare/v0.17.0...HEAD
+[Non publié]: https://github.com/fmplaw/innkeeper/compare/v0.17.1...HEAD
+[0.17.1]: https://github.com/fmplaw/innkeeper/compare/v0.17.0...v0.17.1
 [0.17.0]: https://github.com/fmplaw/innkeeper/compare/v0.16.0...v0.17.0
 [0.16.0]: https://github.com/fmplaw/innkeeper/compare/v0.15.0...v0.16.0
 [0.15.0]: https://github.com/fmplaw/innkeeper/compare/v0.14.0...v0.15.0
