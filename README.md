@@ -434,7 +434,7 @@ npm run dev
 
 **Nouvelle page ou action de formulaire** : déclare son niveau d'accès dans `PAGES` de `src/test/acces.test.ts` (visiteur, joueur, officier, admin…). Le test appelle chaque page et chaque action avec six profils et échoue tant qu'une page n'est pas déclarée ou qu'un profil passe une garde qui devrait l'arrêter.
 
-Les tests tournent aussi à chaque `docker build` et dans la CI GitHub (`.github/workflows/docker.yml`), qui publie l'image multi-architecture (amd64, arm64) sur `ghcr.io/fmplaw/innkeeper` : `latest` suit `main`, chaque version a sa propre étiquette (`0.9.1`…).
+Le contrôle des types (`npm run check`) et les tests tournent aussi à chaque `docker build` et dans la CI GitHub (`.github/workflows/docker.yml`), qui publie l'image multi-architecture (amd64, arm64) sur `ghcr.io/fmplaw/innkeeper` : `latest` suit `main`, chaque version a sa propre étiquette (`0.9.1`…).
 
 **Publier une version** : `node scripts/version.mjs X.Y.Z` change le numéro dans `package.json`, `package-lock.json`, les fichiers compose (image proposée aux guildes) et renomme la section « Non publié » de [CHANGELOG.md](CHANGELOG.md). Un test vérifie que tout concorde. Il ne touche pas au numéro d'InnkeeperSync (`companion/package.json`) : change-le à la main quand l'application elle-même a changé. Committe, puis pose le tag et pousse-le **séparément** de la branche (poussés ensemble, GitHub ne lance que le build de la branche) :
 

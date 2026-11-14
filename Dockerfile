@@ -15,8 +15,10 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
-# Les tests automatisés tournent à chaque construction : une image ne sort pas si l'un échoue.
-RUN npm test && npm run build && npm prune --omit=dev
+# Contrôle des types (comme la CI) et tests automatisés à chaque construction : une image ne sort
+# pas si l'un échoue. Sans le contrôle ici, une erreur de types passait le déploiement local et ne
+# bloquait que l'image publiée (0.17.0).
+RUN npm run check && npm test && npm run build && npm prune --omit=dev
 
 FROM node:22-bookworm-slim
 WORKDIR /app

@@ -4,6 +4,10 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ## [Non publié]
 
+### Modifié
+
+- **Construction de l'image** : le `docker build` contrôle aussi les types (`npm run check`), comme la CI, avant les tests. Une erreur de types ne passe plus un déploiement local sans être vue.
+
 ## [0.17.1] - 2026-11-14
 
 ### Corrigé
