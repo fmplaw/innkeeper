@@ -127,7 +127,7 @@
 						<input type="hidden" name="id" value={o.id} /><input type="hidden" name="rating" value="up" /><button class="small">👍 Oui, merci !</button>
 					</form>
 				{/if}
-				<details class="down-form" open={form?.id === o.id && form?.rating === 'down'}>
+				<details class="down-form" open={form?.id === o.id && form && 'rating' in form && form.rating === 'down'}>
 					<summary class="small">👎 Un souci</summary>
 					<form method="POST" action="?/rate" use:enhance class="down-fields">
 						<input type="hidden" name="id" value={o.id} /><input type="hidden" name="rating" value="down" />
