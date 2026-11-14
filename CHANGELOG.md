@@ -4,6 +4,10 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ## [Non publié]
 
+### Corrigé
+
+- **Lien vers l'Armurerie cassé** : un perso trouvé autrefois dans l'Armurerie puis disparu (renommé, supprimé en jeu) gardait son lien, et la page de Blizzard affichait une erreur. Chaque synchronisation Battle.net revérifie désormais les persos hors du registre de la guilde : le lien disparaît s'ils n'y sont plus.
+
 ### Ajouté
 
 - **Battle.net met aussi à jour les persos hors de la guilde** : une recrue inscrite sur le site avant d'entrer dans la guilde en jeu, ou un reroll resté hors guilde, voit son niveau, ses métiers et sa dernière connexion suivre l'Armurerie à chaque synchronisation, comme les membres du registre. Seulement pour les persos trouvés dans l'Armurerie avec la même classe ; ils n'ont pas le badge « en jeu ». Le résultat de la synchronisation les compte à part.

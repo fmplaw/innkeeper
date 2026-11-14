@@ -265,4 +265,15 @@ describe('synchronisation Battle.net', () => {
 		await syncBattlenet(null, fakeBattlenet().fetchFn);
 		expect(character(nova.id).level).toBe(26);
 	});
+
+	it("retire le lien vers l'Armurerie d'un perso qui n'y est plus", async () => {
+		resetArmoryCache();
+		createUser('z');
+		// Trouvé autrefois, introuvable aujourd'hui (renommé ou supprimé en jeu).
+		const gone = sheet('z', 'Luzo', 'Cpø');
+		db().update(schema.characters).set({ armoryStatus: 'found' }).where(eq(schema.characters.id, gone.id)).run();
+		await syncBattlenet(null, fakeBattlenet().fetchFn);
+		expect(character(gone.id).armoryStatus).toBe('missing');
+		expect(character(gone.id).level).toBe(5);
+	});
 });
