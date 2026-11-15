@@ -24,7 +24,8 @@ export const load: PageServerLoad = async ({ locals }) => {
 			refuse: Boolean(who && canDo('refuse', o, who)),
 			release: Boolean(who && canDo('release', o, who)),
 			deliver: Boolean(who && canDo('deliver', o, who)),
-			cancel: Boolean(who && canDo('cancel', o, who))
+			cancel: Boolean(who && canDo('cancel', o, who)),
+			self: Boolean(who && canDo('self', o, who))
 		}
 	}));
 	return {
@@ -72,6 +73,7 @@ export const actions: Actions = {
 	release: change('release'),
 	deliver: change('deliver'),
 	cancel: change('cancel'),
+	self: change('self'),
 	rate: async ({ locals, request }) => {
 		const user = requireUser(locals);
 		const form = await request.formData();

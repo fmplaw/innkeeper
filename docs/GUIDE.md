@@ -109,7 +109,7 @@ Côté artisan, **Commandes** liste en tête les commandes des recettes que tu c
 
 **Artisans les plus actifs** : en bas de **Commandes**, les cinq artisans qui ont livré le plus de commandes sur les 30 derniers jours, avec leur total et leurs 👍. La page **Artisans** indique aussi, sous chaque artisan, ses commandes livrées. Les commandes qu'on se livre à soi-même ne comptent pas, et les 👎 ne sont comptés que pour les officiers et l'artisan concerné.
 
-Chacun a 5 commandes en cours au plus. Le demandeur peut annuler la sienne ; une commande que personne ne prend est fermée au bout de 14 jours. Les commandes terminées restent affichées 7 jours.
+Chacun a 5 commandes en cours au plus. Le demandeur peut annuler la sienne, ou cliquer **Je l'ai faite moi-même** s'il l'a fabriquée lui-même avant qu'un artisan la prenne : elle est fermée comme livrée, sans avis, et ne compte pour personne ; une commande que personne ne prend est fermée au bout de 14 jours. Les commandes terminées restent affichées 7 jours.
 
 ### Les sorties
 

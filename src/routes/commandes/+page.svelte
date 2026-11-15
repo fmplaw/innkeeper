@@ -25,7 +25,7 @@
 		take: 'Commande prise : le demandeur la voit à ton nom.',
 		quote: 'Prix proposé : le demandeur est prévenu et doit l’accepter.',
 		accept: 'Prix accepté : l’artisan s’en occupe.',
-		refuse: 'Prix refusé : la commande est de nouveau ouverte aux autres artisans.', release: 'Commande rendue : elle est de nouveau ouverte.', deliver: 'Commande livrée.', cancel: 'Commande annulée.',
+		refuse: 'Prix refusé : la commande est de nouveau ouverte aux autres artisans.', release: 'Commande rendue : elle est de nouveau ouverte.', deliver: 'Commande livrée.', cancel: 'Commande annulée.', self: 'Commande fermée : faite par toi-même.',
 		rateUp: 'Merci ! Ton 👍 est noté pour l’artisan.',
 		rateDown: 'Avis noté : seuls l’artisan et les officiers le voient.' };
 </script>
@@ -148,7 +148,7 @@
 				</form>
 			</details>
 		{/if}
-		{#if o.can.take || o.can.accept || o.can.refuse || o.can.release || o.can.deliver || o.can.cancel}
+		{#if o.can.take || o.can.accept || o.can.refuse || o.can.release || o.can.deliver || o.can.self || o.can.cancel}
 			<div class="row actions">
 				{#if o.can.take}
 					<form method="POST" action="?/take" use:enhance><input type="hidden" name="id" value={o.id} /><button>Je m'en occupe</button></form>
@@ -166,6 +166,9 @@
 					<form method="POST" action="?/release" use:enhance>
 						<input type="hidden" name="id" value={o.id} /><button class="secondary">{o.status === 'quoted' ? 'Retirer mon prix' : 'Je ne peux plus'}</button>
 					</form>
+				{/if}
+				{#if o.can.self}
+					<form method="POST" action="?/self" use:enhance><input type="hidden" name="id" value={o.id} /><button class="secondary" title="Ferme la commande sans avis : elle ne compte pour aucun artisan">Je l’ai faite moi-même</button></form>
 				{/if}
 				{#if o.can.cancel}
 					<form method="POST" action="?/cancel" use:enhance={({ cancel }) => { if (!confirm('Annuler cette commande ?')) cancel(); }}>
