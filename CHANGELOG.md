@@ -4,6 +4,10 @@ Toutes les évolutions notables d'Innkeeper sont notées ici. Le format suit [Ke
 
 ## [Non publié]
 
+### Ajouté
+
+- **« Je l'ai faite moi-même »** : le demandeur d'une commande pas encore prise peut la fermer parce qu'il l'a fabriquée lui-même (métier monté entre-temps, reroll…). Elle passe en livrée avec la mention « Faite par le demandeur lui-même », sans avis à donner, et ne compte pour aucun artisan.
+
 ### Modifié
 
 - **Construction de l'image** : le `docker build` contrôle aussi les types (`npm run check`), comme la CI, avant les tests. Une erreur de types ne passe plus un déploiement local sans être vue.

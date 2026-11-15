@@ -118,6 +118,8 @@ function getOrder(id: number) {
 	return db().select().from(schema.craftOrders).where(eq(schema.craftOrders.id, id)).get() ?? null;
 }
 
+export const SELF_NOTE = 'Faite par le demandeur lui-même.';
+
 // Changements d'état autorisés : qui peut faire quoi, depuis quel état. Composants fournis :
 // l'artisan prend la commande. Composants à trouver : il propose un prix ; dans le budget, la
 // commande est prise aussitôt, sinon le demandeur l'accepte ou la refuse.
@@ -129,7 +131,10 @@ const TRANSITIONS = {
 	// Le demandeur, lui, refuse le prix (« refuse ») : « release » est pour l'artisan, ou un officier.
 	release: { from: ['quoted', 'taken'], allowed: (o: CraftOrder, a: Actor) => (o.status === 'taken' ? o.takenBy : o.quotedBy) === a.id || (a.officer && o.requesterId !== a.id) },
 	deliver: { from: ['taken'], allowed: (o: CraftOrder, a: Actor) => o.takenBy === a.id || o.requesterId === a.id || a.officer },
-	cancel: { from: ['open', 'quoted', 'taken'], allowed: (o: CraftOrder, a: Actor) => o.requesterId === a.id || a.officer }
+	cancel: { from: ['open', 'quoted', 'taken'], allowed: (o: CraftOrder, a: Actor) => o.requesterId === a.id || a.officer },
+	// Le demandeur l'a faite lui-même (métier monté entre-temps, reroll…) : fermée comme livrée, à
+	// son propre nom, donc sans avis ni compte pour les artisans (comme une commande qu'on se livre).
+	self: { from: ['open', 'quoted'], allowed: (o: CraftOrder, a: Actor) => o.requesterId === a.id }
 } satisfies Record<string, { from: CraftStatus[]; allowed: (o: CraftOrder, a: Actor) => boolean }>;
 export type CraftAction = keyof typeof TRANSITIONS;
 
@@ -154,6 +159,8 @@ function nextValues(action: CraftAction, order: CraftOrder, actor: Actor, price:
 			return { status: 'open', takenBy: null, quotedBy: null, price: null };
 		case 'deliver':
 			return { status: 'delivered', closedAt: now };
+		case 'self':
+			return { status: 'delivered', takenBy: actor.id, quotedBy: null, price: null, closedAt: now, closedNote: SELF_NOTE };
 		case 'cancel':
 			return { status: 'cancelled', closedAt: now, closedNote: order.requesterId === actor.id ? null : 'Fermée par un officier.' };
 	}
@@ -354,6 +361,8 @@ function embed(
 				? `${people.quoter} propose ${formatMoney(order.price)} : en attente du demandeur`
 			: order.status === 'cancelled' && order.closedNote
 				? `Annulée : ${order.closedNote}`
+				: order.status === 'delivered' && order.closedNote
+					? `${STATUS_LABELS.delivered} : ${order.closedNote.replace(/\.$/, '').toLocaleLowerCase('fr')}`
 				: order.status === 'delivered' && order.rating === 'up'
 					? `${STATUS_LABELS.delivered} · 👍 bien reçue`
 					: STATUS_LABELS[order.status];

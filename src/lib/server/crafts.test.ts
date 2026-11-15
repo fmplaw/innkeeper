@@ -2,7 +2,7 @@ import { eq } from 'drizzle-orm';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createUser, horde } from '../../test/helpers';
 import { createCharacter } from './characters';
-import { act, artisanStats, createOrder, EXPIRE_DAYS, listOrders, MAX_ACTIVE, openOrdersFor, RATE_DAYS, rateOrder, recipeChoice, seesDown } from './crafts';
+import { act, artisanStats, createOrder, EXPIRE_DAYS, listOrders, MAX_ACTIVE, openOrdersFor, RATE_DAYS, rateOrder, recipeChoice, seesDown, SELF_NOTE } from './crafts';
 import { db, schema } from './db';
 import { craftSchema, setCrafts, setDiscord } from './settings';
 
@@ -184,6 +184,21 @@ describe('commandes de craft', () => {
 		db().update(schema.craftOrders).set({ status: 'delivered', takenBy: solo, closedAt: new Date() }).where(eq(schema.craftOrders.id, r.order.id)).run();
 		expect(await rateOrder(r.order.id, me(solo), 'up', null)).toHaveProperty('error');
 		expect(artisanStats().some((s) => s.playerId === solo)).toBe(false);
+	});
+
+	it("« je l'ai faite moi-même » : fermée comme livrée, sans avis ni compte", async () => {
+		const solo = '100000000000000009';
+		const r = await createOrder(solo, { recipeId: POTION, quantity: 2, materials: true, comment: null, artisanId: null, commission: null, budget: null });
+		if ('error' in r) throw new Error(r.error);
+		// Personne d'autre que le demandeur.
+		expect(await act('self', r.order.id, me(ARTISAN))).toHaveProperty('error');
+		const done = await act('self', r.order.id, me(solo));
+		if ('error' in done) throw new Error(done.error);
+		expect(done.order).toMatchObject({ status: 'delivered', takenBy: solo, closedNote: SELF_NOTE });
+		expect(await rateOrder(r.order.id, me(solo), 'up', null)).toHaveProperty('error');
+		expect(artisanStats().some((s) => s.playerId === solo)).toBe(false);
+		// Déjà fermée : plus possible.
+		expect(await act('self', r.order.id, me(solo))).toHaveProperty('error');
 	});
 });
 
